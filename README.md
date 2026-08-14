@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pro & Elite booking funnel — The Formula Performance
 
-## Getting Started
+Greenfield Next.js (App Router) implementation of the Pro/Elite lead-qualification funnel.
 
-First, run the development server:
+## Section 8 assumptions (swap in one place)
+
+See `src/lib/config/assumptions.ts` and `.env.example`.
+
+| Item | Assumed value | Where to change |
+|------|---------------|-----------------|
+| Pro / Elite prices | £297 / £497 (Q9 only) | `NEXT_PUBLIC_PRICE_PRO` / `NEXT_PUBLIC_PRICE_ELITE` |
+| Entry tier below Challenge | Off (3 cards) | `NEXT_PUBLIC_SHOW_ENTRY_TIER` + `src/lib/content/tier-cards.ts` |
+| Calendar platform | GoHighLevel | `NEXT_PUBLIC_CALENDAR_PLATFORM=ghl\|calendly` |
+| Card copy | Spec Section 2 | `src/lib/content/tier-cards.ts` |
+
+## Routes
+
+- `/` — landing + tier row (Challenge checkout CTA; Pro/Elite → Book Your Call only)
+- `/book?tier=pro|elite` — questionnaire (tier persisted in session)
+- `/book/calendar` — inline calendar after qualify (not linked from nav)
+- `/book/confirmation` — exact confirmation copy + WhatsApp opt-in
+- `/challenge` — Challenge page; disqualified leads land here with reason
+- `/integrations` — pre go-live hub for GHL, calendar embeds, pricing, product flags
+
+## Admin
+
+1. Copy `.env.example` to `.env.local` and set `ADMIN_USERNAME` / `ADMIN_PASSWORD`
+2. Open `/admin/login` with those credentials
+3. **Content CMS** (`/admin/content`) — edit brand, nav, hero, banners, videos, tiers, CTAs, funnel copy
+4. **Integrations** (`/admin/integrations`) — GHL, calendar embeds, Q9 pricing
+
+CMS saves to `data/cms.local.json` (gitignored). Live site reads via `/api/public-cms`.
+
+## Commands
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm test
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Non-negotiable
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No price and no checkout for Pro or Elite on public pages. Challenge checkout is the only self-serve path.
