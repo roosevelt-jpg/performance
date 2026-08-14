@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -179,7 +179,7 @@ export function IntegrationsAdmin({
       setEmailKeyDraft("");
       setShopifyTokenDraft("");
       setJudgemeTokenDraft("");
-      setMessage("Saved to data/integrations.local.json");
+      setMessage("Saved to Firestore.");
     } catch {
       setError("Save failed");
     } finally {
@@ -315,8 +315,8 @@ export function IntegrationsAdmin({
             </p>
             <p className="mt-1 text-xs text-[var(--muted)]">
               Storage: {data.storage.path}
-              {data.storage.fileExists ? " (file present)" : " (no file yet)"}
-              {data.storage.writable ? "" : " · read-only host"}
+              {data.storage.fileExists ? " (configured)" : " (not configured)"}
+              {data.storage.writable ? "" : " · Firebase credentials required"}
             </p>
             <ul className="mt-4 space-y-2">
               {(

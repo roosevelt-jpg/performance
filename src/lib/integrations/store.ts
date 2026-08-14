@@ -1,16 +1,11 @@
-import { promises as fs } from "fs";
-import path from "path";
 import {
   DEFAULT_INTEGRATIONS,
   type IntegrationCheck,
   type IntegrationsConfig,
 } from "./types";
+import { getFirebaseFirestore, isFirebaseConfigured } from "@/lib/firebase/admin";
 
-export const INTEGRATIONS_FILE = path.join(
-  process.cwd(),
-  "data",
-  "integrations.local.json",
-);
+const INTEGRATIONS_DOCUMENT = "configuration/integrations";
 
 function num(value: string | undefined, fallback: number): number {
   const n = Number(value);
@@ -101,19 +96,15 @@ function mergeConfig(
   };
 }
 
-async function readFileConfig(): Promise<Partial<IntegrationsConfig> | null> {
-  try {
-    const raw = await fs.readFile(INTEGRATIONS_FILE, "utf8");
-    return JSON.parse(raw) as Partial<IntegrationsConfig>;
-  } catch {
-    return null;
-  }
-}
-
-/** Env defaults, then local file overrides (UI saves here). */
+/** Environment defaults, then Firestore overrides. */
 export async function loadIntegrations(): Promise<IntegrationsConfig> {
-  const file = await readFileConfig();
-  const merged = mergeConfig(fromEnv(), file);
+  const snapshot = isFirebaseConfigured()
+    ? await getFirebaseFirestore().doc(INTEGRATIONS_DOCUMENT).get()
+    : null;
+  const persisted = snapshot?.exists
+    ? (snapshot.data() as Partial<IntegrationsConfig>)
+    : null;
+  const merged = mergeConfig(fromEnv(), persisted);
 
   // Migrate stub placeholder to the live Shopify Challenge product.
   if (
@@ -143,12 +134,7 @@ export async function loadIntegrations(): Promise<IntegrationsConfig> {
 export async function saveIntegrations(
   next: IntegrationsConfig,
 ): Promise<void> {
-  await fs.mkdir(path.dirname(INTEGRATIONS_FILE), { recursive: true });
-  await fs.writeFile(
-    INTEGRATIONS_FILE,
-    `${JSON.stringify(next, null, 2)}\n`,
-    "utf8",
-  );
+  await getFirebaseFirestore().doc(INTEGRATIONS_DOCUMENT).set(next);
 }
 
 export async function getStorageMeta(): Promise<{
@@ -156,28 +142,10 @@ export async function getStorageMeta(): Promise<{
   path: string;
   writable: boolean;
 }> {
-  let fileExists = false;
-  try {
-    await fs.access(INTEGRATIONS_FILE);
-    fileExists = true;
-  } catch {
-    fileExists = false;
-  }
-
-  let writable = true;
-  try {
-    await fs.mkdir(path.dirname(INTEGRATIONS_FILE), { recursive: true });
-    const probe = path.join(path.dirname(INTEGRATIONS_FILE), ".write-probe");
-    await fs.writeFile(probe, "ok");
-    await fs.unlink(probe);
-  } catch {
-    writable = false;
-  }
-
   return {
-    fileExists,
-    path: "data/integrations.local.json",
-    writable,
+    fileExists: isFirebaseConfigured(),
+    path: "Firestore: configuration/integrations",
+    writable: isFirebaseConfigured(),
   };
 }
 

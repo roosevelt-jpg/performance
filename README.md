@@ -29,7 +29,7 @@ See `src/lib/config/assumptions.ts` and `.env.example`.
 3. **Content CMS** (`/admin/content`) — edit brand, nav, hero, banners, videos, tiers, CTAs, funnel copy
 4. **Integrations** (`/admin/integrations`) — GHL, calendar embeds, Q9 pricing
 
-CMS saves to `data/cms.local.json` (gitignored). Live site reads via `/api/public-cms`.
+CMS and integration settings persist in Firestore; admin uploads go to Firebase Storage. Configure the four `FIREBASE_*` variables from `.env.example` as server-only environment variables. Live site reads CMS content via `/api/public-cms`.
 
 ## Commands
 

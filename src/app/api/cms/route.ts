@@ -34,7 +34,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Filesystem is not writable. Export CMS JSON and deploy as data/cms.local.json or host storage.",
+          "Firestore is not configured. Set the Firebase Admin environment variables.",
       },
       { status: 503 },
     );

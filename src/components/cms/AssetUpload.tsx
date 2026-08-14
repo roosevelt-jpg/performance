@@ -110,8 +110,7 @@ export function AssetUpload({
         )
       ) : (
         <p className="text-xs text-[var(--muted)]">
-          Direct upload only — files save to public/assets/{folder}.{" "}
-          {kind === "video" ? "MP4 or WebM, max 40MB." : "No image URLs."}
+          Direct upload to Firebase Storage. {kind === "video" ? "MP4 or WebM, max 40MB." : "No image URLs."}
         </p>
       )}
       {error ? (

@@ -10,7 +10,7 @@ export default function AdminContentPage() {
   return (
     <AdminShell
       title="Content CMS"
-      subtitle="Edit every public string, CTA, banner, video, and tier card. Saves to data/cms.local.json and powers the live site."
+      subtitle="Edit every public string, CTA, banner, video, and tier card. Saves to Firestore and powers the live site."
     >
       <CmsAdmin />
     </AdminShell>
