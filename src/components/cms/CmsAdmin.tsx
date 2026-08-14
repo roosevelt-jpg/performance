@@ -2038,9 +2038,7 @@ export function CmsAdmin() {
 
           <Section title="Image banner sections">
             <p className="text-xs text-[var(--muted)]">
-              Each section is independent. Upload images to{" "}
-              <code className="text-[var(--fg-soft)]">public/assets/images</code>
-              , pick a page slot, enable, then Save CMS.
+              Each section is independent. Upload images to Firebase Storage, pick a page slot, enable, then Save CMS.
             </p>
             {form.home.imageSections.map((section, si) => (
               <div

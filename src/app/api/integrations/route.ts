@@ -153,7 +153,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Filesystem is not writable (common on serverless). Export as .env and set secrets on the host instead.",
+          "Firestore is not configured. Set the Firebase Admin environment variables.",
       },
       { status: 503 },
     );
