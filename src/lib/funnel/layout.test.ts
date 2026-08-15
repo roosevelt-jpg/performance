@@ -39,8 +39,8 @@ describe("isFunnelSectionOn", () => {
     expect(isFunnelSectionOn(DEFAULT_CMS, "problem")).toBe(true);
     expect(isFunnelSectionOn(DEFAULT_CMS, "whatsappCoach")).toBe(true);
     expect(isFunnelSectionOn(DEFAULT_CMS, "benchmarks")).toBe(true);
-    expect(isFunnelSectionOn(DEFAULT_CMS, "howItWorks")).toBe(true);
-    expect(isFunnelSectionOn(DEFAULT_CMS, "tiers")).toBe(true);
+    expect(isFunnelSectionOn(DEFAULT_CMS, "howItWorks")).toBe(false);
+    expect(isFunnelSectionOn(DEFAULT_CMS, "tiers")).toBe(false);
     expect(isFunnelSectionOn(DEFAULT_CMS, "faq")).toBe(true);
     expect(isFunnelSectionOn(DEFAULT_CMS, "finalCta")).toBe(true);
     expect(isFunnelSectionOn(DEFAULT_CMS, "phoneMockup")).toBe(false);

@@ -46,7 +46,7 @@ const LAYOUT_OPTIONS: { id: keyof CmsFunnelLayout; label: string }[] = [
   { id: "whatsappCoach", label: "WhatsApp marketing section" },
   { id: "benchmarks", label: "Benchmarks" },
   { id: "howItWorks", label: "How it works" },
-  { id: "tiers", label: "Programme cards" },
+  { id: "tiers", label: "Programme cards (Choose your level)" },
   { id: "faq", label: "FAQ" },
   { id: "finalCta", label: "Final CTA" },
 ];
@@ -377,7 +377,7 @@ export function FunnelAdmin() {
 
       <Section
         title="Landing page"
-        hint="Landing order is locked: video, transformations, credentials, The Gap, WhatsApp coach, benchmarks, how it works, programmes, FAQ, final CTA. Untick only if you must hide a block. Copy lives in Content CMS."
+        hint="Copy stays in Content CMS. Untick a block to hide it and shorten the public page — How it works and Programme cards are off by default for a short landing."
       >
         <div className="grid gap-2 sm:grid-cols-2">
           {LAYOUT_OPTIONS.map((item) => (

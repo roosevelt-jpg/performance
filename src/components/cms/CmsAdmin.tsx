@@ -1901,8 +1901,12 @@ export function CmsAdmin() {
                   })
                 }
               />
-              Enabled
+              Enabled (used when Funnel engine is off)
             </label>
+            <p className="text-xs text-[var(--muted)]">
+              To hide this on the public page, open Admin → Funnel → Landing
+              page and untick How it works. Copy stays here.
+            </p>
             <Field label="Heading">
               <Text
                 value={form.home.howItWorks.heading}
@@ -2031,8 +2035,12 @@ export function CmsAdmin() {
                   })
                 }
               />
-              Show programme cards (when Funnel engine is off, or if Funnel layout ticks Tiers)
+              Show programme cards (when Funnel engine is off)
             </label>
+            <p className="text-xs text-[var(--muted)]">
+              To hide Choose your level on the public page, open Admin → Funnel
+              → Landing page and untick Programme cards. Copy stays here.
+            </p>
             <Field label="Heading">
               <Text
                 value={form.home.tiersSection.heading}

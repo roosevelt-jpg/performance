@@ -9,8 +9,8 @@ export const DEFAULT_FUNNEL_LAYOUT: CmsFunnelLayout = {
   problem: true,
   whatsappCoach: true,
   benchmarks: true,
-  howItWorks: true,
-  tiers: true,
+  howItWorks: false,
+  tiers: false,
   faq: true,
   finalCta: true,
 };
