@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { SiteFooter, SiteHeader } from "@/components/layout/SiteChrome";
+import { SiteFooter, SiteHeader, BrandLogo } from "@/components/layout/SiteChrome";
 import { useCms } from "@/components/cms/CmsProvider";
 import { MediaAt } from "@/components/marketing/MediaSections";
 import { BenchmarkSection } from "@/components/marketing/BenchmarkSection";
@@ -217,7 +217,8 @@ function FaqSection() {
 }
 
 function FinalCta() {
-  const { finalCta } = useCms().home;
+  const cms = useCms();
+  const { finalCta } = cms.home;
   if (!finalCta.enabled) return null;
 
   return (
@@ -243,6 +244,9 @@ function FinalCta() {
           >
             {finalCta.secondary.label}
           </Link>
+        </div>
+        <div className="mt-16 flex justify-center sm:mt-20">
+          <BrandLogo className="h-12 w-auto max-w-[260px] object-contain sm:h-14" />
         </div>
       </div>
     </section>

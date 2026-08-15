@@ -3,18 +3,29 @@
 import Link from "next/link";
 import { useCms } from "@/components/cms/CmsProvider";
 
-const FALLBACK_LOGO = "/logo.png";
+export const FALLBACK_LOGO = "/logo.png";
 
 type Props = {
   active?: "home" | "tiers" | "book" | "admin";
   compact?: boolean;
 };
 
+export function BrandLogo({
+  className = "h-9 w-auto max-w-[220px] object-contain sm:h-10",
+}: {
+  className?: string;
+}) {
+  const cms = useCms();
+  const src = cms.site.brand.logoUrl?.trim() || FALLBACK_LOGO;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={cms.site.brand.name} className={className} />
+  );
+}
+
 export function SiteHeader({ active }: Props) {
   const cms = useCms();
-  const brand = cms.site.brand;
   const links = cms.chrome.nav.filter((l) => l.visible);
-  const logoSrc = brand.logoUrl?.trim() || FALLBACK_LOGO;
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--bg)]">
@@ -24,12 +35,7 @@ export function SiteHeader({ active }: Props) {
           href={cms.chrome.headerLogoHref || "/"}
           className="justify-self-center"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logoSrc}
-            alt={brand.name}
-            className="h-9 w-auto max-w-[220px] object-contain sm:h-10"
-          />
+          <BrandLogo />
         </Link>
         <nav className="flex shrink-0 items-center justify-end gap-4 text-sm">
           {links.map((link) => (
