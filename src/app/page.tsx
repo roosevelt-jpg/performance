@@ -246,7 +246,7 @@ export default function HomePage() {
 
       <section
         id="hero"
-        className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden border-b border-[var(--border)]"
+        className="hero-stage relative isolate overflow-hidden border-b border-[var(--border)]"
       >
         {hero.portraitUrl ? (
           <div className="pointer-events-none absolute inset-0" aria-hidden>
@@ -254,9 +254,10 @@ export default function HomePage() {
             <img
               src={hero.portraitUrl}
               alt=""
-              className="h-full w-full max-w-none object-cover object-[50%_14%]"
+              className="h-full w-full max-w-none object-cover object-[50%_10%] sm:object-[52%_12%] lg:object-[62%_16%] xl:object-[58%_14%]"
             />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.88)_0%,rgba(10,10,10,0.42)_48%,rgba(10,10,10,0.2)_100%),linear-gradient(180deg,rgba(10,10,10,0.35)_0%,transparent_28%,rgba(10,10,10,0.72)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0.22)_0%,rgba(10,10,10,0.08)_28%,rgba(10,10,10,0.5)_58%,rgba(10,10,10,0.92)_100%)] lg:hidden" />
+            <div className="absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(10,10,10,0.9)_0%,rgba(10,10,10,0.46)_46%,rgba(10,10,10,0.16)_100%),linear-gradient(180deg,rgba(10,10,10,0.28)_0%,transparent_30%,rgba(10,10,10,0.5)_100%)] lg:block" />
           </div>
         ) : hasHeroMedia ? (
           <>
@@ -272,73 +273,78 @@ export default function HomePage() {
 
         <div
           className={[
-            "relative mx-auto grid w-full max-w-6xl items-center gap-8 px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8",
-            showPhone ? "min-[940px]:grid-cols-[1.06fr_0.94fr] min-[940px]:gap-12" : "",
+            "hero-copy-wrap relative mx-auto flex w-full max-w-6xl flex-col justify-end gap-8 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-6 sm:px-6",
+            "lg:justify-start lg:pb-12 lg:pt-8",
+            showPhone
+              ? "min-[940px]:grid min-[940px]:grid-cols-[1.06fr_0.94fr] min-[940px]:items-center min-[940px]:justify-stretch min-[940px]:gap-12"
+              : "",
           ].join(" ")}
         >
-          <div>
+          <div className="w-full max-w-xl xl:max-w-2xl">
             {hero.eyebrow ? (
               <p className="animate-rise text-xs font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
                 {hero.eyebrow}
               </p>
             ) : null}
             <h1
-              className="animate-rise mt-3 max-w-3xl font-heading text-[clamp(1.85rem,5.2vw,3.05rem)] leading-[1.12] text-[var(--fg)]"
+              className="animate-rise mt-3 max-w-3xl font-heading text-[clamp(1.65rem,2.4vw+1.15rem,3.05rem)] leading-[1.12] text-[var(--fg)]"
               style={{ animationDelay: "80ms" }}
             >
               {hero.headline}
             </h1>
-            <p
-              className="animate-rise mt-4 max-w-xl text-[0.95rem] leading-[1.7] text-[var(--muted)] sm:text-lg"
-              style={{ animationDelay: "140ms" }}
-            >
-              {hero.body}
-            </p>
-            <div
-              className="animate-rise mt-6 flex flex-col gap-3 sm:flex-row sm:items-center"
-              style={{ animationDelay: "200ms" }}
-            >
-              {isFunnelApplyHref(hero.cta.href) ? (
-                <GatedLink
-                  href={hero.cta.href}
-                  className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
-                >
-                  {hero.cta.label}
-                </GatedLink>
-              ) : (
-                <Link
-                  href={hero.cta.href}
-                  className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
-                >
-                  {hero.cta.label}
-                </Link>
-              )}
-              {hero.secondaryCta?.label ? (
-                isFunnelApplyHref(hero.secondaryCta.href) ? (
+            <div className="mt-3 sm:mt-4 lg:mt-[clamp(2.75rem,9svh,6.75rem)]">
+              <p
+                className="animate-rise max-w-xl text-[0.9rem] leading-[1.65] text-[var(--muted)] sm:text-base sm:leading-[1.7] lg:text-lg"
+                style={{ animationDelay: "140ms" }}
+              >
+                {hero.body}
+              </p>
+              <div
+                className="animate-rise mt-5 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center sm:mt-6"
+                style={{ animationDelay: "200ms" }}
+              >
+                {isFunnelApplyHref(hero.cta.href) ? (
                   <GatedLink
-                    href={hero.secondaryCta.href}
-                    className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+                    href={hero.cta.href}
+                    className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] min-[420px]:w-auto sm:px-6 sm:py-3.5"
                   >
-                    {hero.secondaryCta.label}
+                    {hero.cta.label}
                   </GatedLink>
                 ) : (
                   <Link
-                    href={hero.secondaryCta.href}
-                    className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+                    href={hero.cta.href}
+                    className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] min-[420px]:w-auto sm:px-6 sm:py-3.5"
                   >
-                    {hero.secondaryCta.label}
+                    {hero.cta.label}
                   </Link>
-                )
+                )}
+                {hero.secondaryCta?.label ? (
+                  isFunnelApplyHref(hero.secondaryCta.href) ? (
+                    <GatedLink
+                      href={hero.secondaryCta.href}
+                      className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-5 py-3 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] min-[420px]:w-auto sm:px-6 sm:py-3.5"
+                    >
+                      {hero.secondaryCta.label}
+                    </GatedLink>
+                  ) : (
+                    <Link
+                      href={hero.secondaryCta.href}
+                      className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-5 py-3 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] min-[420px]:w-auto sm:px-6 sm:py-3.5"
+                    >
+                      {hero.secondaryCta.label}
+                    </Link>
+                  )
+                ) : null}
+              </div>
+              {hero.ctaNote ? (
+                <p
+                  className="animate-rise mt-3 text-sm text-[var(--muted)]"
+                  style={{ animationDelay: "260ms" }}
+                >
+                  {hero.ctaNote}
+                </p>
               ) : null}
             </div>
-            {hero.ctaNote ? (
-              <p
-                className="animate-rise mt-3 text-sm text-[var(--muted)]"
-                style={{ animationDelay: "260ms" }}
-              >
-                {hero.ctaNote}
-              </p>
-            ) : null}
           </div>
           {showPhone && hero.portraitUrl ? (
             <div className="animate-rise" style={{ animationDelay: "160ms" }}>

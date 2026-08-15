@@ -37,8 +37,8 @@ export function verifyAdminCredentials(
   const expected = getAdminCredentials();
   if (!expected) return false;
   return (
-    safeEqual(username.trim(), expected.username) &&
-    safeEqual(password, expected.password)
+    safeEqual(username.trim().toLowerCase(), expected.username.toLowerCase()) &&
+    safeEqual(password.trimEnd(), expected.password)
   );
 }
 

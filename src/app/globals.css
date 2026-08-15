@@ -59,6 +59,24 @@
   mix-blend-mode: soft-light;
 }
 
+.hero-stage,
+.hero-copy-wrap {
+  min-height: calc(100dvh - 4.25rem);
+}
+
+@media (max-height: 540px) {
+  .hero-stage,
+  .hero-copy-wrap {
+    min-height: calc(100dvh - 3.75rem);
+  }
+
+  .hero-copy-wrap {
+    justify-content: flex-end;
+    padding-top: 0.75rem;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
 .section-y {
   padding-block: var(--section-y);
 }

@@ -66,6 +66,10 @@ function LoginForm() {
           <input
             className={fieldClass}
             autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
