@@ -145,6 +145,8 @@ function fromEnv(): IntegrationsConfig {
       locationId: process.env.GHL_LOCATION_ID ?? "",
       apiBaseUrl:
         process.env.GHL_API_BASE_URL ?? DEFAULT_INTEGRATIONS.ghl.apiBaseUrl,
+      workflowQualifiedId: process.env.GHL_WORKFLOW_QUALIFIED_ID ?? "",
+      workflowDisqualifiedId: process.env.GHL_WORKFLOW_DISQUALIFIED_ID ?? "",
     },
     youtube: {
       apiKey: process.env.YOUTUBE_API_KEY ?? "",
@@ -185,7 +187,14 @@ function mergeConfig(
     pricing: { ...base.pricing, ...overlay.pricing },
     product: { ...base.product, ...overlay.product },
     calendar: calendarDefaults({ ...base.calendar, ...overlay.calendar }),
-    ghl: { ...base.ghl, ...overlay.ghl },
+    ghl: {
+      ...base.ghl,
+      ...overlay.ghl,
+      workflowQualifiedId:
+        overlay.ghl?.workflowQualifiedId ?? base.ghl.workflowQualifiedId,
+      workflowDisqualifiedId:
+        overlay.ghl?.workflowDisqualifiedId ?? base.ghl.workflowDisqualifiedId,
+    },
     youtube: { ...base.youtube, ...overlay.youtube },
     email: { ...base.email, ...overlay.email },
     shopify: { ...base.shopify, ...overlay.shopify },
@@ -527,6 +536,8 @@ export function toEnvSnippet(config: IntegrationsConfig): string {
     `GHL_API_KEY=${config.ghl.apiKey}`,
     `GHL_LOCATION_ID=${config.ghl.locationId}`,
     `GHL_API_BASE_URL=${config.ghl.apiBaseUrl}`,
+    `GHL_WORKFLOW_QUALIFIED_ID=${config.ghl.workflowQualifiedId}`,
+    `GHL_WORKFLOW_DISQUALIFIED_ID=${config.ghl.workflowDisqualifiedId}`,
     `YOUTUBE_API_KEY=${config.youtube.apiKey}`,
     `YOUTUBE_CHANNEL_ID=${config.youtube.channelId}`,
     `EMAIL_PROVIDER=${config.email.provider}`,

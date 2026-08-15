@@ -4,11 +4,13 @@ export type ChatLine = {
 };
 
 export const HERO_CHAT: ChatLine[] = [
-  { from: "coach", text: "Day 12. How did training feel yesterday?" },
-  { from: "user", text: "Heavy. Legs are wrecked." },
-  { from: "coach", text: "Good. That’s growth. 30g protein within the hour." },
-  { from: "user", text: "On it. Swap rows for pull-ups?" },
-  { from: "coach", text: "Yes, same target. Film a set and send it over." },
+  { from: "coach", text: "Watch the video. Then we'll see if Pro is a fit." },
+  { from: "user", text: "What do you need?" },
+  {
+    from: "coach",
+    text: "Name, days you can train, whether you're ready to invest. Two minutes.",
+  },
+  { from: "user", text: "Let's go." },
 ];
 
 export const COACH_CHAT: ChatLine[] = [

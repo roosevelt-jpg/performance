@@ -7,6 +7,7 @@ import { SiteFooter, SiteHeader } from "@/components/layout/SiteChrome";
 
 const TABS = [
   { href: "/admin/content", label: "Content CMS" },
+  { href: "/admin/funnel", label: "Funnel" },
   { href: "/admin/integrations", label: "Integrations" },
 ] as const;
 

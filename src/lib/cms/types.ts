@@ -270,6 +270,7 @@ export type CmsContent = {
       steps: CmsStep[];
     };
     tiersSection: {
+      enabled: boolean;
       heading: string;
       subhead: string;
       offer: CmsChallengeOffer;
@@ -393,4 +394,69 @@ export type CmsContent = {
     saving: string;
     saved: string;
   };
+  /** Autonomous apply chat + short-landing layout. Admin → Funnel. */
+  funnel: CmsFunnel;
+};
+
+export type CmsFunnelField =
+  | "message"
+  | "tier"
+  | "name"
+  | "email"
+  | "mobile"
+  | "instagram"
+  | "mainGoal"
+  | "trainingNow"
+  | "daysCommit"
+  | "medical"
+  | "stoppedResults"
+  | "whyNow"
+  | "structuredProgramme"
+  | "investment"
+  | "privacy";
+
+export type CmsFunnelStep = {
+  id: string;
+  enabled: boolean;
+  field: CmsFunnelField;
+  coachText: string;
+  /** Input placeholder, or the button label on message / privacy steps. */
+  placeholder: string;
+};
+
+export type CmsFunnelLayout = {
+  phoneMockup: boolean;
+  vsl: boolean;
+  proof: boolean;
+  testimonials: boolean;
+  credentials: boolean;
+  problem: boolean;
+  whatsappCoach: boolean;
+  benchmarks: boolean;
+  howItWorks: boolean;
+  tiers: boolean;
+  faq: boolean;
+  finalCta: boolean;
+};
+
+export type CmsFunnelOpenOn = "cta" | "delay" | "after-vsl";
+
+export type CmsFunnel = {
+  enabled: boolean;
+  coachName: string;
+  avatarUrl: string;
+  launcherLabel: string;
+  greeting: string;
+  openOn: CmsFunnelOpenOn;
+  delayMs: number;
+  defaultTier: "pro" | "elite";
+  startButton: string;
+  qualifiedMessage: string;
+  qualifiedCta: string;
+  disqualifiedMessage: string;
+  disqualifiedCta: string;
+  submittingText: string;
+  errorText: string;
+  layout: CmsFunnelLayout;
+  steps: CmsFunnelStep[];
 };

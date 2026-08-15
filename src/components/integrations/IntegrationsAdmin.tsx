@@ -396,7 +396,7 @@ export function IntegrationsAdmin({
                 hint={
                   data.secretsSet.ghlApiKey
                     ? "Saved (masked). Paste a new key only to replace."
-                    : "Required for lead upsert + WhatsApp opt-in."
+                    : "Required for contact upsert, apply-chat automations, and WhatsApp opt-in."
                 }
               >
                 <input
@@ -434,6 +434,38 @@ export function IntegrationsAdmin({
                       ghl: { ...f.ghl, apiBaseUrl: e.target.value },
                     }))
                   }
+                />
+              </Field>
+              <Field
+                label="Qualified workflow ID"
+                hint="Optional. After a Pro/Elite apply qualifies, GHL starts this workflow. You can also trigger from the tag funnel_qualified."
+              >
+                <input
+                  className={inputClass}
+                  value={form.ghl.workflowQualifiedId ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      ghl: { ...f.ghl, workflowQualifiedId: e.target.value },
+                    }))
+                  }
+                  placeholder="workflow id from GHL"
+                />
+              </Field>
+              <Field
+                label="Not-a-fit workflow ID"
+                hint="Optional. Fires when they go to the Challenge. Tag: funnel_disqualified."
+              >
+                <input
+                  className={inputClass}
+                  value={form.ghl.workflowDisqualifiedId ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      ghl: { ...f.ghl, workflowDisqualifiedId: e.target.value },
+                    }))
+                  }
+                  placeholder="workflow id from GHL"
                 />
               </Field>
             </section>

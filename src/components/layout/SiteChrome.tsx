@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useCms } from "@/components/cms/CmsProvider";
+import { GatedLink } from "@/components/marketing/WatchGate";
+import { isFunnelApplyHref } from "@/lib/funnel/open";
 
 export const FALLBACK_LOGO = "/logo.png";
 
@@ -38,21 +40,27 @@ export function SiteHeader({ active }: Props) {
           <BrandLogo />
         </Link>
         <nav className="flex shrink-0 items-center justify-end gap-4 text-sm">
-          {links.map((link) => (
-            <Link
-              key={link.id}
-              href={link.href}
-              className={[
-                "transition hover:text-[var(--accent)]",
-                (active === "tiers" || active === "book") &&
-                link.href.includes("#tiers")
-                  ? "text-[var(--accent)]"
-                  : "text-[var(--muted)]",
-              ].join(" ")}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {links.map((link) => {
+            const className = [
+              "transition hover:text-[var(--accent)]",
+              (active === "tiers" || active === "book") &&
+              (link.href.includes("#tiers") || link.href.includes("/book"))
+                ? "text-[var(--accent)]"
+                : "text-[var(--muted)]",
+            ].join(" ");
+            if (isFunnelApplyHref(link.href)) {
+              return (
+                <GatedLink key={link.id} href={link.href} className={className}>
+                  {link.label}
+                </GatedLink>
+              );
+            }
+            return (
+              <Link key={link.id} href={link.href} className={className}>
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>
@@ -69,15 +77,25 @@ export function SiteFooter() {
         <div className="flex flex-wrap gap-4">
           {cms.chrome.footerLinks
             .filter((l) => l.visible)
-            .map((link) => (
-              <Link
-                key={link.id}
-                href={link.href}
-                className="hover:text-[var(--accent)]"
-              >
-                {link.label}
-              </Link>
-            ))}
+            .map((link) =>
+              isFunnelApplyHref(link.href) ? (
+                <GatedLink
+                  key={link.id}
+                  href={link.href}
+                  className="hover:text-[var(--accent)]"
+                >
+                  {link.label}
+                </GatedLink>
+              ) : (
+                <Link
+                  key={link.id}
+                  href={link.href}
+                  className="hover:text-[var(--accent)]"
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
         </div>
       </div>
       {cms.home.disclaimer?.enabled && cms.home.disclaimer.text ? (

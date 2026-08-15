@@ -10,8 +10,10 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { useCms } from "@/components/cms/CmsProvider";
 import { extractYoutubeId } from "@/lib/media/youtube";
+import { isFunnelApplyHref, openFunnel, tierFromHref } from "@/lib/funnel/open";
 
 const STORAGE_KEY = "tfp-vsl-watched";
 
@@ -126,8 +128,29 @@ export function GatedLink({
   gate?: boolean;
 }) {
   const { requestApply } = useWatchGate();
+  const funnelEnabled = Boolean(useCms().funnel?.enabled);
+  const pathname = usePathname();
+  const intercept =
+    funnelEnabled &&
+    isFunnelApplyHref(href) &&
+    !pathname.startsWith("/admin") &&
+    pathname !== "/book" &&
+    !pathname.startsWith("/book/") &&
+    !pathname.startsWith("/challenge");
 
   function onClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (intercept) {
+      if (gate) {
+        const ok = requestApply(href);
+        if (!ok) {
+          event.preventDefault();
+          return;
+        }
+      }
+      event.preventDefault();
+      openFunnel({ tier: tierFromHref(href) });
+      return;
+    }
     if (!gate) return;
     const ok = requestApply(href);
     if (!ok) event.preventDefault();

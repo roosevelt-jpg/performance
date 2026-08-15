@@ -56,6 +56,9 @@ export type IntegrationsConfig = {
     apiKey: string;
     locationId: string;
     apiBaseUrl: string;
+    /** Optional GHL workflow IDs — triggered after apply via the Contacts API. */
+    workflowQualifiedId: string;
+    workflowDisqualifiedId: string;
   };
   youtube: {
     apiKey: string;
@@ -131,6 +134,8 @@ export const DEFAULT_INTEGRATIONS: IntegrationsConfig = {
     apiKey: "",
     locationId: "",
     apiBaseUrl: "https://services.leadconnectorhq.com",
+    workflowQualifiedId: "",
+    workflowDisqualifiedId: "",
   },
   youtube: {
     apiKey: "",

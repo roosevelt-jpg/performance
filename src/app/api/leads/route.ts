@@ -6,7 +6,9 @@ import type { QuestionnaireAnswers } from "@/types/lead";
 
 export const runtime = "nodejs";
 
-function isValidAnswers(body: unknown): body is QuestionnaireAnswers {
+function isValidAnswers(body: unknown): body is QuestionnaireAnswers & {
+  intakeSource?: string;
+} {
   if (!body || typeof body !== "object") return false;
   const a = body as QuestionnaireAnswers;
   return (
@@ -18,6 +20,12 @@ function isValidAnswers(body: unknown): body is QuestionnaireAnswers {
     typeof a.medical === "string" &&
     a.privacyConsent === true
   );
+}
+
+function intakeSource(body: QuestionnaireAnswers & { intakeSource?: string }): string {
+  return body.intakeSource === "funnel_chat"
+    ? "funnel_chat"
+    : CONSENT_SOURCE;
 }
 
 export async function POST(request: Request) {
@@ -37,13 +45,14 @@ export async function POST(request: Request) {
 
   const evaluation = evaluateLead(body);
   const consentTimestamp = new Date().toISOString();
+  const { intakeSource: _source, ...answers } = body;
 
   try {
     const contact = await upsertLeadInGhl({
-      answers: body,
+      answers,
       consent: {
         privacy: true,
-        source: CONSENT_SOURCE,
+        source: intakeSource(body),
         timestamp: consentTimestamp,
       },
       evaluation,

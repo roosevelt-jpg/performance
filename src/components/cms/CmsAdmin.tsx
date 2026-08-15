@@ -1672,6 +1672,26 @@ export function CmsAdmin() {
           </Section>
 
           <Section title="Tiers section headings">
+            <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+              <input
+                type="checkbox"
+                className="accent-[var(--accent)]"
+                checked={form.home.tiersSection.enabled !== false}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      tiersSection: {
+                        ...form.home.tiersSection,
+                        enabled: e.target.checked,
+                      },
+                    },
+                  })
+                }
+              />
+              Show programme cards (when Funnel engine is off, or if Funnel layout ticks Tiers)
+            </label>
             <Field label="Heading">
               <Text
                 value={form.home.tiersSection.heading}

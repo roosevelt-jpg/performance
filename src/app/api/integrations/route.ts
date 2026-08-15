@@ -139,6 +139,12 @@ function normalizeIncoming(
         body.ghl?.apiBaseUrl?.trim() ||
         current.ghl.apiBaseUrl ||
         DEFAULT_INTEGRATIONS.ghl.apiBaseUrl,
+      workflowQualifiedId:
+        body.ghl?.workflowQualifiedId ?? current.ghl.workflowQualifiedId ?? "",
+      workflowDisqualifiedId:
+        body.ghl?.workflowDisqualifiedId ??
+        current.ghl.workflowDisqualifiedId ??
+        "",
     },
     youtube: {
       apiKey: keepSecret(body.youtube?.apiKey, current.youtube.apiKey),

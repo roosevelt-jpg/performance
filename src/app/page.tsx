@@ -14,6 +14,8 @@ import { WhatsappCoachSection } from "@/components/marketing/WhatsappCoachSectio
 import { GatedLink } from "@/components/marketing/WatchGate";
 import { TierRow } from "@/components/tiers/TierRow";
 import { HERO_CHAT } from "@/content/hero-chat";
+import { isFunnelSectionOn } from "@/lib/funnel/layout";
+import { isFunnelApplyHref } from "@/lib/funnel/open";
 import {
   extractYoutubeId,
   youtubeEmbedSrc,
@@ -303,19 +305,37 @@ export default function HomePage() {
               className="animate-rise mt-6 flex flex-col gap-3 sm:flex-row sm:items-center"
               style={{ animationDelay: "200ms" }}
             >
-              <Link
-                href={hero.cta.href}
-                className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
-              >
-                {hero.cta.label}
-              </Link>
-              {hero.secondaryCta?.label ? (
-                <Link
-                  href={hero.secondaryCta.href}
-                  className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+              {isFunnelApplyHref(hero.cta.href) ? (
+                <GatedLink
+                  href={hero.cta.href}
+                  className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
                 >
-                  {hero.secondaryCta.label}
+                  {hero.cta.label}
+                </GatedLink>
+              ) : (
+                <Link
+                  href={hero.cta.href}
+                  className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
+                >
+                  {hero.cta.label}
                 </Link>
+              )}
+              {hero.secondaryCta?.label ? (
+                isFunnelApplyHref(hero.secondaryCta.href) ? (
+                  <GatedLink
+                    href={hero.secondaryCta.href}
+                    className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+                  >
+                    {hero.secondaryCta.label}
+                  </GatedLink>
+                ) : (
+                  <Link
+                    href={hero.secondaryCta.href}
+                    className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+                  >
+                    {hero.secondaryCta.label}
+                  </Link>
+                )
               ) : null}
             </div>
             {hero.ctaNote ? (
@@ -327,7 +347,7 @@ export default function HomePage() {
               </p>
             ) : null}
           </div>
-          {hero.portraitUrl ? (
+          {isFunnelSectionOn(cms, "phoneMockup") && hero.portraitUrl ? (
             <div className="animate-rise" style={{ animationDelay: "160ms" }}>
               <PhoneMockup
                 imageSrc={hero.portraitUrl}
@@ -342,27 +362,27 @@ export default function HomePage() {
       </section>
 
       <MediaAt slot="after-hero" />
-      <VslSection />
+      {isFunnelSectionOn(cms, "vsl") ? <VslSection /> : null}
       <MediaAt slot="after-vsl" />
-      <ProofStrip />
+      {isFunnelSectionOn(cms, "proof") ? <ProofStrip /> : null}
       <MediaAt slot="after-proof" />
-      <Testimonials />
+      {isFunnelSectionOn(cms, "testimonials") ? <Testimonials /> : null}
       <MediaAt slot="after-testimonials" />
-      <CredentialsSection />
-      <ProblemSection />
+      {isFunnelSectionOn(cms, "credentials") ? <CredentialsSection /> : null}
+      {isFunnelSectionOn(cms, "problem") ? <ProblemSection /> : null}
       <MediaAt slot="after-problem" />
-      <WhatsappCoachSection />
-      <BenchmarkSection />
-      <HowItWorks />
+      {isFunnelSectionOn(cms, "whatsappCoach") ? <WhatsappCoachSection /> : null}
+      {isFunnelSectionOn(cms, "benchmarks") ? <BenchmarkSection /> : null}
+      {isFunnelSectionOn(cms, "howItWorks") ? <HowItWorks /> : null}
       <MediaAt slot="after-how" />
       <MediaAt slot="before-tiers" />
-      <TierRow />
+      {isFunnelSectionOn(cms, "tiers") ? <TierRow /> : null}
       <MediaAt slot="after-tiers" />
       <MediaAt slot="before-faq" />
-      <FaqSection />
+      {isFunnelSectionOn(cms, "faq") ? <FaqSection /> : null}
       <MediaAt slot="after-faq" />
       <MediaAt slot="before-final" />
-      <FinalCta />
+      {isFunnelSectionOn(cms, "finalCta") ? <FinalCta /> : null}
       <SiteFooter />
     </main>
   );

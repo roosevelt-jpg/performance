@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { GatedLink } from "@/components/marketing/WatchGate";
 import type { CmsTier } from "@/lib/cms/types";
 import { useCms } from "@/components/cms/CmsProvider";
 import { ChallengeOffer } from "@/components/marketing/ChallengeOffer";
@@ -66,17 +67,21 @@ export function TierCard({ tier }: Props) {
         <ChallengeOffer offer={tiersSection.offer} />
       ) : null}
 
-      <Link
-        href={href}
-        className={[
-          "inline-flex w-full items-center justify-center rounded-md px-4 py-3 text-center text-sm font-semibold transition sm:py-2.5",
-          isSell
-            ? "bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-bright)]"
-            : "border border-[var(--border-soft)] text-[var(--fg)] hover:border-[var(--fg-soft)]",
-        ].join(" ")}
-      >
-        {tier.cta.label}
-      </Link>
+      {isSell ? (
+        <GatedLink
+          href={href}
+          className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 py-3 text-center text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:py-2.5"
+        >
+          {tier.cta.label}
+        </GatedLink>
+      ) : (
+        <Link
+          href={href}
+          className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-4 py-3 text-center text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:py-2.5"
+        >
+          {tier.cta.label}
+        </Link>
+      )}
       {isChallenge && guarantee?.enabled ? (
         <div className="mt-3 space-y-1 text-center text-xs text-[var(--muted)]">
           {guarantee.trustLine ? <p>{guarantee.trustLine}</p> : null}

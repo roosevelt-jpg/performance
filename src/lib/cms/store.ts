@@ -130,6 +130,22 @@ export function mergeCms(
   if (out.home.hero.ctaNote === undefined) {
     out.home.hero.ctaNote = base.home.hero.ctaNote;
   }
+  if (!out.funnel) {
+    out.funnel = structuredClone(base.funnel);
+  } else {
+    out.funnel = {
+      ...base.funnel,
+      ...out.funnel,
+      layout: { ...base.funnel.layout, ...out.funnel.layout },
+      steps:
+        Array.isArray(out.funnel.steps) && out.funnel.steps.length
+          ? out.funnel.steps
+          : structuredClone(base.funnel.steps),
+    };
+  }
+  if (out.home.tiersSection.enabled === undefined) {
+    out.home.tiersSection.enabled = base.home.tiersSection.enabled;
+  }
 
   return out;
 }

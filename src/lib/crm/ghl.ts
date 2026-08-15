@@ -1,5 +1,15 @@
 import type { LeadSubmissionPayload } from "@/types/lead";
 import { loadIntegrations } from "@/lib/integrations/store";
+import type { IntegrationsConfig } from "@/lib/integrations/types";
+
+function ghlHeaders(apiKey: string): HeadersInit {
+  return {
+    Authorization: `Bearer ${apiKey}`,
+    Version: "2021-07-28",
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+}
 
 function tierTag(tier: "pro" | "elite"): string {
   return tier === "pro" ? "tier_pro" : "tier_elite";
@@ -15,20 +25,61 @@ function flagTags(flags: LeadSubmissionPayload["evaluation"]["flags"]): string[]
   return flags.map((f) => map[f]).filter(Boolean);
 }
 
-/**
- * Thin GoHighLevel contact upsert. Server-only.
- * Credentials come from integrations store (UI + env).
- */
-export async function upsertLeadInGhl(
-  payload: LeadSubmissionPayload,
-): Promise<{ id: string; mocked: boolean }> {
-  const { ghl } = await loadIntegrations();
-  const { apiKey, locationId, apiBaseUrl } = ghl;
+function sourceTag(source: string): string {
+  return source === "funnel_chat"
+    ? "source_funnel_chat"
+    : "source_questionnaire";
+}
 
-  const tags = [
+/** Tags GHL workflows can listen to — no workflow ID required. */
+export function leadAutomationTags(payload: LeadSubmissionPayload): string[] {
+  const outcome =
+    payload.evaluation.outcome === "qualified"
+      ? "funnel_qualified"
+      : "funnel_disqualified";
+  const reasons = payload.evaluation.disqualifyReasons.map(
+    (reason) => `funnel_${reason}`,
+  );
+  return [
+    "funnel_apply",
+    sourceTag(payload.consent.source),
+    outcome,
+    ...reasons,
     tierTag(payload.answers.tier),
     ...flagTags(payload.evaluation.flags),
   ];
+}
+
+export function applicationNote(payload: LeadSubmissionPayload): string {
+  const a = payload.answers;
+  const lines = [
+    `Application — ${a.tier} — ${payload.evaluation.outcome}`,
+    `Source: ${payload.consent.source}`,
+    `Goal: ${a.mainGoal || "—"}`,
+    `Training now: ${a.trainingNow || "—"}`,
+    `Days commit: ${a.daysCommit || "—"}`,
+    `Investment: ${a.investment || "—"}`,
+    `Instagram: ${a.instagram}`,
+    `Medical: ${a.medical}`,
+    `Stopped before: ${a.stoppedResults}`,
+    `Why now: ${a.whyNow}`,
+    `Programme: ${a.structuredProgramme}`,
+    `Flags: ${payload.evaluation.flags.join(", ") || "none"}`,
+  ];
+  return lines.join("\n");
+}
+
+/**
+ * Thin GoHighLevel contact upsert. Server-only.
+ * Credentials come from integrations store (UI + env).
+ * When connected, tags + a note + optional workflow IDs drive GHL automations.
+ */
+export async function upsertLeadInGhl(
+  payload: LeadSubmissionPayload,
+): Promise<{ id: string; mocked: boolean; automation: GhlAutomationResult }> {
+  const { ghl } = await loadIntegrations();
+  const { apiKey, locationId, apiBaseUrl } = ghl;
+  const tags = leadAutomationTags(payload);
 
   const customFields = [
     { key: "tier", field_value: payload.answers.tier },
@@ -74,17 +125,13 @@ export async function upsertLeadInGhl(
     return {
       id: `mock_${payload.answers.tier}_${Date.now()}`,
       mocked: true,
+      automation: { mocked: true, noteAdded: false, workflowTriggered: false },
     };
   }
 
   const res = await fetch(`${apiBaseUrl}/contacts/upsert`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      Version: "2021-07-28",
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers: ghlHeaders(apiKey),
     body: JSON.stringify(body),
   });
 
@@ -98,10 +145,80 @@ export async function upsertLeadInGhl(
     id?: string;
   };
 
-  return {
-    id: data.contact?.id ?? data.id ?? `ghl_${Date.now()}`,
+  const id = data.contact?.id ?? data.id ?? `ghl_${Date.now()}`;
+  const automation = await runGhlLeadAutomations({
+    contactId: id,
+    payload,
+    ghl,
+  });
+
+  return { id, mocked: false, automation };
+}
+
+export type GhlAutomationResult = {
+  mocked: boolean;
+  noteAdded: boolean;
+  workflowTriggered: boolean;
+};
+
+async function runGhlLeadAutomations(params: {
+  contactId: string;
+  payload: LeadSubmissionPayload;
+  ghl: IntegrationsConfig["ghl"];
+}): Promise<GhlAutomationResult> {
+  const { contactId, payload, ghl } = params;
+  const result: GhlAutomationResult = {
     mocked: false,
+    noteAdded: false,
+    workflowTriggered: false,
   };
+
+  try {
+    const noteRes = await fetch(
+      `${ghl.apiBaseUrl}/contacts/${encodeURIComponent(contactId)}/notes`,
+      {
+        method: "POST",
+        headers: ghlHeaders(ghl.apiKey),
+        body: JSON.stringify({ body: applicationNote(payload) }),
+      },
+    );
+    result.noteAdded = noteRes.ok;
+    if (!noteRes.ok) {
+      console.warn("[ghl] note failed", noteRes.status, await noteRes.text());
+    }
+  } catch (error) {
+    console.warn("[ghl] note failed", error);
+  }
+
+  const workflowId =
+    payload.evaluation.outcome === "qualified"
+      ? ghl.workflowQualifiedId.trim()
+      : ghl.workflowDisqualifiedId.trim();
+
+  if (!workflowId) return result;
+
+  try {
+    const wfRes = await fetch(
+      `${ghl.apiBaseUrl}/contacts/${encodeURIComponent(contactId)}/workflow/${encodeURIComponent(workflowId)}`,
+      {
+        method: "POST",
+        headers: ghlHeaders(ghl.apiKey),
+        body: JSON.stringify({}),
+      },
+    );
+    result.workflowTriggered = wfRes.ok;
+    if (!wfRes.ok) {
+      console.warn(
+        "[ghl] workflow failed",
+        wfRes.status,
+        await wfRes.text(),
+      );
+    }
+  } catch (error) {
+    console.warn("[ghl] workflow failed", error);
+  }
+
+  return result;
 }
 
 export async function updateWhatsAppOptIn(params: {
@@ -121,12 +238,7 @@ export async function updateWhatsAppOptIn(params: {
 
   const res = await fetch(`${apiBaseUrl}/contacts/${params.contactId}`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      Version: "2021-07-28",
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers: ghlHeaders(apiKey),
     body: JSON.stringify({
       tags,
       customFields: [
@@ -158,12 +270,7 @@ export async function upsertEmailSignup(params: {
 
   const res = await fetch(`${apiBaseUrl}/contacts/upsert`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      Version: "2021-07-28",
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers: ghlHeaders(apiKey),
     body: JSON.stringify({
       locationId,
       email: params.email,

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useCms } from "@/components/cms/CmsProvider";
+import { FunnelChat } from "@/components/funnel/FunnelChat";
 import { GatedLink } from "@/components/marketing/WatchGate";
 import { usePublicConfig } from "@/hooks/usePublicConfig";
 
@@ -86,6 +87,7 @@ export function SiteWidgets() {
       <EmailPopup />
       <ReviewsPopup />
       <StickyApplyBar />
+      <FunnelChat />
     </>
   );
 }

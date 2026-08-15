@@ -1,3 +1,4 @@
+import { DEFAULT_FUNNEL } from "@/lib/funnel/defaults";
 import type { CmsContent } from "./types";
 
 export const DEFAULT_CMS: CmsContent = {
@@ -12,18 +13,24 @@ export const DEFAULT_CMS: CmsContent = {
       logoUrl: "/logo.png",
     },
     seo: {
-      title: "The Formula Performance | Watch the video. Apply for coaching.",
+      title: "The Formula Performance | Watch. Chat. Apply.",
       description:
-        "Watch the video to see if you qualify. Apply for Pro or Elite with Kane — or join the 8-Week Challenge.",
+        "Watch Kane, then apply in chat for Pro or Elite — two minutes. If it isn't a fit, the 8-Week Challenge is ready.",
     },
   },
   chrome: {
     headerLogoHref: "/",
     nav: [
       {
-        id: "programmes",
-        label: "Programmes",
-        href: "/#tiers",
+        id: "video",
+        label: "Video",
+        href: "/#vsl",
+        visible: true,
+      },
+      {
+        id: "apply",
+        label: "Apply",
+        href: "/book?tier=pro",
         visible: true,
       },
       {
@@ -36,9 +43,9 @@ export const DEFAULT_CMS: CmsContent = {
     footerCopyright: "© The Formula Performance",
     footerLinks: [
       {
-        id: "programmes",
-        label: "Programmes",
-        href: "/#tiers",
+        id: "apply",
+        label: "Apply",
+        href: "/book?tier=pro",
         visible: true,
       },
       {
@@ -57,12 +64,12 @@ export const DEFAULT_CMS: CmsContent = {
   },
   home: {
     hero: {
-      eyebrow: "For people who are done starting over",
-      headline: "Stop guessing. Get coached like it matters.",
-      body: "No leftover PDFs. No two-hour sessions you will skip. Kane builds the plan around your week and keeps you on it. Watch the video to see if you qualify.",
-      cta: { label: "Watch the video", href: "#vsl" },
-      ctaNote: "Then apply. No card required for Pro or Elite.",
-      secondaryCta: { label: "Compare programmes", href: "#tiers" },
+      eyebrow: "1:1 coaching with Kane",
+      headline: "Watch the video. If that's you, apply in the chat.",
+      body: "Kane only takes people who will train at least three days a week. Two minutes in chat — then a call, or the 8-Week Challenge.",
+      cta: { label: "Start application", href: "/book?tier=pro" },
+      ctaNote: "No card. No public prices. Kane reviews every application.",
+      secondaryCta: { label: "Watch the video", href: "#vsl" },
       mediaType: "none",
       mediaUrl: "",
       mediaPoster: "",
@@ -75,13 +82,13 @@ export const DEFAULT_CMS: CmsContent = {
       stepLabel: "Watch first",
       heading: "Hear it from Kane.",
       helper:
-        "Five minutes on how coaching works, who gets in, and what happens after you apply.",
+        "How coaching works, who gets in, and what happens after you apply.",
       youtubeUrl: "https://www.youtube.com/watch?v=OCZ8WztqIOw",
       thumbnailUrl: "",
       muteHint: "Tap to unmute",
       applyStepLabel: "Step 2",
-      applyCta: { label: "Apply for Pro coaching", href: "/book?tier=pro" },
-      applyNote: "Takes a few minutes. No card required to apply.",
+      applyCta: { label: "Continue in chat", href: "/book?tier=pro" },
+      applyNote: "Two minutes. No card required.",
       requireWatch: true,
       gateTitle: "Hold up. Watch the video first.",
       gateBody:
@@ -188,6 +195,7 @@ export const DEFAULT_CMS: CmsContent = {
       ],
     },
     tiersSection: {
+      enabled: true,
       heading: "Choose your level",
       subhead:
         "Start with the Challenge, or apply for Pro and Elite. Booking only for the one-to-one tiers — no price shown here.",
@@ -241,9 +249,9 @@ export const DEFAULT_CMS: CmsContent = {
     },
     finalCta: {
       enabled: true,
-      title: "Ready for a programme that doesn't leave you alone with it?",
-      body: "Apply for Pro or Elite. If you're not there yet, the Challenge is live and ready.",
-      primary: { label: "Apply for Pro coaching", href: "/book?tier=pro" },
+      title: "If the video sounded like you, start the chat.",
+      body: "Two minutes. Kane's team reviews every application.",
+      primary: { label: "Apply in chat", href: "/book?tier=pro" },
       secondary: { label: "Join the Challenge", href: "/challenge" },
     },
     testimonials: {
@@ -314,7 +322,7 @@ export const DEFAULT_CMS: CmsContent = {
     },
     popups: {
       email: {
-        enabled: true,
+        enabled: false,
         delayMs: 18000,
         title: "Get the coaching brief",
         body: "Early access, programme notes, and when Pro or Elite places open. Plain email. Unsubscribe anytime.",
@@ -324,16 +332,16 @@ export const DEFAULT_CMS: CmsContent = {
         privacy: "We never sell your email. Used only for Formula Performance updates.",
       },
       reviews: {
-        enabled: true,
+        enabled: false,
         delayMs: 28000,
         title: "What clients say after a few coached weeks",
-        ctaLabel: "Apply for Pro",
+        ctaLabel: "Apply in chat",
         ctaHref: "/book?tier=pro",
       },
     },
     stickyCta: {
       enabled: true,
-      label: "Apply for Pro",
+      label: "Apply in chat",
       href: "/book?tier=pro",
     },
     imageSections: [
@@ -510,12 +518,12 @@ export const DEFAULT_CMS: CmsContent = {
     },
   ],
   questionnaire: {
-    back: { label: "← Back to programmes", href: "/#tiers" },
-    title: "Book your call",
+    back: { label: "← Back", href: "/" },
+    title: "Application",
     introMobile:
-      "One question at a time on smaller screens. Kane reviews every application personally.",
+      "One question at a time. Kane reviews every application personally.",
     introDesktop:
-      "Fill everything on one page. Kane reviews every application personally.",
+      "Kane reviews every application personally. Chat is the default path — this form is the fallback.",
     progressLabel: "Question {current} of {total}",
     goals: [
       "fat loss",
@@ -608,4 +616,5 @@ export const DEFAULT_CMS: CmsContent = {
     saving: "Saving…",
     saved: "Preference saved.",
   },
+  funnel: DEFAULT_FUNNEL,
 };
