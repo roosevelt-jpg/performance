@@ -93,8 +93,8 @@ export function mergeCms(
     out.home.hero.portraitAlt = base.home.hero.portraitAlt;
   }
   out.home.testimonials.items = out.home.testimonials.items.map((item) => ({
-    beforeImageUrl: "",
     ...item,
+    beforeImageUrl: item.beforeImageUrl ?? "",
   }));
   if (out.home.hero.eyebrow === undefined) {
     out.home.hero.eyebrow = base.home.hero.eyebrow;
