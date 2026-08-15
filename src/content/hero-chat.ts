@@ -4,7 +4,7 @@ export type ChatLine = {
 };
 
 export const HERO_CHAT: ChatLine[] = [
-  { from: "coach", text: "Watch the video. Then we'll see if Pro is a fit." },
+  { from: "coach", text: "Watch the video. Then we'll see if you're a fit." },
   { from: "user", text: "What do you need?" },
   {
     from: "coach",

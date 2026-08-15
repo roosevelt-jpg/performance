@@ -13,11 +13,11 @@ export const DEFAULT_CMS: CmsContent = {
       logoUrl: "/logo.png",
     },
     seo: {
-      title: "The Formula Performance | Watch. Chat. Apply.",
+      title: "The Formula Performance | You Need Follow-Through",
       description:
-        "Watch Kane, then apply in chat for Pro or Elite — two minutes. If it isn't a fit, the 8-Week Challenge is ready.",
+        "You don't need another training plan. Personalised performance coaching with Kane — accountability, consistency, and proof it worked. Two-minute application. No obligation.",
       keywords:
-        "performance coaching, 1:1 coaching, Kane Mousah, The Formula Performance, 8 week challenge, online fitness coaching",
+        "performance coaching, follow-through, accountability coaching, Kane Mousah, The Formula Performance, 8 week transformation, online fitness coaching",
       ogImageUrl: "/logo.png",
     },
   },
@@ -38,7 +38,7 @@ export const DEFAULT_CMS: CmsContent = {
       },
       {
         id: "apply",
-        label: "Apply for Pro coaching",
+        label: "See If You're a Fit",
         href: "/book?tier=pro",
         visible: true,
       },
@@ -53,7 +53,7 @@ export const DEFAULT_CMS: CmsContent = {
     footerLinks: [
       {
         id: "apply",
-        label: "Apply for Pro coaching",
+        label: "See If You're a Fit",
         href: "/book?tier=pro",
         visible: true,
       },
@@ -74,10 +74,10 @@ export const DEFAULT_CMS: CmsContent = {
   home: {
     hero: {
       eyebrow: "1:1 coaching with Kane",
-      headline: "Watch the video. If that's you, apply in the chat.",
-      body: "Kane only takes people who will train at least three days a week. Two minutes in chat — then a call, or the 8-Week Challenge.",
-      cta: { label: "Apply for Pro coaching", href: "/book?tier=pro" },
-      ctaNote: "No card. No public prices. Kane reviews every application.",
+      headline: "You don't need another training plan. You need follow-through.",
+      body: "Personalised performance coaching with Kane, built around your life, your goals and the standard you want to hold yourself to.",
+      cta: { label: "See If You're a Fit", href: "/book?tier=pro" },
+      ctaNote: "2-minute application · No obligation",
       secondaryCta: { label: "Watch the video", href: "#vsl" },
       mediaType: "none",
       mediaUrl: "",
@@ -91,17 +91,17 @@ export const DEFAULT_CMS: CmsContent = {
       stepLabel: "Watch first",
       heading: "Hear it from Kane.",
       helper:
-        "How coaching works, who gets in, and what happens after you apply.",
+        "Why most people fail, why accountability matters, and who he actually works with.",
       youtubeUrl: "https://www.youtube.com/watch?v=OCZ8WztqIOw",
       thumbnailUrl: "",
       muteHint: "Tap to unmute",
       applyStepLabel: "Step 2",
-      applyCta: { label: "Apply for Pro coaching", href: "/book?tier=pro" },
-      applyNote: "Two minutes. No card required.",
+      applyCta: { label: "See If You're a Fit", href: "/book?tier=pro" },
+      applyNote: "2-minute application · No obligation",
       requireWatch: true,
-      gateTitle: "Hold up. Watch the video first.",
+      gateTitle: "Watch the video first.",
       gateBody:
-        "The video answers most questions before you ever get on a call. How coaching works. Who gets accepted. What happens next. Watch it, then come back and apply.",
+        "Kane covers why people stall, what he expects, and whether this is actually for you. Watch it, then apply.",
       gateCta: "Take me to the video",
     },
     proof: {
@@ -110,20 +110,20 @@ export const DEFAULT_CMS: CmsContent = {
         { id: "p1", value: "", label: "Clients coached" },
         { id: "p2", value: "", label: "Weight lost" },
         { id: "p3", value: "", label: "Muscle gained" },
-        { id: "p4", value: "1:1", label: "Real human coach" },
+        { id: "p4", value: "", label: "Real human coach" },
       ],
     },
     problem: {
       enabled: true,
       eyebrow: "The gap",
       title: "Plans don't fail. Follow-through does.",
-      body: "Most people don't need another PDF. They need a coach who sees the week, adjusts the work, and keeps the standard high when motivation dips.",
+      body: "You probably don't need more information. You know how to train and what you should be eating. The problem is doing it consistently when work gets busy, motivation disappears and life gets in the way.",
     },
     credentials: {
       enabled: true,
-      eyebrow: "Who’s in your corner",
-      heading: "Coached by someone who’s been in the fight.",
-      body: "I fought pro MMA in Bellator, then spent 20+ years coaching. I founded The Formula and built the accountability system behind it myself.",
+      eyebrow: "Why Kane",
+      heading: "Why trust him with this.",
+      body: "Kane has spent decades understanding what makes people perform — and what makes them quit. Ex-pro MMA. Bellator. 20+ years coaching. 132K watching. The standard is his; the follow-through is yours.",
       imageUrl: "/assets/kane-coach.jpg",
       imageAlt: "Kane Mousah at a Bellator weigh-in",
       caption: "Ex-pro MMA · Founder, The Formula",
@@ -133,34 +133,34 @@ export const DEFAULT_CMS: CmsContent = {
         { id: "c1", value: "Ex-pro", label: "MMA fighter" },
         { id: "c2", value: "Bellator", label: "On the big stage" },
         { id: "c3", value: "20+", label: "Years coaching" },
-        { id: "c4", value: "132K", label: "Following" },
+        { id: "c4", value: "132K", label: "Audience" },
       ],
     },
     whatsappCoach: {
       enabled: true,
-      eyebrow: "How it works",
-      heading: "Your Performance Coach, inside WhatsApp",
-      body: "One number to save. For eight weeks it's how you train, eat and stay on track, all in the app you already have open.",
+      eyebrow: "Always on",
+      heading: "Your coach, in your pocket.",
+      body: "The technology isn't your coach. It makes sure your coaching doesn't disappear when life gets busy. The strongest part: it messages you first.",
       steps: [
         {
           id: "w1",
           title: "It messages you first",
-          body: "Your coach opens the conversation, most days before you’ve had your coffee.",
+          body: "The coach doesn't wait for you to check in. When motivation disappears, the system still reaches you.",
         },
         {
           id: "w2",
-          title: "Ask it literally anything",
-          body: "Stuck on a lift, tempted by a takeaway, unsure what to swap dinner for: ask and get a straight answer in seconds.",
+          title: "Ask it anything",
+          body: "Stuck on a lift, tempted by a takeaway, unsure what to swap: you get a straight answer in seconds.",
         },
         {
           id: "w3",
-          title: "It moves with your week",
-          body: "Train four days instead of five, sleep badly, travel for work: your targets shift to match.",
+          title: "The week gets rewritten",
+          body: "Travel, missed sessions, poor sleep, busy weeks — the plan adapts instead of falling apart.",
         },
         {
           id: "w4",
-          title: "There’s nowhere to hide",
-          body: "Skip a session and it’s flagged the same day. No shame, just a nudge back on track.",
+          title: "There's nowhere to hide",
+          body: "Skip a session and it's flagged the same day. Not shame. A nudge back to the standard.",
         },
       ],
       chatName: "Kane · Your Coach",
@@ -171,9 +171,9 @@ export const DEFAULT_CMS: CmsContent = {
     },
     benchmarks: {
       enabled: true,
-      eyebrow: "Measured, not guessed",
-      heading: "What eight weeks actually changes.",
-      body: "We test four benchmarks in week one and re-test them in week eight, from your own starting point.",
+      eyebrow: "The 8-week transformation",
+      heading: "You'll know exactly what changed.",
+      body: "Week 1: we establish your baseline using four performance benchmarks. Weeks 2–7: train, adapt, execute. Week 8: we test again.",
       items: [
         { id: "b1", value: "01", label: "Strength" },
         { id: "b2", value: "02", label: "Conditioning" },
@@ -183,31 +183,32 @@ export const DEFAULT_CMS: CmsContent = {
     },
     howItWorks: {
       enabled: true,
-      heading: "How it works",
-      subhead: "No checkout for Pro or Elite. Qualify, book, talk to Kane.",
+      heading: "The core system",
+      subhead:
+        "This isn't another plan. It's the mechanism that keeps you consistent when life gets busy.",
       steps: [
         {
           id: "s1",
-          title: "Apply in minutes",
-          body: "Ten questions. We learn your goal, schedule, and what's blocked results before.",
+          title: "01 — Personalised Training",
+          body: "Training built around your goals, ability, schedule and starting point.",
         },
         {
           id: "s2",
-          title: "Book the call",
-          body: "If you qualify, pick a time. Pro is 20 minutes. Elite is 30. Kane is briefed before you join.",
+          title: "02 — Daily Accountability",
+          body: "The coach doesn't wait for you to check in. The system keeps you accountable when motivation disappears.",
         },
         {
           id: "s3",
-          title: "Get your programme",
-          body: "If it's a fit, your coaching starts with a plan written for you — not the group average.",
+          title: "03 — Real-Time Coaching",
+          body: "Travel, missed sessions, poor sleep and busy weeks are handled through adaptation rather than letting the plan fall apart.",
         },
       ],
     },
     tiersSection: {
       enabled: true,
-      heading: "Choose your level",
+      heading: "What you actually get",
       subhead:
-        "Start with the Challenge, or apply for Pro and Elite. Booking only for the one-to-one tiers — no price shown here.",
+        "Personalised training, nutrition, daily accountability and coaching that adapts with the week. Pro and Elite are by application — no public prices.",
       offer: {
         enabled: true,
         anchorPrice: "",
@@ -228,45 +229,57 @@ export const DEFAULT_CMS: CmsContent = {
     },
     faq: {
       enabled: true,
-      heading: "Questions before you apply",
+      heading: "Before you apply",
       items: [
         {
           id: "f1",
-          question: "Why can't I just buy Pro or Elite online?",
+          question: "Do I need to be experienced?",
           answer:
-            "These tiers are limited and built around you. The call is how Kane confirms fit, capacity, and the right programme — not a checkout form.",
+            "No. You need to be serious. Kane coaches from your starting point — what matters is that you'll train and take the standard.",
         },
         {
           id: "f2",
-          question: "What if I don't qualify?",
+          question: "How much time do I need?",
           answer:
-            "You'll be pointed to the 8-Week Performance Challenge. It's self-serve, coached, and the right place to build consistency first.",
+            "At least three sessions a week. If you can't commit to that, this isn't for you yet — the 8-Week Challenge is the better first step.",
         },
         {
           id: "f3",
-          question: "How fast will I hear back?",
+          question: "What if I miss a session?",
           answer:
-            "Kane reviews every application personally. You'll hear back within 24 hours.",
+            "You say so. The plan adapts instead of collapsing. Skip without a word and it gets flagged the same day.",
         },
         {
           id: "f4",
-          question: "Is there a price on this page?",
+          question: "Is this personalised?",
           answer:
-            "Not for Pro or Elite. Investment is confirmed inside the application so the public page stays focused on fit, not checkout.",
+            "Yes. Training, nutrition and the week's adjustments are built around your goals, ability, schedule and starting point — not a group template.",
+        },
+        {
+          id: "f5",
+          question: "How does WhatsApp coaching work?",
+          answer:
+            "It messages you first. You can ask anything, and the week gets rewritten when life gets busy. You are not paying for a bot. The technology makes the coaching persistent.",
+        },
+        {
+          id: "f6",
+          question: "What happens after the 8 weeks?",
+          answer:
+            "We re-test the same four benchmarks you started with, so you know exactly what changed. If it's working and you want to stay on, Kane reviews that on the call — not on this page.",
         },
       ],
     },
     finalCta: {
       enabled: true,
-      title: "If the video sounded like you, start the chat.",
-      body: "Two minutes. Kane's team reviews every application.",
-      primary: { label: "Book Your Call", href: "/book?tier=pro" },
+      title: "Stop starting over.",
+      body: "If you're ready to train consistently, be held accountable and find out what you're actually capable of, apply to work with Kane. Applications are reviewed individually.",
+      primary: { label: "See If You're a Fit", href: "/book?tier=pro" },
       secondary: { label: "Join the Challenge", href: "/challenge" },
     },
     testimonials: {
       enabled: true,
-      heading: "Results of accountability.",
-      subhead: "Real people. Real discipline. Real results.",
+      heading: "People like you. Results like this.",
+      subhead: "Before → process → after. Not a wall of generic praise.",
       items: [
         {
           id: "t1",
@@ -274,7 +287,7 @@ export const DEFAULT_CMS: CmsContent = {
           quote:
             "Taking The Complete Stack and being held accountable got me the results I wanted.",
           name: "Mustafa S.",
-          result: "",
+          result: "Accountability, then the result.",
           imageUrl: "/assets/transformations/mustafa-s.jpg",
           beforeImageUrl: "",
           imageAlt: "Mustafa S. before and after",
@@ -285,7 +298,7 @@ export const DEFAULT_CMS: CmsContent = {
           quote:
             "The Formula system improved my ability to push myself harder.",
           name: "Casey B.",
-          result: "",
+          result: "The standard, then the output.",
           imageUrl: "/assets/transformations/casey.jpg",
           beforeImageUrl: "",
           imageAlt: "Casey B. before and after",
@@ -296,7 +309,7 @@ export const DEFAULT_CMS: CmsContent = {
           quote:
             "Kane set the tone and the standard. I followed it and got the results.",
           name: "Mustafa R.",
-          result: "",
+          result: "Kane's standard. Their follow-through.",
           imageUrl: "/assets/transformations/mustafa-r.jpg",
           beforeImageUrl: "",
           imageAlt: "Mustafa R. before and after",
@@ -307,18 +320,18 @@ export const DEFAULT_CMS: CmsContent = {
           quote:
             "Following The Formula training system made me realise I could lose the weight I never thought I could with this programme.",
           name: "Ben K.",
-          result: "",
+          result: "A plan they actually finished.",
           imageUrl: "/assets/transformations/ben.jpg",
           beforeImageUrl: "",
           imageAlt: "Ben K. before and after",
         },
         {
           id: "t5",
-          enabled: true,
+          enabled: false,
           quote:
             "Kane held me accountable every step of the way. Now I don't need him because the discipline is built.",
           name: "Jamie H.",
-          result: "",
+          result: "Discipline that stayed.",
           imageUrl: "/assets/transformations/jamie.jpg",
           beforeImageUrl: "",
           imageAlt: "Jamie H. before and after",
@@ -327,14 +340,14 @@ export const DEFAULT_CMS: CmsContent = {
     },
     disclaimer: {
       enabled: true,
-      text: "Results vary. Pro and Elite are by application only — never sold at checkout. The 8-Week Challenge is the only self-serve option.",
+      text: "Results vary. This is for serious people who will train at least three days a week and be held accountable. Pro and Elite are by application only — never sold at checkout. The 8-Week Challenge is the only self-serve option.",
     },
     popups: {
       email: {
         enabled: false,
         delayMs: 18000,
         title: "Get the coaching brief",
-        body: "Early access, programme notes, and when Pro or Elite places open. Plain email. Unsubscribe anytime.",
+        body: "Notes on follow-through, and when places open. Plain email. Unsubscribe anytime.",
         placeholder: "Email",
         cta: "Send it to me",
         success: "You're on the list. Watch for Kane in your inbox.",
@@ -344,13 +357,13 @@ export const DEFAULT_CMS: CmsContent = {
         enabled: false,
         delayMs: 28000,
         title: "What clients say after a few coached weeks",
-        ctaLabel: "Apply for Pro coaching",
+        ctaLabel: "See If You're a Fit",
         ctaHref: "/book?tier=pro",
       },
     },
     stickyCta: {
       enabled: true,
-      label: "Apply for Pro",
+      label: "See If You're a Fit",
       href: "/book?tier=pro",
     },
     imageSections: [
@@ -368,7 +381,7 @@ export const DEFAULT_CMS: CmsContent = {
             url: "",
             alt: "Training results banner",
             caption: "",
-            cta: { label: "Book Your Call", href: "/book?tier=pro" },
+            cta: { label: "See If You're a Fit", href: "/book?tier=pro" },
           },
         ],
       },
@@ -410,7 +423,7 @@ export const DEFAULT_CMS: CmsContent = {
           {
             id: "intro-1",
             enabled: true,
-            title: "How Pro coaching works",
+            title: "How Kane coaches",
             body: "Paste a YouTube link in Admin. Click play to watch without leaving the site.",
             youtubeUrl: "",
             thumbnailUrl: "",
@@ -461,9 +474,9 @@ export const DEFAULT_CMS: CmsContent = {
       badge: "Live",
       subhead: "Self-serve · Already built",
       body: [
-        "Eight weeks. Five days a week.",
+        "You'll know exactly what changed.",
+        "Week 1 baseline. Week 8 re-test.",
         "A coach tracking you the whole way.",
-        "You are not left alone with it.",
       ],
       includes: [
         "One-to-one coach",
@@ -488,18 +501,20 @@ export const DEFAULT_CMS: CmsContent = {
       subhead: "Booking only",
       body: [
         "Your programme, written for you.",
-        "Kane reviews and adjusts it weekly.",
-        "Closer contact. Faster answers.",
-        "Places are limited.",
+        "Daily accountability that doesn't wait for you to check in.",
+        "Real-time adjustments when the week changes.",
+        "Places are limited. By application.",
       ],
       includes: [
-        "Everything in the Challenge",
-        "Bespoke programme, not the group plan",
-        "Weekly review by Kane",
-        "Direct line to Kane and the team",
-        "Nutrition targets set and adjusted for you",
+        "Personalised training",
+        "Nutrition guidance",
+        "Daily accountability",
+        "Direct coaching",
+        "Real-time programme adjustments",
+        "Performance testing",
+        "Week 1 → Week 8 progress tracking",
       ],
-      cta: { kind: "book", label: "Book Your Call", bookTier: "pro" },
+      cta: { kind: "book", label: "See If You're a Fit", bookTier: "pro" },
       applyBadge: "Apply",
     },
     {
@@ -518,11 +533,11 @@ export const DEFAULT_CMS: CmsContent = {
       includes: [
         "Everything in Pro",
         "Built with Kane personally",
-        "Unannounced check-ins from Kane",
+        "Closer contact when the week gets messy",
         "Video form review",
         "Priority access, first response",
       ],
-      cta: { kind: "book", label: "Book Your Call", bookTier: "elite" },
+      cta: { kind: "book", label: "See If You're a Fit", bookTier: "elite" },
       applyBadge: "Apply",
     },
   ],
@@ -530,9 +545,9 @@ export const DEFAULT_CMS: CmsContent = {
     back: { label: "← Back", href: "/" },
     title: "Application",
     introMobile:
-      "One question at a time. Kane reviews every application personally.",
+      "Two minutes. Kane reviews every application himself.",
     introDesktop:
-      "Kane reviews every application personally. Chat is the default path — this form is the fallback.",
+      "Kane reviews every application himself. Chat is the default path — this form is the fallback.",
     progressLabel: "Question {current} of {total}",
     goals: [
       "fat loss",
@@ -589,7 +604,7 @@ export const DEFAULT_CMS: CmsContent = {
   },
   challenge: {
     title: "The 8-Week Performance Challenge",
-    body: "Eight weeks. Five days a week. A coach tracking you the whole way. You are not left alone with it.",
+    body: "You'll know exactly what changed. Week 1 is your baseline. Weeks 2–7 you train, adapt and execute. Week 8 we test again. You are not left alone with it.",
     cta: { label: "Join the Challenge", href: "#checkout" },
     checkoutHeading: "Secure checkout",
     checkoutBody:
@@ -618,7 +633,7 @@ export const DEFAULT_CMS: CmsContent = {
   confirmation: {
     eyebrow: "Application received",
     title: "You're on the list",
-    body: "Kane reviews every application personally. You'll hear back within 24 hours.",
+    body: "Kane reviews every application himself. You'll hear back within 24 hours.",
     whatsappLabel:
       "Message me on WhatsApp about this application and call reminders. This is separate from the privacy consent you already gave.",
     save: "Save preference",

@@ -3412,7 +3412,7 @@ export function CmsAdmin() {
                             url: "",
                             alt: "",
                             caption: "",
-                            cta: { label: "Book Your Call", href: "/book?tier=pro" },
+                            cta: { label: "See If You're a Fit", href: "/book?tier=pro" },
                           },
                         ],
                       },

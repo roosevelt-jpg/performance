@@ -21,7 +21,7 @@ export const DEFAULT_FUNNEL_STEPS: CmsFunnelStep[] = [
     enabled: true,
     field: "message",
     coachText:
-      "I'm Kane's coach on this chat. Two minutes, then we know if a call is next — or the 8-Week Challenge. Ready?",
+      "Two minutes. Then we know if a call is next — or the 8-Week Challenge. Ready?",
     placeholder: "Let's go",
   },
   {
@@ -90,7 +90,7 @@ export const DEFAULT_FUNNEL: CmsFunnel = {
   coachName: "Kane · Performance",
   avatarUrl: "/assets/kane-headshot.png",
   launcherLabel: "Apply in chat",
-  greeting: "Watch the video first if you haven't. Then we'll see if Pro or Elite is a fit.",
+  greeting: "Watch the video first if you haven't. Then we'll see if you're a fit.",
   openOn: "cta",
   delayMs: 12000,
   defaultTier: "pro",

@@ -122,6 +122,7 @@ export function mergeCms(
       beforeImageUrl: item.beforeImageUrl ?? "",
       imageUrl: item.imageUrl || fallback?.imageUrl || "",
       imageAlt: item.imageAlt || fallback?.imageAlt || item.name,
+      result: item.result || fallback?.result || "",
     };
   });
   if (out.home.hero.eyebrow === undefined) {

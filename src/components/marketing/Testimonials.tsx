@@ -18,7 +18,7 @@ export function Testimonials() {
     <section className="border-b border-[var(--border)]">
       <div className="mx-auto max-w-6xl px-4 section-y sm:px-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-          The difference
+          Proof
         </p>
         <h2 className="mt-3 font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {testimonials.heading}
