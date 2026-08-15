@@ -246,9 +246,19 @@ export default function HomePage() {
 
       <section
         id="hero"
-        className="relative overflow-hidden border-b border-[var(--border)]"
+        className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden border-b border-[var(--border)]"
       >
-        {hasHeroMedia && !hero.portraitUrl ? (
+        {hero.portraitUrl ? (
+          <div className="pointer-events-none absolute inset-0" aria-hidden>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={hero.portraitUrl}
+              alt=""
+              className="h-full w-full max-w-none object-cover object-[50%_14%]"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.88)_0%,rgba(10,10,10,0.42)_48%,rgba(10,10,10,0.2)_100%),linear-gradient(180deg,rgba(10,10,10,0.35)_0%,transparent_28%,rgba(10,10,10,0.72)_100%)]" />
+          </div>
+        ) : hasHeroMedia ? (
           <>
             <HeroMedia />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/70 to-[var(--bg)]/40" />
@@ -328,16 +338,6 @@ export default function HomePage() {
               >
                 {hero.ctaNote}
               </p>
-            ) : null}
-            {!showPhone && hero.portraitUrl ? (
-              <div className="animate-rise mt-8" style={{ animationDelay: "280ms" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={hero.portraitUrl}
-                  alt={hero.portraitAlt || ""}
-                  className="w-full max-w-xl rounded-[var(--radius)] object-cover object-[50%_18%] sm:max-w-lg"
-                />
-              </div>
             ) : null}
           </div>
           {showPhone && hero.portraitUrl ? (

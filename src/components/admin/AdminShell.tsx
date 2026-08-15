@@ -57,7 +57,7 @@ export function AdminShell({
 
   return (
     <main className="flex min-h-dvh flex-1 flex-col">
-      <SiteHeader active="admin" />
+      <SiteHeader active="admin" onLogout={() => void logout()} />
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-10 lg:px-6">
         <header className="mb-6 border-b border-[var(--border)] pb-5 sm:mb-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -81,9 +81,9 @@ export function AdminShell({
               <button
                 type="button"
                 onClick={() => void logout()}
-                className="text-[var(--muted)] hover:text-[var(--accent)]"
+                className="inline-flex items-center justify-center rounded-md border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
               >
-                Sign out
+                Log out
               </button>
               <Link
                 href="/"

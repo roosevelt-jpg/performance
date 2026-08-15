@@ -10,6 +10,7 @@ export const FALLBACK_LOGO = "/logo.png";
 type Props = {
   active?: "home" | "tiers" | "book" | "admin";
   compact?: boolean;
+  onLogout?: () => void;
 };
 
 export function BrandLogo({
@@ -25,7 +26,7 @@ export function BrandLogo({
   );
 }
 
-export function SiteHeader({ active }: Props) {
+export function SiteHeader({ active, onLogout }: Props) {
   const cms = useCms();
   const links = cms.chrome.nav.filter((l) => l.visible);
 
@@ -39,29 +40,47 @@ export function SiteHeader({ active }: Props) {
         >
           <BrandLogo />
         </Link>
-        <nav className="hidden shrink-0 items-center justify-end gap-4 text-sm sm:flex">
-          {links.map((link) => {
-            const className = [
-              "transition hover:text-[var(--accent)]",
-              (active === "tiers" || active === "book") &&
-              (link.href.includes("#tiers") || link.href.includes("/book"))
-                ? "text-[var(--accent)]"
-                : "text-[var(--muted)]",
-            ].join(" ");
-            if (isFunnelApplyHref(link.href)) {
+        {onLogout ? (
+          <nav className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
+            <Link
+              href="/"
+              className="hidden text-sm text-[var(--muted)] hover:text-[var(--accent)] sm:inline"
+            >
+              View site
+            </Link>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="inline-flex items-center justify-center rounded-md border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              Log out
+            </button>
+          </nav>
+        ) : (
+          <nav className="hidden shrink-0 items-center justify-end gap-4 text-sm sm:flex">
+            {links.map((link) => {
+              const className = [
+                "transition hover:text-[var(--accent)]",
+                (active === "tiers" || active === "book") &&
+                (link.href.includes("#tiers") || link.href.includes("/book"))
+                  ? "text-[var(--accent)]"
+                  : "text-[var(--muted)]",
+              ].join(" ");
+              if (isFunnelApplyHref(link.href)) {
+                return (
+                  <GatedLink key={link.id} href={link.href} className={className}>
+                    {link.label}
+                  </GatedLink>
+                );
+              }
               return (
-                <GatedLink key={link.id} href={link.href} className={className}>
+                <Link key={link.id} href={link.href} className={className}>
                   {link.label}
-                </GatedLink>
+                </Link>
               );
-            }
-            return (
-              <Link key={link.id} href={link.href} className={className}>
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+            })}
+          </nav>
+        )}
       </div>
     </header>
   );
