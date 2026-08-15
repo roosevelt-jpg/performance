@@ -11,37 +11,46 @@ type Props = {
 export function SiteHeader({ active }: Props) {
   const cms = useCms();
   const brand = cms.site.brand;
+  const links = cms.chrome.nav.filter((l) => l.visible);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--border-soft)] bg-[var(--bg)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--bg)]/80">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+    <header className="border-b border-[var(--border)] bg-[var(--bg)]">
+      <div className="relative mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5">
+        <div />
         <Link
           href={cms.chrome.headerLogoHref || "/"}
-          className="font-heading min-w-0 truncate text-sm tracking-tight text-[var(--fg)] sm:text-base"
+          className="justify-self-center"
         >
-          {brand.wordmark}{" "}
-          <span className="text-[var(--accent)]">{brand.accent}</span>
+          {brand.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={brand.logoUrl}
+              alt={brand.name}
+              className="h-7 w-auto max-w-[220px] object-contain sm:h-8"
+            />
+          ) : (
+            <span className="font-heading text-base tracking-tight text-[var(--fg)]">
+              {brand.wordmark}{" "}
+              <span className="text-[var(--accent)]">{brand.accent}</span>
+            </span>
+          )}
         </Link>
-        <nav className="flex shrink-0 items-center gap-4 text-sm sm:gap-5">
-          {cms.chrome.nav
-            .filter((l) => l.visible)
-            .map((link) => (
-              <Link
-                key={link.id}
-                href={link.href}
-                className={[
-                  "transition hover:text-[var(--accent)]",
-                  (active === "tiers" || active === "book") &&
-                  link.href.includes("#tiers")
-                    ? "text-[var(--accent)]"
-                    : active === "admin" && link.href.includes("admin")
-                      ? "text-[var(--accent)]"
-                      : "text-[var(--muted)]",
-                ].join(" ")}
-              >
-                {link.label}
-              </Link>
-            ))}
+        <nav className="flex shrink-0 items-center justify-end gap-4 text-sm">
+          {links.map((link) => (
+            <Link
+              key={link.id}
+              href={link.href}
+              className={[
+                "transition hover:text-[var(--accent)]",
+                (active === "tiers" || active === "book") &&
+                link.href.includes("#tiers")
+                  ? "text-[var(--accent)]"
+                  : "text-[var(--muted)]",
+              ].join(" ")}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
       </div>
     </header>
@@ -52,7 +61,7 @@ export function SiteFooter() {
   const cms = useCms();
 
   return (
-    <footer className="mt-auto border-t border-[var(--border-soft)] py-6">
+    <footer className="mt-auto border-t border-[var(--border)] py-6">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 text-sm text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <span>{cms.chrome.footerCopyright}</span>
         <div className="flex flex-wrap gap-4">

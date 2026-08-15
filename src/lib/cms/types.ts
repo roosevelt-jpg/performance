@@ -124,8 +124,63 @@ export type CmsTestimonial = {
   quote: string;
   name: string;
   result: string;
+  /** After photo, or a single composite before/after */
   imageUrl: string;
+  /** Optional before photo; pair with imageUrl */
+  beforeImageUrl: string;
   imageAlt: string;
+};
+
+export type CmsCoachStep = {
+  id: string;
+  title: string;
+  body: string;
+};
+
+export type CmsWhatsappCoach = {
+  enabled: boolean;
+  eyebrow: string;
+  heading: string;
+  body: string;
+  steps: CmsCoachStep[];
+  chatName: string;
+  chatTime: string;
+  chatMessage: string;
+};
+
+export type CmsCredentials = {
+  enabled: boolean;
+  eyebrow: string;
+  heading: string;
+  body: string;
+  items: CmsProofItem[];
+};
+
+export type CmsBenchmarks = {
+  enabled: boolean;
+  eyebrow: string;
+  heading: string;
+  body: string;
+  items: CmsProofItem[];
+};
+
+export type CmsChallengeOffer = {
+  enabled: boolean;
+  anchorPrice: string;
+  livePrice: string;
+  addonLabel: string;
+  addonValue: string;
+  addonPrice: string;
+  totalSaving: string;
+  recurringTerms: string;
+  offerEnd: string;
+  placesRemaining: string;
+};
+
+export type CmsGuarantee = {
+  enabled: boolean;
+  guarantee: string;
+  trustLine: string;
 };
 
 export type CmsVsl = {
@@ -159,6 +214,7 @@ export type CmsContent = {
       siteUrl: string;
       wordmark: string;
       accent: string;
+      logoUrl: string;
     };
     seo: {
       title: string;
@@ -183,6 +239,9 @@ export type CmsContent = {
       mediaUrl: string;
       mediaPoster: string;
       mediaAlt: string;
+      /** Kane portrait shown below the CTAs, not behind them */
+      portraitUrl: string;
+      portraitAlt: string;
     };
     vsl: CmsVsl;
     proof: {
@@ -195,6 +254,9 @@ export type CmsContent = {
       title: string;
       body: string;
     };
+    credentials: CmsCredentials;
+    whatsappCoach: CmsWhatsappCoach;
+    benchmarks: CmsBenchmarks;
     howItWorks: {
       enabled: boolean;
       heading: string;
@@ -204,6 +266,8 @@ export type CmsContent = {
     tiersSection: {
       heading: string;
       subhead: string;
+      offer: CmsChallengeOffer;
+      guarantee: CmsGuarantee;
     };
     faq: {
       enabled: boolean;

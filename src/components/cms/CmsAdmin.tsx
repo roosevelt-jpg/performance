@@ -299,7 +299,7 @@ export function CmsAdmin() {
                   }
                 />
               </Field>
-              <Field label="Accent word (lime)">
+              <Field label="Accent word">
                 <Text
                   value={form.site.brand.accent}
                   onChange={(v) =>
@@ -313,6 +313,20 @@ export function CmsAdmin() {
                   }
                 />
               </Field>
+              <AssetUpload
+                label="Logo lockup"
+                folder="images"
+                value={form.site.brand.logoUrl}
+                onChange={(url) =>
+                  setForm({
+                    ...form,
+                    site: {
+                      ...form.site,
+                      brand: { ...form.site.brand, logoUrl: url },
+                    },
+                  })
+                }
+              />
               <Field label="Coach name">
                 <Text
                   value={form.site.brand.coach}
@@ -769,6 +783,34 @@ export function CmsAdmin() {
                   }
                 />
               </Field>
+              <AssetUpload
+                label="Kane portrait (below the CTAs)"
+                folder="hero"
+                value={form.home.hero.portraitUrl}
+                onChange={(url) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      hero: { ...form.home.hero, portraitUrl: url },
+                    },
+                  })
+                }
+              />
+              <Field label="Portrait alt text">
+                <Text
+                  value={form.home.hero.portraitAlt}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        hero: { ...form.home.hero, portraitAlt: v },
+                      },
+                    })
+                  }
+                />
+              </Field>
             </div>
           </Section>
 
@@ -854,8 +896,8 @@ export function CmsAdmin() {
               />
             </Field>
             <Field
-              label="YouTube video ID"
-              hint="11-character ID. Thumbnails are uploaded below — no image URLs."
+              label="YouTube URL or video ID"
+              hint="Paste a full YouTube URL (watch, youtu.be, or embed) or the 11-character ID."
             >
               <Text
                 value={form.home.vsl.youtubeUrl}
@@ -1141,6 +1183,363 @@ export function CmsAdmin() {
             </Field>
           </Section>
 
+          <Section title="Founder credentials (after testimonials)">
+            <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+              <input
+                type="checkbox"
+                className="accent-[var(--accent)]"
+                checked={form.home.credentials.enabled}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      credentials: {
+                        ...form.home.credentials,
+                        enabled: e.target.checked,
+                      },
+                    },
+                  })
+                }
+              />
+              Enabled
+            </label>
+            <Field label="Eyebrow">
+              <Text
+                value={form.home.credentials.eyebrow}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      credentials: { ...form.home.credentials, eyebrow: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Heading">
+              <Text
+                value={form.home.credentials.heading}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      credentials: { ...form.home.credentials, heading: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Body">
+              <Text
+                multiline
+                value={form.home.credentials.body}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      credentials: { ...form.home.credentials, body: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            {form.home.credentials.items.map((item, i) => (
+              <div
+                key={item.id}
+                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-2"
+              >
+                <Field label="Value">
+                  <Text
+                    value={item.value}
+                    onChange={(v) => {
+                      const items = form.home.credentials.items.map(
+                        (row, idx) => (idx === i ? { ...row, value: v } : row),
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          credentials: { ...form.home.credentials, items },
+                        },
+                      });
+                    }}
+                  />
+                </Field>
+                <Field label="Label">
+                  <Text
+                    value={item.label}
+                    onChange={(v) => {
+                      const items = form.home.credentials.items.map(
+                        (row, idx) => (idx === i ? { ...row, label: v } : row),
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          credentials: { ...form.home.credentials, items },
+                        },
+                      });
+                    }}
+                  />
+                </Field>
+              </div>
+            ))}
+          </Section>
+
+          <Section title="WhatsApp Performance Coach (after The Gap)">
+            <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+              <input
+                type="checkbox"
+                className="accent-[var(--accent)]"
+                checked={form.home.whatsappCoach.enabled}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      whatsappCoach: {
+                        ...form.home.whatsappCoach,
+                        enabled: e.target.checked,
+                      },
+                    },
+                  })
+                }
+              />
+              Enabled
+            </label>
+            <Field label="Eyebrow">
+              <Text
+                value={form.home.whatsappCoach.eyebrow}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      whatsappCoach: { ...form.home.whatsappCoach, eyebrow: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Heading">
+              <Text
+                value={form.home.whatsappCoach.heading}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      whatsappCoach: { ...form.home.whatsappCoach, heading: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Body">
+              <Text
+                multiline
+                value={form.home.whatsappCoach.body}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      whatsappCoach: { ...form.home.whatsappCoach, body: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            {form.home.whatsappCoach.steps.map((step, i) => (
+              <div
+                key={step.id}
+                className="space-y-2 rounded-md border border-[var(--border)] p-3"
+              >
+                <Field label={`Step ${i + 1} title`}>
+                  <Text
+                    value={step.title}
+                    onChange={(v) => {
+                      const steps = form.home.whatsappCoach.steps.map(
+                        (row, idx) => (idx === i ? { ...row, title: v } : row),
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          whatsappCoach: { ...form.home.whatsappCoach, steps },
+                        },
+                      });
+                    }}
+                  />
+                </Field>
+                <Field label="Body">
+                  <Text
+                    multiline
+                    value={step.body}
+                    onChange={(v) => {
+                      const steps = form.home.whatsappCoach.steps.map(
+                        (row, idx) => (idx === i ? { ...row, body: v } : row),
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          whatsappCoach: { ...form.home.whatsappCoach, steps },
+                        },
+                      });
+                    }}
+                  />
+                </Field>
+              </div>
+            ))}
+            <Field label="Chat mockup name">
+              <Text
+                value={form.home.whatsappCoach.chatName}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      whatsappCoach: {
+                        ...form.home.whatsappCoach,
+                        chatName: v,
+                      },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Chat mockup message">
+              <Text
+                multiline
+                value={form.home.whatsappCoach.chatMessage}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      whatsappCoach: {
+                        ...form.home.whatsappCoach,
+                        chatMessage: v,
+                      },
+                    },
+                  })
+                }
+              />
+            </Field>
+          </Section>
+
+          <Section title="Week 1 / week 8 benchmarks (after Coach)">
+            <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+              <input
+                type="checkbox"
+                className="accent-[var(--accent)]"
+                checked={form.home.benchmarks.enabled}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      benchmarks: {
+                        ...form.home.benchmarks,
+                        enabled: e.target.checked,
+                      },
+                    },
+                  })
+                }
+              />
+              Enabled
+            </label>
+            <Field label="Eyebrow">
+              <Text
+                value={form.home.benchmarks.eyebrow}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      benchmarks: { ...form.home.benchmarks, eyebrow: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Heading">
+              <Text
+                value={form.home.benchmarks.heading}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      benchmarks: { ...form.home.benchmarks, heading: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Body">
+              <Text
+                multiline
+                value={form.home.benchmarks.body}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      benchmarks: { ...form.home.benchmarks, body: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            {form.home.benchmarks.items.map((item, i) => (
+              <div
+                key={item.id}
+                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-2"
+              >
+                <Field label="Value">
+                  <Text
+                    value={item.value}
+                    onChange={(v) => {
+                      const items = form.home.benchmarks.items.map((row, idx) =>
+                        idx === i ? { ...row, value: v } : row,
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          benchmarks: { ...form.home.benchmarks, items },
+                        },
+                      });
+                    }}
+                  />
+                </Field>
+                <Field label="Label">
+                  <Text
+                    value={item.label}
+                    onChange={(v) => {
+                      const items = form.home.benchmarks.items.map((row, idx) =>
+                        idx === i ? { ...row, label: v } : row,
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          benchmarks: { ...form.home.benchmarks, items },
+                        },
+                      });
+                    }}
+                  />
+                </Field>
+              </div>
+            ))}
+          </Section>
+
           <Section title="How it works">
             <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
               <input
@@ -1267,6 +1666,277 @@ export function CmsAdmin() {
                       tiersSection: {
                         ...form.home.tiersSection,
                         subhead: v,
+                      },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+              <input
+                type="checkbox"
+                className="accent-[var(--accent)]"
+                checked={form.home.tiersSection.offer.enabled}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      tiersSection: {
+                        ...form.home.tiersSection,
+                        offer: {
+                          ...form.home.tiersSection.offer,
+                          enabled: e.target.checked,
+                        },
+                      },
+                    },
+                  })
+                }
+              />
+              Challenge savings price block (leave figures blank until signed off)
+            </label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Anchor price (struck through)">
+                <Text
+                  value={form.home.tiersSection.offer.anchorPrice}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            anchorPrice: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Live price">
+                <Text
+                  value={form.home.tiersSection.offer.livePrice}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            livePrice: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Total saving">
+                <Text
+                  value={form.home.tiersSection.offer.totalSaving}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            totalSaving: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Addon label">
+                <Text
+                  value={form.home.tiersSection.offer.addonLabel}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            addonLabel: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Addon VALUE">
+                <Text
+                  value={form.home.tiersSection.offer.addonValue}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            addonValue: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Addon price">
+                <Text
+                  value={form.home.tiersSection.offer.addonPrice}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            addonPrice: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+            </div>
+            <Field label="Recurring terms">
+              <Text
+                multiline
+                value={form.home.tiersSection.offer.recurringTerms}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      tiersSection: {
+                        ...form.home.tiersSection,
+                        offer: {
+                          ...form.home.tiersSection.offer,
+                          recurringTerms: v,
+                        },
+                      },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Offer end">
+                <Text
+                  value={form.home.tiersSection.offer.offerEnd}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            offerEnd: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Places remaining">
+                <Text
+                  value={form.home.tiersSection.offer.placesRemaining}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        tiersSection: {
+                          ...form.home.tiersSection,
+                          offer: {
+                            ...form.home.tiersSection.offer,
+                            placesRemaining: v,
+                          },
+                        },
+                      },
+                    })
+                  }
+                />
+              </Field>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+              <input
+                type="checkbox"
+                className="accent-[var(--accent)]"
+                checked={form.home.tiersSection.guarantee.enabled}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      tiersSection: {
+                        ...form.home.tiersSection,
+                        guarantee: {
+                          ...form.home.tiersSection.guarantee,
+                          enabled: e.target.checked,
+                        },
+                      },
+                    },
+                  })
+                }
+              />
+              Guarantee / trust lines under Challenge CTA
+            </label>
+            <Field label="Trust line">
+              <Text
+                value={form.home.tiersSection.guarantee.trustLine}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      tiersSection: {
+                        ...form.home.tiersSection,
+                        guarantee: {
+                          ...form.home.tiersSection.guarantee,
+                          trustLine: v,
+                        },
+                      },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <Field label="Guarantee">
+              <Text
+                value={form.home.tiersSection.guarantee.guarantee}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      tiersSection: {
+                        ...form.home.tiersSection,
+                        guarantee: {
+                          ...form.home.tiersSection.guarantee,
+                          guarantee: v,
+                        },
                       },
                     },
                   })
@@ -1565,12 +2235,30 @@ export function CmsAdmin() {
                   Enabled
                 </label>
                 <AssetUpload
-                  label="Photo"
+                  label="Photo (after, or composite)"
                   folder="images"
                   value={item.imageUrl}
                   onChange={(url) => {
                     const items = form.home.testimonials.items.map(
                       (row, idx) => (idx === i ? { ...row, imageUrl: url } : row),
+                    );
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        testimonials: { ...form.home.testimonials, items },
+                      },
+                    });
+                  }}
+                />
+                <AssetUpload
+                  label="Before photo (optional pair)"
+                  folder="images"
+                  value={item.beforeImageUrl}
+                  onChange={(url) => {
+                    const items = form.home.testimonials.items.map(
+                      (row, idx) =>
+                        idx === i ? { ...row, beforeImageUrl: url } : row,
                     );
                     setForm({
                       ...form,
@@ -1695,6 +2383,7 @@ export function CmsAdmin() {
                           name: "",
                           result: "",
                           imageUrl: "",
+                          beforeImageUrl: "",
                           imageAlt: "",
                         },
                       ],
@@ -1748,7 +2437,8 @@ export function CmsAdmin() {
           <Section title="Popups and sticky bar">
             <p className="text-xs text-[var(--muted)]">
               Email popup uses the provider on Integrations. Reviews popup uses
-              the testimonials above. All copy is plain text.
+              the testimonials above. Neither fires on page load — reviews wait
+              for 50% scroll plus exit intent so the hero stays clear.
             </p>
             <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
               <input
@@ -2002,7 +2692,7 @@ export function CmsAdmin() {
                   })
                 }
               />
-              Mobile sticky apply bar
+              Sticky apply bar (shows after the hero scrolls out of view)
             </label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Sticky label">

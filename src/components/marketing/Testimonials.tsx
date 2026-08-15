@@ -8,13 +8,15 @@ export function Testimonials() {
   const { testimonials, vsl } = cms.home;
   if (!testimonials.enabled) return null;
 
-  const items = testimonials.items.filter((item) => item.enabled);
+  const items = testimonials.items.filter(
+    (item) => item.enabled && item.name && item.quote,
+  );
   if (!items.length) return null;
 
   return (
     <section className="border-b border-[var(--border)]">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <h2 className="font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]">
+      <div className="mx-auto max-w-6xl px-4 section-y sm:px-6">
+        <h2 className="font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {testimonials.heading}
         </h2>
         {testimonials.subhead ? (
@@ -27,22 +29,34 @@ export function Testimonials() {
           {items.map((item) => (
             <article
               key={item.id}
-              className="flex min-w-0 flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border-soft)] bg-[var(--surface)]"
+              className="card-depth flex min-w-0 flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]"
             >
-              {item.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.imageUrl}
-                  alt={item.imageAlt || item.name}
-                  className="aspect-[4/5] w-full object-cover"
-                />
-              ) : (
-                <div className="flex aspect-[4/5] items-end bg-[linear-gradient(180deg,#231f20_0%,#000_100%)] p-4">
-                  <p className="font-heading text-3xl uppercase text-[var(--accent)]">
-                    {item.result}
-                  </p>
+              {item.beforeImageUrl || item.imageUrl ? (
+                <div
+                  className={
+                    item.beforeImageUrl && item.imageUrl
+                      ? "grid grid-cols-2"
+                      : ""
+                  }
+                >
+                  {item.beforeImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.beforeImageUrl}
+                      alt={`${item.name} before`}
+                      className="aspect-[4/5] w-full object-cover"
+                    />
+                  ) : null}
+                  {item.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.imageUrl}
+                      alt={item.imageAlt || item.name}
+                      className="aspect-[4/5] w-full object-cover"
+                    />
+                  ) : null}
                 </div>
-              )}
+              ) : null}
               <div className="flex flex-1 flex-col p-5">
                 <p className="text-sm leading-[1.7] text-[var(--fg-soft)]">
                   “{item.quote}”

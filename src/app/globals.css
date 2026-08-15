@@ -1,33 +1,36 @@
 @import "tailwindcss";
 
 /**
- * Brand tokens aligned to https://theformulaperformance.com/
- * Body: Inter · Headings: Poppins 800 · Accent: #FF7000 · Hover: #E8610A
+ * Brand tokens from the live programme page (train.theformulaperformance.com)
+ * Display: Newsreader 500 · Body: Poppins · Accent: #d8231c
  */
 :root {
-  --bg: #000000;
-  --surface: #171717;
-  --surface-elevated: #1c1c1c;
-  --border: #8d8d8d;
-  --border-soft: #3a3a3a;
-  --fg: #ffffff;
-  --fg-soft: #f6f2ee;
-  --muted: #a3a3a3;
-  --muted-warm: #5f5451;
-  --accent: #ff7000;
-  --accent-bright: #e8610a;
+  --bg: #0a0a0a;
+  --surface: #121110;
+  --surface-elevated: #171513;
+  --border: #211f1d;
+  --border-soft: #322e2a;
+  --fg: #f4f1ec;
+  --fg-soft: #f4f1ec;
+  --muted: #9a938c;
+  --muted-warm: #827c76;
+  --accent: #d8231c;
+  --accent-bright: #ea3a2e;
   --accent-fg: #ffffff;
-  --accent-soft: rgba(255, 112, 0, 0.14);
-  --accent-glow: rgba(255, 112, 0, 0.22);
+  --accent-soft: rgba(216, 35, 28, 0.14);
+  --accent-glow: rgba(216, 35, 28, 0.22);
 
-  --radius-button: 7px;
-  --radius: 10px;
+  --radius-button: 2px;
+  --radius: 6px;
 
   --body-size: 16px;
   --body-line: 1.7;
-  --heading-letter: -0.04em;
-  --heading-line: 1.1;
-  --heading-weight: 800;
+  --heading-letter: -0.018em;
+  --heading-line: 1.12;
+  --heading-weight: 500;
+
+  --section-y: clamp(82px, 12vw, 140px);
+  --card-shadow: 0 20px 50px #00000080;
 }
 
 @theme inline {
@@ -56,6 +59,28 @@
   mix-blend-mode: soft-light;
 }
 
+.section-y {
+  padding-block: var(--section-y);
+}
+
+.section-vignette {
+  position: relative;
+}
+
+.section-vignette::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(80% 50% at 50% 0%, rgba(26, 6, 5, 0.45), transparent 60%),
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.18));
+}
+
+.card-depth {
+  box-shadow: var(--card-shadow);
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
@@ -67,9 +92,9 @@ html {
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-body), Inter, sans-serif;
+  font-family: var(--font-body), Poppins, sans-serif;
   font-size: var(--body-size);
-  font-weight: 400;
+  font-weight: 300;
   line-height: var(--body-line);
   letter-spacing: 0;
   overflow-x: hidden;
@@ -82,23 +107,24 @@ h2,
 h3,
 h4,
 .font-heading {
-  font-family: var(--font-heading), Poppins, sans-serif;
+  font-family: var(--font-heading), Newsreader, Georgia, serif;
   font-weight: var(--heading-weight);
   letter-spacing: var(--heading-letter);
   line-height: var(--heading-line);
   overflow-wrap: anywhere;
+  text-transform: none;
 }
 
 h1 {
-  font-size: clamp(2.25rem, 5vw, 3.6rem);
+  font-size: clamp(1.85rem, 5.2vw, 3.05rem);
 }
 
 h2 {
-  font-size: clamp(1.75rem, 3.5vw, 2.8rem);
+  font-size: clamp(1.7rem, 4.2vw, 2.5rem);
 }
 
 h3 {
-  font-size: clamp(1.35rem, 2.5vw, 2.4rem);
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
 }
 
 a {
@@ -120,7 +146,6 @@ button {
   max-width: 100%;
 }
 
-/* Parent Shopify theme uses ~7px button radius */
 .btn-brand,
 a.inline-flex.rounded-md,
 button.rounded-md,

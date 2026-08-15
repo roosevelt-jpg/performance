@@ -17,11 +17,11 @@ export function VslSection() {
       id="vsl"
       className="scroll-mt-24 border-b border-[var(--border)] bg-[var(--surface)]"
     >
-      <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+      <div className="mx-auto max-w-3xl px-4 section-y sm:px-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
           {vsl.stepLabel}
         </p>
-        <h2 className="mt-3 font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]">
+        <h2 className="mt-3 font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {vsl.heading}
         </h2>
 
@@ -35,9 +35,7 @@ export function VslSection() {
               onPlay={markWatched}
             />
           ) : (
-            <div className="flex aspect-video items-center justify-center border border-dashed border-[var(--border)] bg-black text-center text-sm text-[var(--muted)]">
-              Paste a YouTube URL in Admin → Home / Media → VSL video
-            </div>
+            <div className="aspect-video border border-[var(--border)] bg-black" />
           )}
         </div>
 

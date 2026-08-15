@@ -9,6 +9,7 @@ export const DEFAULT_CMS: CmsContent = {
       siteUrl: "https://marketing.theformulaperformance.com/",
       wordmark: "The Formula",
       accent: "Performance",
+      logoUrl: "/logo.svg",
     },
     seo: {
       title: "The Formula Performance | Watch the video. Apply for coaching.",
@@ -66,6 +67,8 @@ export const DEFAULT_CMS: CmsContent = {
       mediaUrl: "",
       mediaPoster: "",
       mediaAlt: "Athletes training with The Formula Performance",
+      portraitUrl: "",
+      portraitAlt: "Kane, founder of The Formula Performance",
     },
     vsl: {
       enabled: true,
@@ -73,7 +76,7 @@ export const DEFAULT_CMS: CmsContent = {
       heading: "Watch this video to see if you qualify",
       helper:
         "The application asks if you watched the whole video. It covers how Pro and Elite work, who gets in, and what happens after you apply. Skip it and the application will not make sense.",
-      youtubeUrl: "",
+      youtubeUrl: "https://www.youtube.com/watch?v=OCZ8WztqIOw",
       thumbnailUrl: "",
       muteHint: "Tap to unmute",
       applyStepLabel: "Step 2",
@@ -99,6 +102,62 @@ export const DEFAULT_CMS: CmsContent = {
       eyebrow: "The gap",
       title: "Plans don't fail. Follow-through does.",
       body: "Most people don't need another PDF. They need a coach who sees the week, adjusts the work, and keeps the standard high when motivation dips.",
+    },
+    credentials: {
+      enabled: true,
+      eyebrow: "Who’s in your corner",
+      heading: "Coached by someone who’s been in the fight.",
+      body: "I fought pro MMA in Bellator, then spent 20+ years coaching. I founded The Formula and built the accountability system behind it myself.",
+      items: [
+        { id: "c1", value: "Ex-pro", label: "MMA fighter" },
+        { id: "c2", value: "Bellator", label: "On the big stage" },
+        { id: "c3", value: "20+", label: "Years coaching" },
+        { id: "c4", value: "132K", label: "Following" },
+      ],
+    },
+    whatsappCoach: {
+      enabled: true,
+      eyebrow: "How it works",
+      heading: "Your Performance Coach, inside WhatsApp",
+      body: "One number to save. For eight weeks it's how you train, eat and stay on track, all in the app you already have open.",
+      steps: [
+        {
+          id: "w1",
+          title: "It messages you first",
+          body: "Your coach opens the conversation, most days before you’ve had your coffee.",
+        },
+        {
+          id: "w2",
+          title: "Ask it literally anything",
+          body: "Stuck on a lift, tempted by a takeaway, unsure what to swap dinner for: ask and get a straight answer in seconds.",
+        },
+        {
+          id: "w3",
+          title: "It moves with your week",
+          body: "Train four days instead of five, sleep badly, travel for work: your targets shift to match.",
+        },
+        {
+          id: "w4",
+          title: "There’s nowhere to hide",
+          body: "Skip a session and it’s flagged the same day. No shame, just a nudge back on track.",
+        },
+      ],
+      chatName: "Kane",
+      chatTime: "Today",
+      chatMessage:
+        "Morning. Session is locked for 6. If the week runs long, we drop accessory work first — not the main lift. Message me before you skip.",
+    },
+    benchmarks: {
+      enabled: true,
+      eyebrow: "Measured, not guessed",
+      heading: "What eight weeks actually changes.",
+      body: "We test four benchmarks in week one and re-test them in week eight, from your own starting point.",
+      items: [
+        { id: "b1", value: "01", label: "Strength" },
+        { id: "b2", value: "02", label: "Conditioning" },
+        { id: "b3", value: "03", label: "Body composition" },
+        { id: "b4", value: "04", label: "Work capacity" },
+      ],
     },
     howItWorks: {
       enabled: true,
@@ -126,6 +185,23 @@ export const DEFAULT_CMS: CmsContent = {
       heading: "Choose your level",
       subhead:
         "Start with the Challenge, or apply for Pro and Elite. Booking only for the one-to-one tiers — no price shown here.",
+      offer: {
+        enabled: true,
+        anchorPrice: "",
+        livePrice: "",
+        addonLabel: "Complete Stack",
+        addonValue: "",
+        addonPrice: "",
+        totalSaving: "",
+        recurringTerms: "",
+        offerEnd: "",
+        placesRemaining: "",
+      },
+      guarantee: {
+        enabled: true,
+        guarantee: "14-day money-back guarantee",
+        trustLine: "Secure checkout, cancel anytime",
+      },
     },
     faq: {
       enabled: true,
@@ -166,38 +242,63 @@ export const DEFAULT_CMS: CmsContent = {
     },
     testimonials: {
       enabled: true,
-      heading: "Real clients. Real weeks of coaching.",
-      subhead: "Replace these with your photos and quotes in Admin — Home / Media.",
+      heading: "Results of accountability.",
+      subhead: "",
       items: [
         {
           id: "t1",
           enabled: true,
           quote:
-            "I'd been collecting plans for years. Having Kane review the week is what made it stick.",
-          name: "Alex",
-          result: "Finally consistent",
+            "Taking The Complete Stack and being held accountable got me the results I wanted.",
+          name: "Mustafa S.",
+          result: "",
           imageUrl: "",
-          imageAlt: "Alex training",
+          beforeImageUrl: "",
+          imageAlt: "Mustafa S.",
         },
         {
           id: "t2",
           enabled: true,
           quote:
-            "The weekly check-ins kept me on track when I wanted to quit. Best investment I've made.",
-          name: "Sam",
-          result: "Weekly reviews",
+            "The Formula system improved my ability to push myself harder.",
+          name: "Casey B.",
+          result: "",
           imageUrl: "",
-          imageAlt: "Sam training",
+          beforeImageUrl: "",
+          imageAlt: "Casey B.",
         },
         {
           id: "t3",
           enabled: true,
           quote:
-            "I only had a small window in the week. The programme was built around my life, not the other way around.",
-          name: "Jordan",
-          result: "Plan built around life",
+            "Kane set the tone and the standard. I followed it and got the results.",
+          name: "Mustafa R.",
+          result: "",
           imageUrl: "",
-          imageAlt: "Jordan training",
+          beforeImageUrl: "",
+          imageAlt: "Mustafa R.",
+        },
+        {
+          id: "t4",
+          enabled: true,
+          quote:
+            "Following The Formula training system made me realise I could lose the weight I never thought I could with this programme.",
+          name: "Ben K.",
+          result: "",
+          imageUrl: "",
+          beforeImageUrl: "",
+          imageAlt: "Ben K.",
+        },
+        {
+          id: "t5",
+          enabled: true,
+          quote:
+            "Kane held me accountable every step of the way. Now I don't need him because the discipline is built.",
+          name: "Jamie H.",
+          result: "",
+          imageUrl: "",
+          beforeImageUrl: "",
+          imageAlt: "Jamie H.",
         },
       ],
     },
@@ -226,8 +327,8 @@ export const DEFAULT_CMS: CmsContent = {
     },
     stickyCta: {
       enabled: true,
-      label: "Apply now",
-      href: "#vsl",
+      label: "Apply for Pro",
+      href: "/book?tier=pro",
     },
     imageSections: [
       {

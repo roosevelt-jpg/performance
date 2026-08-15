@@ -29,6 +29,55 @@ function dismiss(key: string) {
   }
 }
 
+function pageScrollRatio(): number {
+  const el = document.documentElement;
+  const total = el.scrollHeight - window.innerHeight;
+  if (total <= 0) return 0;
+  return window.scrollY / total;
+}
+
+/** Never on arrival. Requires 50% page scroll, then exit intent (desktop) or the scroll itself (touch). */
+function useDeferredPopup(enabled: boolean) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+  }, [open]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    let scrolled = false;
+    let shown = false;
+
+    function show() {
+      if (shown) return;
+      shown = true;
+      setOpen(true);
+    }
+
+    function onScroll() {
+      if (pageScrollRatio() < 0.5) return;
+      scrolled = true;
+      if (window.matchMedia("(pointer: coarse)").matches) show();
+    }
+
+    function onMouseOut(event: MouseEvent) {
+      if (!scrolled) return;
+      if (event.clientY > 0) return;
+      show();
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("mouseout", onMouseOut);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("mouseout", onMouseOut);
+    };
+  }, [enabled]);
+
+  return [open, setOpen] as const;
+}
+
 export function SiteWidgets() {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
@@ -44,21 +93,14 @@ export function SiteWidgets() {
 function EmailPopup() {
   const popup = useCms().home.popups?.email;
   const { config } = usePublicConfig();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useDeferredPopup(Boolean(popup?.enabled));
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">(
     "idle",
   );
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!popup?.enabled) return;
-    if (dismissedRecently(EMAIL_KEY)) return;
-    const id = window.setTimeout(() => setOpen(true), popup.delayMs || 18000);
-    return () => window.clearTimeout(id);
-  }, [popup?.enabled, popup?.delayMs]);
-
-  if (!popup?.enabled || !open) return null;
+  if (!popup?.enabled || !open || dismissedRecently(EMAIL_KEY)) return null;
 
   async function submit() {
     setStatus("saving");
@@ -98,7 +140,7 @@ function EmailPopup() {
       <div className="w-full max-w-md border border-[var(--border)] bg-[var(--bg)] p-5 sm:p-7">
         <h2
           id="email-popup-title"
-          className="font-heading text-xl uppercase text-[var(--fg)] sm:text-2xl"
+          className="font-heading text-xl text-[var(--fg)] sm:text-2xl"
         >
           {popup.title}
         </h2>
@@ -161,16 +203,13 @@ function EmailPopup() {
 function ReviewsPopup() {
   const cms = useCms();
   const popup = cms.home.popups?.reviews;
-  const items = (cms.home.testimonials?.items ?? []).filter((t) => t.enabled);
-  const [open, setOpen] = useState(false);
+  const items = (cms.home.testimonials?.items ?? []).filter(
+    (t) => t.enabled && t.quote && t.name,
+  );
+  const [open, setOpen] = useDeferredPopup(
+    Boolean(popup?.enabled && items.length && !dismissedRecently(REVIEW_KEY)),
+  );
   const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (!popup?.enabled || !items.length) return;
-    if (dismissedRecently(REVIEW_KEY)) return;
-    const id = window.setTimeout(() => setOpen(true), popup.delayMs || 28000);
-    return () => window.clearTimeout(id);
-  }, [popup?.enabled, popup?.delayMs, items.length]);
 
   if (!popup?.enabled || !open || !items.length) return null;
 
@@ -200,7 +239,7 @@ function ReviewsPopup() {
         <div className="p-5 sm:p-7">
           <h2
             id="reviews-popup-title"
-            className="font-heading text-xl uppercase text-[var(--fg)] sm:text-2xl"
+            className="font-heading text-xl text-[var(--fg)] sm:text-2xl"
           >
             {popup.title}
           </h2>
@@ -254,17 +293,39 @@ function ReviewsPopup() {
 
 function StickyApplyBar() {
   const sticky = useCms().home.stickyCta;
-  if (!sticky?.enabled) return null;
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!sticky?.enabled) return;
+    const hero = document.getElementById("hero");
+    if (!hero) {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    io.observe(hero);
+    return () => io.disconnect();
+  }, [sticky?.enabled]);
+
+  if (!sticky?.enabled || !visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-soft)] bg-[var(--bg)]/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
-      <GatedLink
-        href={sticky.href}
-        gate={sticky.href.includes("/book")}
-        className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-fg)]"
-      >
-        {sticky.label}
-      </GatedLink>
+    <div className="fixed inset-x-0 top-0 z-50 border-b border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+        <p className="hidden text-sm text-[var(--muted)] sm:block">
+          The Formula Performance
+        </p>
+        <GatedLink
+          href={sticky.href}
+          gate={sticky.href.includes("/book")}
+          className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-[var(--accent-fg)] sm:w-auto"
+        >
+          {sticky.label}
+        </GatedLink>
+      </div>
     </div>
   );
 }

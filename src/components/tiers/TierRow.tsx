@@ -17,12 +17,12 @@ export function TierRow() {
     <section
       id="tiers"
       aria-labelledby="tiers-heading"
-      className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 md:py-16"
+      className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 section-y sm:px-6"
     >
-      <div className="mb-6 max-w-2xl sm:mb-8">
+      <div className="mb-8 max-w-2xl">
         <h2
           id="tiers-heading"
-          className="font-heading text-[clamp(1.75rem,3.5vw,2.8rem)] uppercase text-[var(--fg)]"
+          className="font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]"
         >
           {section.heading}
         </h2>

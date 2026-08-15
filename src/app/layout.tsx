@@ -1,20 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Newsreader, Poppins } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import { loadCms } from "@/lib/cms/store";
 import "./globals.css";
 
-/** Match theformulaperformance.com — body: Inter, headings: Poppins */
-const inter = Inter({
+const poppins = Poppins({
   variable: "--font-body",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const poppins = Poppins({
+const newsreader = Newsreader({
   variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,7 +39,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#000000",
+  themeColor: "#0a0a0a",
 };
 
 export default async function RootLayout({
@@ -52,7 +51,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${poppins.variable} h-full antialiased`}
+      className={`${poppins.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col bg-[var(--bg)] font-sans text-[var(--fg)]">
         <Providers initial={cms}>{children}</Providers>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landing Page — Change Specification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a; --surface:#121110; --surface-2:#171513;
+  --text:#f4f1ec; --text-muted:#9a938c; --text-dim:#827c76;
+  --red:#d8231c; --red-bright:#ea3a2e;
+  --hairline:#211f1d; --hairline-strong:#322e2a;
+  --good:#3ba776; --warn:#e8913a;
+  --font-display:"Newsreader",Georgia,serif;
+  --font-body:"Poppins",system-ui,sans-serif;
+  --maxw:1100px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+h1,h2,h3{font-family:var(--font-display);font-weight:500;letter-spacing:-.018em;line-height:1.12}
+h1{font-size:clamp(2.1rem,5.6vw,3.5rem)}
+h2{font-size:clamp(1.7rem,4.2vw,2.5rem);margin-bottom:.5rem}
+h3{font-size:clamp(1.1rem,2.5vw,1.35rem)}
+.eyebrow{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:600;font-family:var(--font-body)}
+.eyebrow.n{color:var(--text-dim)}
+header.top{border-bottom:1px solid var(--hairline);padding:clamp(44px,7vw,84px) 0 clamp(34px,5vw,56px);background:radial-gradient(80% 60% at 50% 0%,#1a0605 0%,transparent 60%)}
+header.top p.lede{color:var(--text-muted);max-width:58ch;margin-top:1.1rem;font-size:1.05rem}
+.meta{margin-top:1.9rem;display:flex;flex-wrap:wrap;gap:.5rem}
+.pill{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;border:1px solid var(--hairline-strong);border-radius:2px;padding:.34rem .7rem;color:var(--text-dim)}
+section{padding:clamp(42px,6vw,74px) 0;border-bottom:1px solid var(--hairline)}
+.sec-head{margin-bottom:1.8rem}
+.sec-head p{color:var(--text-muted);max-width:66ch;margin-top:.6rem}
+
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--hairline);border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
+th,td{text-align:left;padding:.72rem .85rem;border-bottom:1px solid var(--hairline);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.tok{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;white-space:nowrap}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:.45rem;vertical-align:-1px;border:1px solid #ffffff20}
+
+.tag{display:inline-block;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:.22rem .5rem;border-radius:2px;white-space:nowrap}
+.t-p0{background:var(--red);color:#fff}
+.t-p1{background:#e8913a;color:#1a1a1a}
+.t-p2{background:var(--hairline-strong);color:var(--text-muted)}
+.t-hold{background:#ffffff12;color:var(--text-muted);border:1px solid var(--hairline-strong)}
+
+.note{border:1px solid var(--hairline-strong);border-left:3px solid var(--warn);background:var(--surface);border-radius:6px;padding:1.05rem 1.25rem;margin-top:1.3rem}
+.note.red{border-left-color:var(--red)}
+.note.good{border-left-color:var(--good)}
+.note strong{color:var(--text);font-weight:600}
+.note p{color:var(--text-muted);font-size:.92rem}
+.note p+p{margin-top:.55rem}
+
+ol.spec{list-style:none;counter-reset:s}
+ol.spec>li{counter-increment:s;position:relative;padding:1rem 0 1rem 3rem;border-bottom:1px solid var(--hairline)}
+ol.spec>li:last-child{border-bottom:0}
+ol.spec>li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:1.05rem;font-size:.72rem;font-weight:600;color:var(--red);letter-spacing:.08em}
+ol.spec h4{font-weight:600;font-size:.97rem;margin-bottom:.3rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-family:var(--font-body)}
+ol.spec p{color:var(--text-muted);font-size:.9rem}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;background:var(--surface-2);border:1px solid var(--hairline-strong);border-radius:2px;padding:.08rem .35rem;color:#e8c9a0}
+
+.dnc{background:#d8231c0d;border:1px solid #d8231c40;border-radius:6px;padding:clamp(18px,2.6vw,26px)}
+.dnc ul{list-style:none;margin-top:.8rem}
+.dnc li{padding:.4rem 0 .4rem 1.4rem;position:relative;color:var(--text-muted);font-size:.93rem}
+.dnc li::before{content:"×";position:absolute;left:.2rem;top:.4rem;color:var(--red);font-weight:700}
+
+.fold{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.4rem}
+@media(max-width:700px){.fold{grid-template-columns:1fr}}
+.phone{background:var(--surface);border:1px solid var(--hairline-strong);border-radius:6px;padding:1rem}
+.phone h4{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.8rem;font-family:var(--font-body);font-weight:600}
+.bar{position:relative;height:210px;background:linear-gradient(180deg,#1c1a18,#0e0d0c);border:1px solid var(--hairline);border-radius:3px;overflow:hidden}
+.mark{position:absolute;left:0;right:0;border-top:1px dashed #ffffff30;font-size:.62rem;color:var(--text-dim);padding-left:.4rem}
+.mark.cta{border-top:2px solid var(--red);color:#f08b85;font-weight:600}
+.mark.foldline{border-top:2px solid var(--good);color:#6fd6a4;font-weight:600}
+.mark.img{border-top:1px solid #ffffff50;color:var(--text-muted)}
+.headroom{font-size:.85rem;color:var(--text-muted);margin-top:.7rem}
+.headroom b{color:var(--good)}
+
+footer{padding:clamp(38px,5vw,60px) 0;color:var(--text-dim);font-size:.85rem}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Change specification &middot; 14 August 2026</div>
+    <h1>Landing page — brand layer<br>and build completion</h1>
+    <p class="lede">The new structure is a clear improvement and we are keeping it. This spec covers the brand layer to bring across from the live programme page, plus a small number of build items still showing placeholder content.</p>
+    <div class="meta">
+      <span class="pill">Target &middot; test.myflynai.com</span>
+      <span class="pill">Reference &middot; train.theformulaperformance.com</span>
+      <span class="pill">Prepared for Roosevelt</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">First</div>
+      <h2>What we are not changing</h2>
+      <p>The structural decisions in this build are the reason we are adopting it over the current live page. None of the changes below should alter any of the following. If something in this spec appears to conflict with this list, the list wins — flag it back rather than working around it.</p>
+    </div>
+    <div class="dnc">
+      <ul>
+        <li>Section order, exactly as built. Existing sections do not move. The three new sections in this spec each carry a named insertion point — please use it rather than choosing your own, and flag it back if you think the placement is wrong</li>
+        <li>The hero keeps exactly one primary and one secondary CTA. Do not add a third inside the hero. The persistent sticky bar under P2 sits outside the hero and is the only exception</li>
+        <li>No CTA wording changes. "Watch the video", "Compare programmes", "Apply for Pro coaching", "Book Your Call" and "Join the Challenge" all stay as written</li>
+        <li>No price shown for Pro or Elite anywhere on the page</li>
+        <li>The VSL stays as the qualification gate ahead of the application</li>
+        <li>Application before price, call before sale</li>
+        <li>Three-tier layout with the 8-Week Challenge as the self-serve entry point</li>
+        <li>The four FAQ objection handlers and their order</li>
+        <li>The primary CTA must remain above 812px at 375px viewport width</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">Priority 0</div>
+      <h2>Blocking — currently public on the staging URL</h2>
+      <p>These are build completion rather than design. Item 1 unblocks items 2 to 4.</p>
+    </div>
+    <ol class="spec">
+      <li>
+        <h4>Admin is not provisioned on the deployment <span class="tag t-p0">P0</span></h4>
+        <p><code>/admin/login</code> returns <code>Admin credentials are not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD in .env.local.</code> The credentials work locally only, so nobody on our side can sign in to populate content. Please set these on the deployed environment and confirm the login works — everything below depends on it.</p>
+      </li>
+      <li>
+        <h4>Build instructions are rendering to the public page <span class="tag t-p0">P0</span></h4>
+        <p>The VSL section displays <code>Paste a YouTube URL in Admin → Home / Media → VSL video</code> in place of the video. The testimonial block displays <code>Replace these with your photos and quotes in Admin — Home / Media.</code> Both are visible to any visitor.</p>
+      </li>
+      <li>
+        <h4>The VSL is empty <span class="tag t-p0">P0</span></h4>
+        <p>The funnel is built on "watch the video to see if you qualify" and the application asks whether the visitor watched it. We will supply the video; please confirm the field accepts a standard YouTube URL and renders correctly once admin access is working.</p>
+      </li>
+      <li>
+        <h4>Placeholder testimonials are live <span class="tag t-p0">P0</span></h4>
+        <p>"Alex", "Sam" and "Jordan" with placeholder quotes. We will supply five real named clients with before/after imagery from the live page. Please confirm the field structure — name, quote, category label, and whether an image slot exists per entry.</p>
+      </li>
+      <li>
+        <h4>A modal covers the hero on mobile load <span class="tag t-p0">P0</span></h4>
+        <p>At 375&times;812 a testimonial overlay fires on page load and covers the headline, subheading and both CTAs. Please either remove it, or change the trigger to 50% scroll depth combined with exit intent, so the hero is never obscured on arrival.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">Priority 1</div>
+      <h2>Brand tokens</h2>
+      <p>Exact values, taken from the computed stylesheet of the live programme page. Applying these as token overrides should carry most of the page without touching layout.</p>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Token</th><th>Current</th><th>Change to</th></tr></thead>
+      <tbody>
+        <tr><td>CTA / accent</td><td class="tok"><span class="sw" style="background:#ff7000"></span>#ff7000</td><td class="tok"><span class="sw" style="background:#d8231c"></span><strong>#d8231c</strong> &nbsp;hover <span class="sw" style="background:#ea3a2e"></span>#ea3a2e</td></tr>
+        <tr><td>Page background</td><td class="tok"><span class="sw" style="background:#000"></span>#000000</td><td class="tok"><span class="sw" style="background:#0a0a0a"></span><strong>#0a0a0a</strong></td></tr>
+        <tr><td>Surface</td><td class="tok"><span class="sw" style="background:#171717"></span>#171717</td><td class="tok"><span class="sw" style="background:#121110"></span><strong>#121110</strong></td></tr>
+        <tr><td>Surface elevated</td><td class="tok"><span class="sw" style="background:#1c1c1c"></span>#1c1c1c</td><td class="tok"><span class="sw" style="background:#171513"></span><strong>#171513</strong></td></tr>
+        <tr><td>Body text</td><td class="tok"><span class="sw" style="background:#fff"></span>#ffffff</td><td class="tok"><span class="sw" style="background:#f4f1ec"></span><strong>#f4f1ec</strong></td></tr>
+        <tr><td>Muted text</td><td class="tok"><span class="sw" style="background:#a3a3a3"></span>#a3a3a3</td><td class="tok"><span class="sw" style="background:#9a938c"></span><strong>#9a938c</strong></td></tr>
+        <tr><td>Border</td><td class="tok"><span class="sw" style="background:#8d8d8d"></span>#8d8d8d</td><td class="tok"><span class="sw" style="background:#211f1d"></span><strong>#211f1d</strong></td></tr>
+        <tr><td>Border strong</td><td class="tok"><span class="sw" style="background:#3a3a3a"></span>#3a3a3a</td><td class="tok"><span class="sw" style="background:#322e2a"></span><strong>#322e2a</strong></td></tr>
+        <tr><td>Display font</td><td class="tok">Poppins 800, uppercase, -0.04em</td><td class="tok"><strong>Newsreader</strong>, weight 500, sentence case, -0.018em</td></tr>
+        <tr><td>Body font</td><td class="tok">Inter</td><td class="tok"><strong>Poppins</strong></td></tr>
+        <tr><td>Button radius</td><td class="tok">7px</td><td class="tok"><strong>2px</strong></td></tr>
+        <tr><td>Card radius</td><td class="tok">10px</td><td class="tok"><strong>6px</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note good">
+      <p><strong>The border value is the highest-impact single change here.</strong> <code>#8d8d8d</code> hairlines on a dark page render every card and divider as a visible grey outline. <code>#211f1d</code> separates without drawing attention to itself, and is most of the difference in perceived finish.</p>
+    </div>
+    <div class="note">
+      <p><strong>One thing to check after the type swap.</strong> Newsreader at weight 500 in sentence case runs longer than Poppins 800 in caps at the same point size. The hero H1 will likely need a size adjustment to hold its current line count — please flag what you land on rather than letting it reflow into the fold.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">Priority 1</div>
+      <h2>Content to bring across</h2>
+      <p>All assets available from the live programme page. We will supply final files.</p>
+    </div>
+    <ol class="spec">
+      <li>
+        <h4>Logo lockup <span class="tag t-p1">P1</span></h4>
+        <p>The header currently renders a plain text wordmark. Replace with the brand logo asset — <code>/logo.svg</code> on the live page. Centred in the header, as per the reference.</p>
+      </li>
+      <li>
+        <h4>Kane hero image — placement matters <span class="tag t-p1">P1</span></h4>
+        <p>The page currently contains no imagery at all. Add the hero portrait, <strong>positioned below both CTAs rather than above them</strong>. On the live page it sits at 697px with the primary CTA at 472px, so it carries the visual weight without moving the button. Please follow the same order here: logo above, headline, CTAs, then image.</p>
+      </li>
+      <li>
+        <h4>WhatsApp Performance Coach section <span class="tag t-p1">P1</span></h4>
+        <p>This is the most significant omission. The live page devotes a full section to it — four numbered steps plus a chat interface mockup showing a real coach message. It is the product's primary differentiator and there is currently no equivalent on the new build. We will supply the copy and the mockup spec.</p>
+        <p><strong>Insertion point: immediately after "The Gap" and before "How it works".</strong> The Gap states the problem — follow-through fails, not plans. The Coach is the mechanism that answers it, so it belongs directly beneath that claim and ahead of the process steps. No existing section moves; this one drops in between the two.</p>
+      </li>
+      <li>
+        <h4>Real client transformations <span class="tag t-p1">P1</span></h4>
+        <p>Five named clients with before/after imagery, replacing the placeholder entries. Needs an image slot per testimonial if one does not already exist.</p>
+      </li>
+      <li>
+        <h4>Guarantee and trust line <span class="tag t-p1">P1</span></h4>
+        <p>14-day money-back guarantee, plus a "secure checkout, cancel anytime" line beneath the CTA in the tier block. Neither currently appears.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">Constraint</div>
+      <h2>The mobile fold</h2>
+      <p>Measured at 375&times;812. This is the limit that governs everything above.</p>
+    </div>
+    <div class="fold">
+      <div class="phone">
+        <h4>Current build</h4>
+        <div class="bar">
+          <div class="mark" style="top:12px">0 — header</div>
+          <div class="mark" style="top:87px">336 — H1</div>
+          <div class="mark cta" style="top:159px">615 — primary CTA</div>
+          <div class="mark" style="top:175px">675 — secondary CTA</div>
+          <div class="mark foldline" style="top:210px">812 — fold</div>
+        </div>
+        <p class="headroom">Clearance below last button: <b>137px</b></p>
+      </div>
+      <div class="phone">
+        <h4>Reference page</h4>
+        <div class="bar">
+          <div class="mark cta" style="top:2px">0 — sticky CTA bar</div>
+          <div class="mark" style="top:49px">189 — H1</div>
+          <div class="mark cta" style="top:122px">472 — primary CTA</div>
+          <div class="mark" style="top:140px">542 — secondary CTA</div>
+          <div class="mark img" style="top:180px">697 — hero image</div>
+          <div class="mark foldline" style="top:210px">812 — fold</div>
+        </div>
+        <p class="headroom">Hero image sits <b>below</b> the CTA</p>
+      </div>
+    </div>
+    <div class="note red">
+      <p><strong>137px is the total budget for anything added above the primary CTA.</strong> The logo lockup and the type change both draw on it. The hero image does not, provided it goes below the buttons. If any change in this spec would push the primary CTA past 812px at 375px width, stop and flag it rather than implementing it.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">Priority 2</div>
+      <h2>Finish, once the above is clear</h2>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>Depth and texture</td><td>Card shadows <code>0 20px 50px #00000080</code>, hero and section vignettes, subtle grid lines. The current build has a single noise layer; the reference uses layered depth.</td></tr>
+        <tr><td>Section rhythm</td><td>Vertical padding to <code>clamp(82px, 12vw, 140px)</code>, replacing the current framework defaults.</td></tr>
+        <tr><td>Credentials block</td><td>Founder background — ex-professional MMA, Bellator, 20+ years coaching, 132K following. Absent from the current build. <strong>Insertion point: after the testimonials block, before "The Gap".</strong></td></tr>
+        <tr><td>Benchmark block</td><td>Four benchmarks tested in week one and re-tested in week eight — strength, conditioning, body composition, work capacity. <strong>Insertion point: immediately after the WhatsApp Coach section.</strong></td></tr>
+        <tr><td>Sticky CTA bar</td><td>The reference page pins a CTA to the top of the viewport for the full scroll. The current build has nothing pinned across a 7,875px mobile page. Suggest adding as "Apply for Pro". <strong>This is page chrome, not a hero CTA</strong> — it must not appear until the hero has scrolled out of view, so the hero still presents exactly two buttons on arrival.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">On hold</div>
+      <h2>Pricing display — build the component, leave the values</h2>
+      <p>The Challenge tier will carry a savings-led price display. The offer structure is being finalised this week, so please build the component and leave the figures as editable tokens rather than hard-coding them.</p>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Element</th><th>Treatment</th></tr></thead>
+      <tbody>
+        <tr><td>Anchor price</td><td>Struck through, muted, smaller than the live price</td></tr>
+        <tr><td>Live price</td><td>Dominant, accent colour</td></tr>
+        <tr><td>Add-on line</td><td>Complete Stack at 50%, shown as its own value-and-price pair</td></tr>
+        <tr><td>Total saving</td><td>Single largest number in the block after the live price</td></tr>
+        <tr><td>Recurring terms</td><td>Explicit and adjacent to the CTA — what renews, when, at what price, and how to cancel</td></tr>
+        <tr><td>Offer end condition</td><td>Placeholder for a date and/or remaining-places count</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note">
+      <p><strong>Please make every figure in this block admin-editable</strong>, including the anchor price, the offer end date and the places-remaining count. We need to be able to change these without a deploy.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">Process</div>
+      <h2>How this gets implemented</h2>
+    </div>
+    <div class="note good">
+      <p>This spec is for your review and comment first. Once you have confirmed the approach and flagged anything you disagree with, implementation will be handed to Ahmed, who owns the live programme domain and deployment. Please raise anything you think is wrong or would harm conversion before that handover rather than after.</p>
+      <p>Order of work: P0 first — admin provisioning ahead of everything else, since it unblocks the rest. Then P1 tokens, then P1 content, then P2.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Sign-off</div>
+      <h2>Funnel verification before this is called done</h2>
+      <p>Two changes in this spec have the potential to move the primary CTA — the display font swap, because Newsreader in sentence case runs longer than Poppins in caps, and the logo lockup, because it adds height above the headline. Nothing else here touches the funnel.</p>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Check</th><th>Requirement</th><th>Report back</th></tr></thead>
+      <tbody>
+        <tr><td>Primary CTA position</td><td>Must remain above 812px at 375px viewport width. It is currently at 615px.</td><td>The measured px value after your changes</td></tr>
+        <tr><td>Hero CTA count</td><td>Exactly two buttons visible on arrival, no overlay obscuring them</td><td>Confirm</td></tr>
+        <tr><td>Section order</td><td>Nine existing sections unmoved; three new sections at their named insertion points only</td><td>Confirm, or flag the placement you disagree with</td></tr>
+        <tr><td>CTA wording</td><td>Unchanged throughout</td><td>Confirm</td></tr>
+        <tr><td>Hero H1 line count</td><td>Should not gain lines after the type swap</td><td>Font size you landed on</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note red">
+      <p><strong>If any change in this spec would push the primary CTA past 812px, stop and flag it rather than implementing it.</strong> The brand work is subordinate to the funnel — we would sooner drop a branding item than move that button. Please treat the measured CTA position as the acceptance criterion for the whole piece.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Over to you</div>
+      <h2>What do you need from us?</h2>
+      <p>We can supply everything this spec calls for. Rather than send a folder of assets and have you re-cut them, tell us the exact format you want and we will deliver to it first time. Below is what we are holding — please fill in the right-hand column.</p>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Asset</th><th>What we hold</th><th>What we need from you</th></tr></thead>
+      <tbody>
+        <tr><td>Logo lockup</td><td>Vector SVG, existing brand lockup</td><td>Format and maximum dimensions. Any clearspace rule you want us to respect?</td></tr>
+        <tr><td>Kane hero portrait</td><td>High-resolution PNG, cut out with transparency</td><td>Target dimensions and aspect ratio. Transparent, or composited onto a background?</td></tr>
+        <tr><td>Client transformations</td><td>Five named clients, before/after imagery, approved quotes</td><td>Per-entry field structure, crop ratio, and whether before/after is one composite image or a pair</td></tr>
+        <tr><td>VSL</td><td>Finished video</td><td>YouTube URL, or self-hosted file? Any preferred player or embed?</td></tr>
+        <tr><td>WhatsApp Coach section</td><td>Copy for four steps, plus the chat interface design</td><td>Do you want the chat mockup as a supplied image, or built in markup so it stays responsive?</td></tr>
+        <tr><td>Credentials block</td><td>Copy and stat figures</td><td>Any structural constraint — fixed number of stats, character limits?</td></tr>
+        <tr><td>Guarantee &amp; trust lines</td><td>Final copy</td><td>Where these sit in the component tree, and whether they are editable</td></tr>
+        <tr><td>Pricing block</td><td>Values to follow once the offer is signed off</td><td>Confirm which fields will be admin-editable without a deploy</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="note good">
+      <p><strong>Four questions alongside that, if you would:</strong></p>
+      <p><strong>1.</strong> What is currently editable through the admin, and what is hard-coded? We want to know what we can change ourselves versus what needs to come back to you.</p>
+      <p><strong>2.</strong> Is there anything in this spec you would push back on? You built the structure and we are deliberately not touching it — if any of these changes would work against conversion, we would rather hear it now than find out later.</p>
+      <p><strong>3.</strong> What else do you need from us that is not on this list?</p>
+      <p><strong>4.</strong> What is your turnaround on the P0 items, starting with admin provisioning?</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>The Formula Performance &middot; 14 August 2026</p>
+    <p style="margin-top:.4rem">Colour, type, spacing and fold values are read directly from the rendered stylesheets of both pages at 1280&times;720 and 375&times;812.</p>
+  </div>
+</footer>
+
+</body>
+</html>

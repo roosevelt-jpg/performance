@@ -29,7 +29,7 @@ export function ImageSectionsAt({ slot }: { slot: CmsMediaSlot }) {
                 {section.heading ? (
                   <h2
                     id={`${section.id}-heading`}
-                    className="font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]"
+                    className="font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]"
                   >
                     {section.heading}
                   </h2>
@@ -154,7 +154,7 @@ export function VideoSectionsAt({ slot }: { slot: CmsMediaSlot }) {
               {section.heading ? (
                 <h2
                   id={`${section.id}-heading`}
-                  className="font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]"
+                  className="font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]"
                 >
                   {section.heading}
                 </h2>

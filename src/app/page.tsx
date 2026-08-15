@@ -5,8 +5,11 @@ import { useState } from "react";
 import { SiteFooter, SiteHeader } from "@/components/layout/SiteChrome";
 import { useCms } from "@/components/cms/CmsProvider";
 import { MediaAt } from "@/components/marketing/MediaSections";
+import { BenchmarkSection } from "@/components/marketing/BenchmarkSection";
+import { CredentialsSection } from "@/components/marketing/CredentialsSection";
 import { Testimonials } from "@/components/marketing/Testimonials";
 import { VslSection } from "@/components/marketing/VslSection";
+import { WhatsappCoachSection } from "@/components/marketing/WhatsappCoachSection";
 import { GatedLink } from "@/components/marketing/WatchGate";
 import { TierRow } from "@/components/tiers/TierRow";
 import {
@@ -94,7 +97,7 @@ function ProofStrip() {
             className="bg-[var(--surface)] px-4 py-6 sm:px-6 sm:py-8"
             style={{ animationDelay: `${120 + i * 80}ms` }}
           >
-            <p className="animate-rise font-heading text-2xl uppercase text-[var(--accent)] sm:text-3xl">
+            <p className="animate-rise font-heading text-2xl text-[var(--accent)] sm:text-3xl">
               {item.value}
             </p>
             <p className="animate-rise mt-1 text-sm text-[var(--muted)]">
@@ -113,11 +116,11 @@ function ProblemSection() {
 
   return (
     <section className="border-b border-[var(--border)]">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+      <div className="mx-auto max-w-6xl px-4 section-y sm:px-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
           {problem.eyebrow}
         </p>
-        <h2 className="mt-3 max-w-3xl font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]">
+        <h2 className="mt-3 max-w-3xl font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {problem.title}
         </h2>
         <p className="mt-5 max-w-2xl text-base leading-[1.7] text-[var(--muted)] sm:text-lg">
@@ -134,8 +137,8 @@ function HowItWorks() {
 
   return (
     <section className="border-b border-[var(--border)] bg-[var(--surface)]">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <h2 className="font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]">
+      <div className="mx-auto max-w-6xl px-4 section-y sm:px-6">
+        <h2 className="font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {howItWorks.heading}
         </h2>
         <p className="mt-3 max-w-xl text-base leading-[1.7] text-[var(--muted)]">
@@ -168,8 +171,8 @@ function FaqSection() {
 
   return (
     <section className="border-b border-[var(--border)]">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <h2 className="font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]">
+      <div className="mx-auto max-w-6xl px-4 section-y sm:px-6">
+        <h2 className="font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {faq.heading}
         </h2>
         <ul className="mt-8 divide-y divide-[var(--border)] border-y border-[var(--border)]">
@@ -220,8 +223,8 @@ function FinalCta() {
   return (
     <section className="relative overflow-hidden border-b border-[var(--border)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_120%,_var(--accent-glow),_transparent_55%)]" />
-      <div className="relative mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-24">
-        <h2 className="mx-auto max-w-3xl font-heading text-[clamp(1.75rem,4vw,2.8rem)] uppercase text-[var(--fg)]">
+      <div className="relative mx-auto max-w-6xl px-4 section-y text-center sm:px-6">
+        <h2 className="mx-auto max-w-3xl font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {finalCta.title}
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base leading-[1.7] text-[var(--muted)]">
@@ -252,44 +255,45 @@ export default function HomePage() {
   const hasHeroMedia = hero.mediaType !== "none" && Boolean(hero.mediaUrl);
 
   return (
-    <main className="flex min-h-dvh flex-1 flex-col pb-20 md:pb-0">
+    <main className="flex min-h-dvh flex-1 flex-col">
       <SiteHeader active="home" />
 
-      <section className="relative flex min-h-[min(92dvh,920px)] flex-col justify-end overflow-hidden border-b border-[var(--border)]">
+      <section
+        id="hero"
+        className="relative overflow-hidden border-b border-[var(--border)]"
+      >
         {hasHeroMedia ? (
           <>
             <HeroMedia />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/70 to-[var(--bg)]/40" />
           </>
         ) : (
           <div className="pointer-events-none absolute inset-0" aria-hidden>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_15%_-10%,_var(--accent-glow),_transparent_50%),radial-gradient(ellipse_60%_50%_at_95%_30%,_rgba(255,112,0,0.12),_transparent_45%),linear-gradient(180deg,#0a0a0a_0%,#000_55%,#000_100%)]" />
-            <div className="hero-grain absolute inset-0 opacity-[0.35]" />
-            <div className="absolute -right-24 top-24 h-[420px] w-[420px] rotate-12 border border-[var(--accent)]/25" />
-            <div className="absolute -right-8 top-40 h-[280px] w-[280px] rotate-12 border border-[var(--border)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,_var(--accent-glow),_transparent_55%),linear-gradient(180deg,#1a0605_0%,#0a0a0a_42%,#0a0a0a_100%)]" />
+            <div className="hero-grain absolute inset-0 opacity-[0.28]" />
           </div>
         )}
 
-        <div className="relative mx-auto w-full max-w-6xl px-4 pb-12 pt-28 sm:px-6 sm:pb-16 sm:pt-32 md:pb-20">
+        <div className="relative mx-auto w-full max-w-6xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8">
           {hero.eyebrow ? (
-            <p className="animate-rise text-xs font-medium uppercase tracking-[0.18em] text-[var(--muted)] sm:text-sm">
+            <p className="animate-rise text-xs font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
               {hero.eyebrow}
             </p>
           ) : null}
           <h1
-            className="animate-rise mt-4 max-w-3xl font-heading text-[clamp(2rem,6vw,3.6rem)] uppercase leading-[1.05] text-[var(--fg)]"
+            className="animate-rise mt-3 max-w-3xl font-heading text-[clamp(1.85rem,5.2vw,3.05rem)] leading-[1.12] text-[var(--fg)]"
             style={{ animationDelay: "80ms" }}
           >
             {hero.headline}
           </h1>
           <p
-            className="animate-rise mt-5 max-w-xl text-base leading-[1.7] text-[var(--muted)] sm:text-lg"
+            className="animate-rise mt-4 max-w-xl text-[0.95rem] leading-[1.7] text-[var(--muted)] sm:text-lg"
             style={{ animationDelay: "140ms" }}
           >
             {hero.body}
           </p>
           <div
-            className="animate-rise mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+            className="animate-rise mt-6 flex flex-col gap-3 sm:flex-row sm:items-center"
             style={{ animationDelay: "200ms" }}
           >
             <Link
@@ -301,7 +305,7 @@ export default function HomePage() {
             {hero.secondaryCta?.label ? (
               <Link
                 href={hero.secondaryCta.href}
-                className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+                className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
               >
                 {hero.secondaryCta.label}
               </Link>
@@ -315,6 +319,16 @@ export default function HomePage() {
               {hero.ctaNote}
             </p>
           ) : null}
+          {hero.portraitUrl ? (
+            <div className="animate-rise mt-8" style={{ animationDelay: "300ms" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={hero.portraitUrl}
+                alt={hero.portraitAlt || ""}
+                className="mx-auto max-h-[420px] w-full max-w-md object-contain object-bottom sm:max-h-[520px]"
+              />
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -325,8 +339,11 @@ export default function HomePage() {
       <MediaAt slot="after-proof" />
       <Testimonials />
       <MediaAt slot="after-testimonials" />
+      <CredentialsSection />
       <ProblemSection />
       <MediaAt slot="after-problem" />
+      <WhatsappCoachSection />
+      <BenchmarkSection />
       <HowItWorks />
       <MediaAt slot="after-how" />
       <MediaAt slot="before-tiers" />

@@ -80,7 +80,7 @@ export function WatchGateProvider({ children }: { children: ReactNode }) {
           <div className="w-full max-w-lg border border-[var(--border)] bg-[var(--bg)] p-5 sm:p-7">
             <p
               id="watch-gate-title"
-              className="font-heading text-2xl uppercase text-[var(--fg)]"
+              className="font-heading text-2xl text-[var(--fg)]"
             >
               {vsl.gateTitle}
             </p>

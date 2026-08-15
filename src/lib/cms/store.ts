@@ -66,6 +66,36 @@ export function mergeCms(
   if (!out.home.stickyCta) {
     out.home.stickyCta = structuredClone(base.home.stickyCta);
   }
+  if (!out.home.whatsappCoach) {
+    out.home.whatsappCoach = structuredClone(base.home.whatsappCoach);
+  }
+  if (!out.home.credentials) {
+    out.home.credentials = structuredClone(base.home.credentials);
+  }
+  if (!out.home.benchmarks) {
+    out.home.benchmarks = structuredClone(base.home.benchmarks);
+  }
+  if (!out.home.tiersSection.offer) {
+    out.home.tiersSection.offer = structuredClone(base.home.tiersSection.offer);
+  }
+  if (!out.home.tiersSection.guarantee) {
+    out.home.tiersSection.guarantee = structuredClone(
+      base.home.tiersSection.guarantee,
+    );
+  }
+  if (!out.site.brand.logoUrl) {
+    out.site.brand.logoUrl = base.site.brand.logoUrl;
+  }
+  if (out.home.hero.portraitUrl === undefined) {
+    out.home.hero.portraitUrl = base.home.hero.portraitUrl;
+  }
+  if (out.home.hero.portraitAlt === undefined) {
+    out.home.hero.portraitAlt = base.home.hero.portraitAlt;
+  }
+  out.home.testimonials.items = out.home.testimonials.items.map((item) => ({
+    beforeImageUrl: "",
+    ...item,
+  }));
   if (out.home.hero.eyebrow === undefined) {
     out.home.hero.eyebrow = base.home.hero.eyebrow;
   }

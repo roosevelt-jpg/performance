@@ -2,25 +2,30 @@
 
 import Link from "next/link";
 import type { CmsTier } from "@/lib/cms/types";
+import { useCms } from "@/components/cms/CmsProvider";
+import { ChallengeOffer } from "@/components/marketing/ChallengeOffer";
 
 type Props = {
   tier: CmsTier;
 };
 
 export function TierCard({ tier }: Props) {
+  const { tiersSection } = useCms().home;
   const isSell = tier.cta.kind === "book";
+  const isChallenge = tier.cta.kind === "checkout";
   const href =
     tier.cta.kind === "book"
       ? `/book?tier=${tier.cta.bookTier}`
       : tier.cta.href;
+  const guarantee = tiersSection.guarantee;
 
   return (
     <article
       className={[
-        "flex h-full min-w-0 flex-col rounded-[var(--radius)] border p-4 sm:p-5 md:p-6",
+        "card-depth flex h-full min-w-0 flex-col rounded-[var(--radius)] border p-4 sm:p-5 md:p-6",
         tier.highlight
-          ? "border-[var(--accent)] bg-[var(--surface-elevated)] shadow-[0_0_0_1px_var(--accent)]"
-          : "border-[var(--border-soft)] bg-[var(--surface)]",
+          ? "border-[var(--accent)] bg-[var(--surface-elevated)]"
+          : "border-[var(--border)] bg-[var(--surface)]",
       ].join(" ")}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -30,7 +35,7 @@ export function TierCard({ tier }: Props) {
               {tier.badge}
             </span>
           ) : null}
-          <h3 className="font-heading text-xl uppercase text-[var(--fg)] sm:text-2xl">
+          <h3 className="font-heading text-xl text-[var(--fg)] sm:text-2xl">
             {tier.name}
           </h3>
           <p className="mt-1 text-sm text-[var(--muted)]">{tier.subhead}</p>
@@ -57,17 +62,27 @@ export function TierCard({ tier }: Props) {
         ))}
       </ul>
 
+      {isChallenge && tiersSection.offer ? (
+        <ChallengeOffer offer={tiersSection.offer} />
+      ) : null}
+
       <Link
         href={href}
         className={[
           "inline-flex w-full items-center justify-center rounded-md px-4 py-3 text-center text-sm font-semibold transition sm:py-2.5",
           isSell
             ? "bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-bright)]"
-            : "border border-[var(--border)] text-[var(--fg)] hover:border-[var(--fg-soft)]",
+            : "border border-[var(--border-soft)] text-[var(--fg)] hover:border-[var(--fg-soft)]",
         ].join(" ")}
       >
         {tier.cta.label}
       </Link>
+      {isChallenge && guarantee?.enabled ? (
+        <div className="mt-3 space-y-1 text-center text-xs text-[var(--muted)]">
+          {guarantee.trustLine ? <p>{guarantee.trustLine}</p> : null}
+          {guarantee.guarantee ? <p>{guarantee.guarantee}</p> : null}
+        </div>
+      ) : null}
     </article>
   );
 }
