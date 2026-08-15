@@ -9,7 +9,7 @@ export const DEFAULT_CMS: CmsContent = {
       siteUrl: "https://marketing.theformulaperformance.com/",
       wordmark: "The Formula",
       accent: "Performance",
-      logoUrl: "/logo.svg",
+      logoUrl: "/logo.png",
     },
     seo: {
       title: "The Formula Performance | Watch the video. Apply for coaching.",

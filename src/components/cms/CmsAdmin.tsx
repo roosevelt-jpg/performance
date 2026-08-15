@@ -285,7 +285,25 @@ export function CmsAdmin() {
                   }
                 />
               </Field>
-              <Field label="Wordmark (left)">
+              <AssetUpload
+                label="Header logo"
+                folder="images"
+                value={form.site.brand.logoUrl}
+                onChange={(url) =>
+                  setForm({
+                    ...form,
+                    site: {
+                      ...form.site,
+                      brand: { ...form.site.brand, logoUrl: url },
+                    },
+                  })
+                }
+              />
+              <p className="text-xs text-[var(--muted)]">
+                Shown in the header on every page. Upload a PNG or WebP to replace
+                the default Formula mark. Save CMS after uploading.
+              </p>
+              <Field label="Wordmark (fallback text only)">
                 <Text
                   value={form.site.brand.wordmark}
                   onChange={(v) =>
@@ -313,20 +331,6 @@ export function CmsAdmin() {
                   }
                 />
               </Field>
-              <AssetUpload
-                label="Logo lockup"
-                folder="images"
-                value={form.site.brand.logoUrl}
-                onChange={(url) =>
-                  setForm({
-                    ...form,
-                    site: {
-                      ...form.site,
-                      brand: { ...form.site.brand, logoUrl: url },
-                    },
-                  })
-                }
-              />
               <Field label="Coach name">
                 <Text
                   value={form.site.brand.coach}

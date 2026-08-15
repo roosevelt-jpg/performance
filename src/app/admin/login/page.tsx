@@ -45,7 +45,7 @@ function LoginForm() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10 sm:py-16">
-      <div className="mb-6 sm:mb-8">
+      <div className="mb-6 text-center sm:mb-8">
         <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
           The Formula Performance
         </p>

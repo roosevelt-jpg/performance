@@ -83,7 +83,7 @@ export function mergeCms(
       base.home.tiersSection.guarantee,
     );
   }
-  if (!out.site.brand.logoUrl) {
+  if (!out.site.brand.logoUrl || out.site.brand.logoUrl === "/logo.svg") {
     out.site.brand.logoUrl = base.site.brand.logoUrl;
   }
   if (out.home.hero.portraitUrl === undefined) {

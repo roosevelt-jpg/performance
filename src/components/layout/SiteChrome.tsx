@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCms } from "@/components/cms/CmsProvider";
 
+const FALLBACK_LOGO = "/logo.png";
+
 type Props = {
   active?: "home" | "tiers" | "book" | "admin";
   compact?: boolean;
@@ -12,28 +14,22 @@ export function SiteHeader({ active }: Props) {
   const cms = useCms();
   const brand = cms.site.brand;
   const links = cms.chrome.nav.filter((l) => l.visible);
+  const logoSrc = brand.logoUrl?.trim() || FALLBACK_LOGO;
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--bg)]">
-      <div className="relative mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5">
+      <div className="relative mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-2.5 sm:px-6 sm:py-3">
         <div />
         <Link
           href={cms.chrome.headerLogoHref || "/"}
           className="justify-self-center"
         >
-          {brand.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={brand.logoUrl}
-              alt={brand.name}
-              className="h-7 w-auto max-w-[220px] object-contain sm:h-8"
-            />
-          ) : (
-            <span className="font-heading text-base tracking-tight text-[var(--fg)]">
-              {brand.wordmark}{" "}
-              <span className="text-[var(--accent)]">{brand.accent}</span>
-            </span>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoSrc}
+            alt={brand.name}
+            className="h-9 w-auto max-w-[220px] object-contain sm:h-10"
+          />
         </Link>
         <nav className="flex shrink-0 items-center justify-end gap-4 text-sm">
           {links.map((link) => (
