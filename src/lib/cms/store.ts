@@ -86,16 +86,44 @@ export function mergeCms(
   if (!out.site.brand.logoUrl || out.site.brand.logoUrl === "/logo.svg") {
     out.site.brand.logoUrl = base.site.brand.logoUrl;
   }
-  if (out.home.hero.portraitUrl === undefined) {
+  if (!out.home.hero.portraitUrl) {
     out.home.hero.portraitUrl = base.home.hero.portraitUrl;
   }
-  if (out.home.hero.portraitAlt === undefined) {
+  if (!out.home.hero.portraitAlt) {
     out.home.hero.portraitAlt = base.home.hero.portraitAlt;
   }
-  out.home.testimonials.items = out.home.testimonials.items.map((item) => ({
-    ...item,
-    beforeImageUrl: item.beforeImageUrl ?? "",
-  }));
+  out.home.credentials = {
+    ...base.home.credentials,
+    ...out.home.credentials,
+    items: out.home.credentials.items?.length
+      ? out.home.credentials.items
+      : base.home.credentials.items,
+  };
+  if (!out.home.credentials.imageUrl) {
+    out.home.credentials.imageUrl = base.home.credentials.imageUrl;
+  }
+  out.home.whatsappCoach = {
+    ...base.home.whatsappCoach,
+    ...out.home.whatsappCoach,
+    steps: out.home.whatsappCoach.steps?.length
+      ? out.home.whatsappCoach.steps
+      : base.home.whatsappCoach.steps,
+  };
+  if (!out.home.whatsappCoach.avatarUrl) {
+    out.home.whatsappCoach.avatarUrl = base.home.whatsappCoach.avatarUrl;
+  }
+  const defaultById = new Map(
+    base.home.testimonials.items.map((item) => [item.id, item]),
+  );
+  out.home.testimonials.items = out.home.testimonials.items.map((item) => {
+    const fallback = defaultById.get(item.id);
+    return {
+      ...item,
+      beforeImageUrl: item.beforeImageUrl ?? "",
+      imageUrl: item.imageUrl || fallback?.imageUrl || "",
+      imageAlt: item.imageAlt || fallback?.imageAlt || item.name,
+    };
+  });
   if (out.home.hero.eyebrow === undefined) {
     out.home.hero.eyebrow = base.home.hero.eyebrow;
   }

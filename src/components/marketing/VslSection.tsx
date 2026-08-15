@@ -13,19 +13,21 @@ export function VslSection() {
   const hasVideo = Boolean(extractYoutubeId(vsl.youtubeUrl));
 
   return (
-    <section
-      id="vsl"
-      className="scroll-mt-24 border-b border-[var(--border)] bg-[var(--surface)]"
-    >
-      <div className="mx-auto max-w-3xl px-4 section-y sm:px-6">
+    <section id="vsl" className="scroll-mt-24 border-b border-[var(--border)]">
+      <div className="mx-auto max-w-5xl px-4 py-[clamp(56px,7vw,88px)] sm:px-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
           {vsl.stepLabel}
         </p>
         <h2 className="mt-3 font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {vsl.heading}
         </h2>
+        {vsl.helper ? (
+          <p className="mt-3 max-w-2xl text-base leading-[1.7] text-[var(--muted)]">
+            {vsl.helper}
+          </p>
+        ) : null}
 
-        <div className="mt-8">
+        <div className="mt-7 overflow-hidden rounded-[var(--radius)] border border-[var(--border-soft)]">
           {hasVideo ? (
             <YoutubeEmbed
               youtubeUrl={vsl.youtubeUrl}
@@ -35,15 +37,9 @@ export function VslSection() {
               onPlay={markWatched}
             />
           ) : (
-            <div className="aspect-video border border-[var(--border)] bg-black" />
+            <div className="aspect-video bg-black" />
           )}
         </div>
-
-        {vsl.helper ? (
-          <p className="mt-5 text-base leading-[1.7] text-[var(--muted)]">
-            {vsl.helper}
-          </p>
-        ) : null}
 
         <div className="mt-10 border-t border-[var(--border)] pt-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">

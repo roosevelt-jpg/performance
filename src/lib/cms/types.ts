@@ -124,9 +124,9 @@ export type CmsTestimonial = {
   quote: string;
   name: string;
   result: string;
-  /** After photo, or a single composite before/after */
+  /** After photo — paired with beforeImageUrl for the hover compare */
   imageUrl: string;
-  /** Optional before photo; pair with imageUrl */
+  /** Before photo — admin upload; hover/drag on the card reveals after */
   beforeImageUrl: string;
   imageAlt: string;
 };
@@ -146,6 +146,7 @@ export type CmsWhatsappCoach = {
   chatName: string;
   chatTime: string;
   chatMessage: string;
+  avatarUrl: string;
 };
 
 export type CmsCredentials = {
@@ -153,6 +154,11 @@ export type CmsCredentials = {
   eyebrow: string;
   heading: string;
   body: string;
+  imageUrl: string;
+  imageAlt: string;
+  caption: string;
+  followerCount: string;
+  followerHref: string;
   items: CmsProofItem[];
 };
 

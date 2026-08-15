@@ -1,10 +1,18 @@
 "use client";
 
 import { useCms } from "@/components/cms/CmsProvider";
+import { ChatPreview } from "@/components/marketing/PhoneMockup";
+import { COACH_CHAT } from "@/content/hero-chat";
 
 export function WhatsappCoachSection() {
   const { whatsappCoach: coach } = useCms().home;
   if (!coach?.enabled) return null;
+
+  const lines =
+    coach.chatMessage?.trim() &&
+    COACH_CHAT[COACH_CHAT.length - 1]?.text !== coach.chatMessage
+      ? [...COACH_CHAT.slice(0, -1), { from: "coach" as const, text: coach.chatMessage }]
+      : COACH_CHAT;
 
   return (
     <section className="section-vignette border-b border-[var(--border)] bg-[var(--surface)]">
@@ -36,28 +44,12 @@ export function WhatsappCoachSection() {
             ))}
           </ol>
 
-          <div
-            className="card-depth mx-auto w-full max-w-sm overflow-hidden rounded-[var(--radius)] border border-[var(--border-soft)] bg-[#0e0d0c]"
-            aria-label="Coach chat preview"
-          >
-            <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[#121110] px-4 py-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-semibold text-white">
-                {coach.chatName.slice(0, 1)}
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-[var(--fg)]">
-                  {coach.chatName}
-                </p>
-                <p className="text-xs text-[var(--muted)]">{coach.chatTime}</p>
-              </div>
-            </div>
-            <div className="space-y-3 px-4 py-5">
-              <p className="text-xs text-[var(--muted)]">Performance Coach</p>
-              <div className="max-w-[90%] rounded-[6px] rounded-tl-none bg-[#1c1916] px-3.5 py-3 text-sm leading-[1.6] text-[var(--fg)]">
-                {coach.chatMessage}
-              </div>
-            </div>
-          </div>
+          <ChatPreview
+            lines={lines}
+            name={coach.chatName}
+            avatarUrl={coach.avatarUrl}
+            className="mx-auto w-full max-w-sm"
+          />
         </div>
       </div>
     </section>

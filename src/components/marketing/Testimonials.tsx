@@ -2,6 +2,7 @@
 
 import { useCms } from "@/components/cms/CmsProvider";
 import { GatedLink } from "@/components/marketing/WatchGate";
+import { TransformationCard } from "@/components/marketing/TransformationCard";
 
 export function Testimonials() {
   const cms = useCms();
@@ -16,7 +17,10 @@ export function Testimonials() {
   return (
     <section className="border-b border-[var(--border)]">
       <div className="mx-auto max-w-6xl px-4 section-y sm:px-6">
-        <h2 className="font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
+          The difference
+        </p>
+        <h2 className="mt-3 font-heading text-[clamp(1.7rem,4.2vw,2.5rem)] text-[var(--fg)]">
           {testimonials.heading}
         </h2>
         {testimonials.subhead ? (
@@ -25,54 +29,21 @@ export function Testimonials() {
           </p>
         ) : null}
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="-mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
           {items.map((item) => (
-            <article
+            <div
               key={item.id}
-              className="card-depth flex min-w-0 flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]"
+              className="w-[min(85vw,22rem)] shrink-0 snap-start sm:w-[min(45%,22rem)] lg:w-[calc((100%-2rem)/3)]"
             >
-              {item.beforeImageUrl || item.imageUrl ? (
-                <div
-                  className={
-                    item.beforeImageUrl && item.imageUrl
-                      ? "grid grid-cols-2"
-                      : ""
-                  }
-                >
-                  {item.beforeImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.beforeImageUrl}
-                      alt={`${item.name} before`}
-                      className="aspect-[4/5] w-full object-cover"
-                    />
-                  ) : null}
-                  {item.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.imageUrl}
-                      alt={item.imageAlt || item.name}
-                      className="aspect-[4/5] w-full object-cover"
-                    />
-                  ) : null}
-                </div>
-              ) : null}
-              <div className="flex flex-1 flex-col p-5">
-                <p className="text-sm leading-[1.7] text-[var(--fg-soft)]">
-                  “{item.quote}”
-                </p>
-                <div className="mt-4 flex items-end justify-between gap-3">
-                  <p className="text-sm font-semibold text-[var(--fg)]">
-                    {item.name}
-                  </p>
-                  {item.result ? (
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
-                      {item.result}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-            </article>
+              <TransformationCard
+                name={item.name}
+                quote={item.quote}
+                result={item.result}
+                imageUrl={item.imageUrl}
+                beforeImageUrl={item.beforeImageUrl}
+                imageAlt={item.imageAlt}
+              />
+            </div>
           ))}
         </div>
 

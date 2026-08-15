@@ -7,11 +7,13 @@ import { useCms } from "@/components/cms/CmsProvider";
 import { MediaAt } from "@/components/marketing/MediaSections";
 import { BenchmarkSection } from "@/components/marketing/BenchmarkSection";
 import { CredentialsSection } from "@/components/marketing/CredentialsSection";
+import { PhoneMockup } from "@/components/marketing/PhoneMockup";
 import { Testimonials } from "@/components/marketing/Testimonials";
 import { VslSection } from "@/components/marketing/VslSection";
 import { WhatsappCoachSection } from "@/components/marketing/WhatsappCoachSection";
 import { GatedLink } from "@/components/marketing/WatchGate";
 import { TierRow } from "@/components/tiers/TierRow";
+import { HERO_CHAT } from "@/content/hero-chat";
 import {
   extractYoutubeId,
   youtubeEmbedSrc,
@@ -266,7 +268,7 @@ export default function HomePage() {
         id="hero"
         className="relative overflow-hidden border-b border-[var(--border)]"
       >
-        {hasHeroMedia ? (
+        {hasHeroMedia && !hero.portraitUrl ? (
           <>
             <HeroMedia />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/70 to-[var(--bg)]/40" />
@@ -278,58 +280,61 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="relative mx-auto w-full max-w-6xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8">
-          {hero.eyebrow ? (
-            <p className="animate-rise text-xs font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
-              {hero.eyebrow}
-            </p>
-          ) : null}
-          <h1
-            className="animate-rise mt-3 max-w-3xl font-heading text-[clamp(1.85rem,5.2vw,3.05rem)] leading-[1.12] text-[var(--fg)]"
-            style={{ animationDelay: "80ms" }}
-          >
-            {hero.headline}
-          </h1>
-          <p
-            className="animate-rise mt-4 max-w-xl text-[0.95rem] leading-[1.7] text-[var(--muted)] sm:text-lg"
-            style={{ animationDelay: "140ms" }}
-          >
-            {hero.body}
-          </p>
-          <div
-            className="animate-rise mt-6 flex flex-col gap-3 sm:flex-row sm:items-center"
-            style={{ animationDelay: "200ms" }}
-          >
-            <Link
-              href={hero.cta.href}
-              className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-8 px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8 min-[940px]:grid-cols-[1.06fr_0.94fr] min-[940px]:gap-12">
+          <div>
+            {hero.eyebrow ? (
+              <p className="animate-rise text-xs font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
+                {hero.eyebrow}
+              </p>
+            ) : null}
+            <h1
+              className="animate-rise mt-3 max-w-3xl font-heading text-[clamp(1.85rem,5.2vw,3.05rem)] leading-[1.12] text-[var(--fg)]"
+              style={{ animationDelay: "80ms" }}
             >
-              {hero.cta.label}
-            </Link>
-            {hero.secondaryCta?.label ? (
+              {hero.headline}
+            </h1>
+            <p
+              className="animate-rise mt-4 max-w-xl text-[0.95rem] leading-[1.7] text-[var(--muted)] sm:text-lg"
+              style={{ animationDelay: "140ms" }}
+            >
+              {hero.body}
+            </p>
+            <div
+              className="animate-rise mt-6 flex flex-col gap-3 sm:flex-row sm:items-center"
+              style={{ animationDelay: "200ms" }}
+            >
               <Link
-                href={hero.secondaryCta.href}
-                className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+                href={hero.cta.href}
+                className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
               >
-                {hero.secondaryCta.label}
+                {hero.cta.label}
               </Link>
+              {hero.secondaryCta?.label ? (
+                <Link
+                  href={hero.secondaryCta.href}
+                  className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-6 py-3.5 text-sm font-semibold text-[var(--fg)] transition hover:border-[var(--fg-soft)] sm:w-auto"
+                >
+                  {hero.secondaryCta.label}
+                </Link>
+              ) : null}
+            </div>
+            {hero.ctaNote ? (
+              <p
+                className="animate-rise mt-3 text-sm text-[var(--muted)]"
+                style={{ animationDelay: "260ms" }}
+              >
+                {hero.ctaNote}
+              </p>
             ) : null}
           </div>
-          {hero.ctaNote ? (
-            <p
-              className="animate-rise mt-3 text-sm text-[var(--muted)]"
-              style={{ animationDelay: "260ms" }}
-            >
-              {hero.ctaNote}
-            </p>
-          ) : null}
           {hero.portraitUrl ? (
-            <div className="animate-rise mt-8" style={{ animationDelay: "300ms" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={hero.portraitUrl}
-                alt={hero.portraitAlt || ""}
-                className="mx-auto max-h-[420px] w-full max-w-md object-contain object-bottom sm:max-h-[520px]"
+            <div className="animate-rise" style={{ animationDelay: "160ms" }}>
+              <PhoneMockup
+                imageSrc={hero.portraitUrl}
+                imageAlt={hero.portraitAlt || ""}
+                chat={HERO_CHAT}
+                chatName="Kane · Your Coach"
+                avatarUrl="/assets/kane-headshot.png"
               />
             </div>
           ) : null}

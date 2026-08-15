@@ -788,7 +788,7 @@ export function CmsAdmin() {
                 />
               </Field>
               <AssetUpload
-                label="Kane portrait (below the CTAs)"
+                label="Kane hero photo (phone mockup)"
                 folder="hero"
                 value={form.home.hero.portraitUrl}
                 onChange={(url) =>
@@ -1246,6 +1246,37 @@ export function CmsAdmin() {
                     home: {
                       ...form.home,
                       credentials: { ...form.home.credentials, body: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <AssetUpload
+              label="Kane photo"
+              folder="hero"
+              value={form.home.credentials.imageUrl ?? ""}
+              onChange={(url) =>
+                setForm({
+                  ...form,
+                  home: {
+                    ...form.home,
+                    credentials: {
+                      ...form.home.credentials,
+                      imageUrl: url,
+                    },
+                  },
+                })
+              }
+            />
+            <Field label="Photo alt">
+              <Text
+                value={form.home.credentials.imageAlt ?? ""}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...form.home,
+                      credentials: { ...form.home.credentials, imageAlt: v },
                     },
                   })
                 }
@@ -2160,7 +2191,11 @@ export function CmsAdmin() {
             </div>
           </Section>
 
-          <Section title="Testimonials">
+          <Section title="Transformation cards">
+            <p className="text-xs text-[var(--muted)]">
+              Upload a Before photo and an After photo on each card. On the
+              live page they sit on one card — hover or drag to compare.
+            </p>
             <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
               <input
                 type="checkbox"
@@ -2238,41 +2273,53 @@ export function CmsAdmin() {
                   />
                   Enabled
                 </label>
-                <AssetUpload
-                  label="Photo (after, or composite)"
-                  folder="images"
-                  value={item.imageUrl}
-                  onChange={(url) => {
-                    const items = form.home.testimonials.items.map(
-                      (row, idx) => (idx === i ? { ...row, imageUrl: url } : row),
-                    );
-                    setForm({
-                      ...form,
-                      home: {
-                        ...form.home,
-                        testimonials: { ...form.home.testimonials, items },
-                      },
-                    });
-                  }}
-                />
-                <AssetUpload
-                  label="Before photo (optional pair)"
-                  folder="images"
-                  value={item.beforeImageUrl}
-                  onChange={(url) => {
-                    const items = form.home.testimonials.items.map(
-                      (row, idx) =>
-                        idx === i ? { ...row, beforeImageUrl: url } : row,
-                    );
-                    setForm({
-                      ...form,
-                      home: {
-                        ...form.home,
-                        testimonials: { ...form.home.testimonials, items },
-                      },
-                    });
-                  }}
-                />
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <AssetUpload
+                    label="Before image"
+                    folder="images"
+                    value={item.beforeImageUrl}
+                    onChange={(url) => {
+                      const items = form.home.testimonials.items.map(
+                        (row, idx) =>
+                          idx === i ? { ...row, beforeImageUrl: url } : row,
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          testimonials: { ...form.home.testimonials, items },
+                        },
+                      });
+                    }}
+                  />
+                  <AssetUpload
+                    label="After image"
+                    folder="images"
+                    value={item.imageUrl}
+                    onChange={(url) => {
+                      const items = form.home.testimonials.items.map(
+                        (row, idx) =>
+                          idx === i ? { ...row, imageUrl: url } : row,
+                      );
+                      setForm({
+                        ...form,
+                        home: {
+                          ...form.home,
+                          testimonials: { ...form.home.testimonials, items },
+                        },
+                      });
+                    }}
+                  />
+                </div>
+                {item.beforeImageUrl && item.imageUrl ? (
+                  <p className="text-xs text-[var(--accent)]">
+                    Hover compare is on — both images will play on one card.
+                  </p>
+                ) : (
+                  <p className="text-xs text-[var(--muted)]">
+                    Add both photos to turn on the before/after hover.
+                  </p>
+                )}
                 <Field label="Quote">
                   <Text
                     multiline
@@ -2364,7 +2411,7 @@ export function CmsAdmin() {
                     })
                   }
                 >
-                  Remove testimonial
+                  Remove card
                 </button>
               </div>
             ))}
@@ -2396,7 +2443,7 @@ export function CmsAdmin() {
                 })
               }
             >
-              Add testimonial
+              Add transformation
             </button>
           </Section>
 
