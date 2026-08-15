@@ -80,6 +80,10 @@ function Text({
   );
 }
 
+function cmsId(prefix: string) {
+  return `${prefix}-${Date.now().toString(36)}`;
+}
+
 function LinesEditor({
   label,
   value,
@@ -90,7 +94,7 @@ function LinesEditor({
   onChange: (v: string[]) => void;
 }) {
   return (
-    <Field label={label} hint="One line per item">
+    <Field label={label} hint="One line per item — add, edit, or delete lines">
       <textarea
         className={`${inputClass} min-h-28 font-mono text-xs sm:text-sm`}
         value={value.join("\n")}
@@ -101,6 +105,42 @@ function LinesEditor({
         }
       />
     </Field>
+  );
+}
+
+function AddBlock({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-semibold"
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+function RemoveBlock({
+  label = "Remove",
+  onClick,
+}: {
+  label?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="self-end text-sm text-red-400"
+      onClick={onClick}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -187,6 +227,34 @@ export function CmsAdmin() {
     setForm((f) => ({
       ...f,
       tiers: f.tiers.map((t, i) => (i === index ? { ...t, ...patch } : t)),
+    }));
+  }
+
+  function addTier() {
+    setForm((f) => ({
+      ...f,
+      tiers: [
+        ...f.tiers,
+        {
+          id: cmsId("tier"),
+          enabled: true,
+          highlight: false,
+          name: "New programme",
+          badge: "",
+          subhead: "",
+          body: [],
+          includes: [],
+          cta: { kind: "book", label: "Apply", bookTier: "pro" },
+          applyBadge: "Application only",
+        },
+      ],
+    }));
+  }
+
+  function removeTier(index: number) {
+    setForm((f) => ({
+      ...f,
+      tiers: f.tiers.filter((_, i) => i !== index),
     }));
   }
 
@@ -391,6 +459,38 @@ export function CmsAdmin() {
                 }
               />
             </Field>
+            <Field
+              label="Keywords"
+              hint="Comma-separated. Google mostly ignores these; they still help you keep the topic list in one place."
+            >
+              <Text
+                multiline
+                value={form.site.seo.keywords ?? ""}
+                onChange={(v) =>
+                  setForm({
+                    ...form,
+                    site: {
+                      ...form.site,
+                      seo: { ...form.site.seo, keywords: v },
+                    },
+                  })
+                }
+              />
+            </Field>
+            <AssetUpload
+              label="Share image (Open Graph)"
+              folder="images"
+              value={form.site.seo.ogImageUrl ?? ""}
+              onChange={(url) =>
+                setForm({
+                  ...form,
+                  site: {
+                    ...form.site,
+                    seo: { ...form.site.seo, ogImageUrl: url },
+                  },
+                })
+              }
+            />
           </Section>
         </div>
       ) : null}
@@ -456,8 +556,39 @@ export function CmsAdmin() {
                   />
                   Visible
                 </label>
+                <RemoveBlock
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      chrome: {
+                        ...form.chrome,
+                        nav: form.chrome.nav.filter((_, idx) => idx !== i),
+                      },
+                    })
+                  }
+                />
               </div>
             ))}
+            <AddBlock
+              label="Add nav link"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  chrome: {
+                    ...form.chrome,
+                    nav: [
+                      ...form.chrome.nav,
+                      {
+                        id: cmsId("nav"),
+                        label: "New link",
+                        href: "/",
+                        visible: true,
+                      },
+                    ],
+                  },
+                })
+              }
+            />
           </Section>
           <Section title="Footer">
             <Field label="Copyright">
@@ -521,8 +652,41 @@ export function CmsAdmin() {
                   />
                   Visible
                 </label>
+                <RemoveBlock
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      chrome: {
+                        ...form.chrome,
+                        footerLinks: form.chrome.footerLinks.filter(
+                          (_, idx) => idx !== i,
+                        ),
+                      },
+                    })
+                  }
+                />
               </div>
             ))}
+            <AddBlock
+              label="Add footer link"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  chrome: {
+                    ...form.chrome,
+                    footerLinks: [
+                      ...form.chrome.footerLinks,
+                      {
+                        id: cmsId("footer"),
+                        label: "New link",
+                        href: "/",
+                        visible: true,
+                      },
+                    ],
+                  },
+                })
+              }
+            />
           </Section>
         </div>
       ) : null}
@@ -1060,6 +1224,10 @@ export function CmsAdmin() {
           </Section>
 
           <Section title="Proof strip">
+            <p className="text-xs text-[var(--muted)]">
+              Live stats Kane types himself. Empty figures do not show on the
+              page. Same fields as Admin → Funnel → Live stats.
+            </p>
             <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
               <input
                 type="checkbox"
@@ -1080,7 +1248,7 @@ export function CmsAdmin() {
             {form.home.proof.items.map((item, i) => (
               <div
                 key={item.id}
-                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-2"
+                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-[1fr_1fr_auto]"
               >
                 <Field label="Value">
                   <Text
@@ -1116,8 +1284,45 @@ export function CmsAdmin() {
                     }}
                   />
                 </Field>
+                <RemoveBlock
+                  onClick={() => {
+                    const items = form.home.proof.items.filter((_, idx) => idx !== i);
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        proof: { ...form.home.proof, items },
+                      },
+                    });
+                  }}
+                />
               </div>
             ))}
+            <button
+              type="button"
+              className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-semibold"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  home: {
+                    ...form.home,
+                    proof: {
+                      ...form.home.proof,
+                      items: [
+                        ...form.home.proof.items,
+                        {
+                          id: cmsId("p"),
+                          value: "",
+                          label: "",
+                        },
+                      ],
+                    },
+                  },
+                })
+              }
+            >
+              Add stat
+            </button>
           </Section>
 
           <Section title="Problem section">
@@ -1285,7 +1490,7 @@ export function CmsAdmin() {
             {form.home.credentials.items.map((item, i) => (
               <div
                 key={item.id}
-                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-2"
+                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-[1fr_1fr_auto]"
               >
                 <Field label="Value">
                   <Text
@@ -1321,8 +1526,42 @@ export function CmsAdmin() {
                     }}
                   />
                 </Field>
+                <RemoveBlock
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        credentials: {
+                          ...form.home.credentials,
+                          items: form.home.credentials.items.filter(
+                            (_, idx) => idx !== i,
+                          ),
+                        },
+                      },
+                    })
+                  }
+                />
               </div>
             ))}
+            <AddBlock
+              label="Add credential stat"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  home: {
+                    ...form.home,
+                    credentials: {
+                      ...form.home.credentials,
+                      items: [
+                        ...form.home.credentials.items,
+                        { id: cmsId("cred"), value: "", label: "" },
+                      ],
+                    },
+                  },
+                })
+              }
+            />
           </Section>
 
           <Section title="WhatsApp Performance Coach (after The Gap)">
@@ -1429,8 +1668,42 @@ export function CmsAdmin() {
                     }}
                   />
                 </Field>
+                <RemoveBlock
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        whatsappCoach: {
+                          ...form.home.whatsappCoach,
+                          steps: form.home.whatsappCoach.steps.filter(
+                            (_, idx) => idx !== i,
+                          ),
+                        },
+                      },
+                    })
+                  }
+                />
               </div>
             ))}
+            <AddBlock
+              label="Add WhatsApp step"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  home: {
+                    ...form.home,
+                    whatsappCoach: {
+                      ...form.home.whatsappCoach,
+                      steps: [
+                        ...form.home.whatsappCoach.steps,
+                        { id: cmsId("wa"), title: "", body: "" },
+                      ],
+                    },
+                  },
+                })
+              }
+            />
             <Field label="Chat mockup name">
               <Text
                 value={form.home.whatsappCoach.chatName}
@@ -1535,7 +1808,7 @@ export function CmsAdmin() {
             {form.home.benchmarks.items.map((item, i) => (
               <div
                 key={item.id}
-                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-2"
+                className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-[1fr_1fr_auto]"
               >
                 <Field label="Value">
                   <Text
@@ -1571,8 +1844,42 @@ export function CmsAdmin() {
                     }}
                   />
                 </Field>
+                <RemoveBlock
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        benchmarks: {
+                          ...form.home.benchmarks,
+                          items: form.home.benchmarks.items.filter(
+                            (_, idx) => idx !== i,
+                          ),
+                        },
+                      },
+                    })
+                  }
+                />
               </div>
             ))}
+            <AddBlock
+              label="Add benchmark"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  home: {
+                    ...form.home,
+                    benchmarks: {
+                      ...form.home.benchmarks,
+                      items: [
+                        ...form.home.benchmarks.items,
+                        { id: cmsId("bm"), value: "", label: "" },
+                      ],
+                    },
+                  },
+                })
+              }
+            />
           </Section>
 
           <Section title="How it works">
@@ -1667,8 +1974,42 @@ export function CmsAdmin() {
                     }}
                   />
                 </Field>
+                <RemoveBlock
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        howItWorks: {
+                          ...form.home.howItWorks,
+                          steps: form.home.howItWorks.steps.filter(
+                            (_, idx) => idx !== i,
+                          ),
+                        },
+                      },
+                    })
+                  }
+                />
               </div>
             ))}
+            <AddBlock
+              label="Add how-it-works step"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  home: {
+                    ...form.home,
+                    howItWorks: {
+                      ...form.home.howItWorks,
+                      steps: [
+                        ...form.home.howItWorks.steps,
+                        { id: cmsId("how"), title: "", body: "" },
+                      ],
+                    },
+                  },
+                })
+              }
+            />
           </Section>
 
           <Section title="Tiers section headings">
@@ -2072,8 +2413,40 @@ export function CmsAdmin() {
                     }}
                   />
                 </Field>
+                <RemoveBlock
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      home: {
+                        ...form.home,
+                        faq: {
+                          ...form.home.faq,
+                          items: form.home.faq.items.filter((_, idx) => idx !== i),
+                        },
+                      },
+                    })
+                  }
+                />
               </div>
             ))}
+            <AddBlock
+              label="Add FAQ"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  home: {
+                    ...form.home,
+                    faq: {
+                      ...form.home.faq,
+                      items: [
+                        ...form.home.faq.items,
+                        { id: cmsId("faq"), question: "", answer: "" },
+                      ],
+                    },
+                  },
+                })
+              }
+            />
           </Section>
 
           <Section title="Final CTA">
@@ -2376,7 +2749,10 @@ export function CmsAdmin() {
                       }}
                     />
                   </Field>
-                  <Field label="Result badge">
+                  <Field
+                    label="Result line"
+                    hint='Shows under the name. e.g. Lost 12kg or +40kg deadlift'
+                  >
                     <Text
                       value={item.result}
                       onChange={(v) => {
@@ -3261,17 +3637,23 @@ export function CmsAdmin() {
         <div className="space-y-6">
           {form.tiers.map((tier, i) => (
             <Section key={tier.id} title={`Tier: ${tier.name || tier.id}`}>
-              <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
-                <input
-                  type="checkbox"
-                  className="accent-[var(--accent)]"
-                  checked={tier.enabled}
-                  onChange={(e) =>
-                    updateTier(i, { enabled: e.target.checked })
-                  }
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+                  <input
+                    type="checkbox"
+                    className="accent-[var(--accent)]"
+                    checked={tier.enabled}
+                    onChange={(e) =>
+                      updateTier(i, { enabled: e.target.checked })
+                    }
+                  />
+                  Enabled on landing page
+                </label>
+                <RemoveBlock
+                  label="Remove programme"
+                  onClick={() => removeTier(i)}
                 />
-                Enabled on landing page
-              </label>
+              </div>
               <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
                 <input
                   type="checkbox"
@@ -3441,6 +3823,7 @@ export function CmsAdmin() {
               )}
             </Section>
           ))}
+          <AddBlock label="Add programme card" onClick={addTier} />
         </div>
       ) : null}
 
@@ -3568,6 +3951,19 @@ export function CmsAdmin() {
                   questionnaire: {
                     ...form.questionnaire,
                     investment: v,
+                  },
+                })
+              }
+            />
+            <LinesEditor
+              label="Step titles"
+              value={form.questionnaire.stepTitles}
+              onChange={(v) =>
+                setForm({
+                  ...form,
+                  questionnaire: {
+                    ...form.questionnaire,
+                    stepTitles: v,
                   },
                 })
               }

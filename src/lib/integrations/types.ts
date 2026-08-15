@@ -64,6 +64,12 @@ export type IntegrationsConfig = {
     apiKey: string;
     channelId: string;
   };
+  seo: {
+    ga4Id: string;
+    gtmId: string;
+    googleAdsId: string;
+    searchConsoleVerification: string;
+  };
   email: {
     provider: "none" | "ghl" | "mailchimp" | "klaviyo";
     apiKey: string;
@@ -85,7 +91,7 @@ export type IntegrationFieldStatus = "ready" | "missing" | "optional";
 
 export type IntegrationCheck = {
   id: string;
-  group: "crm" | "calendar" | "pricing" | "product" | "security" | "media" | "email" | "reviews";
+  group: "crm" | "calendar" | "pricing" | "product" | "security" | "media" | "email" | "reviews" | "seo";
   label: string;
   status: IntegrationFieldStatus;
   detail?: string;
@@ -140,6 +146,12 @@ export const DEFAULT_INTEGRATIONS: IntegrationsConfig = {
   youtube: {
     apiKey: "",
     channelId: "",
+  },
+  seo: {
+    ga4Id: "",
+    gtmId: "",
+    googleAdsId: "",
+    searchConsoleVerification: "",
   },
   email: {
     provider: "ghl",

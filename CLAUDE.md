@@ -1,1 +1,3 @@
-@AGENTS.md
+# The Formula Performance
+
+See AGENTS.md

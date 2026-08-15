@@ -262,6 +262,7 @@ export function IntegrationsAdmin({
       pricing: checks.filter((c) => c.group === "pricing"),
       product: checks.filter((c) => c.group === "product"),
       media: checks.filter((c) => c.group === "media"),
+      seo: checks.filter((c) => c.group === "seo"),
       email: checks.filter((c) => c.group === "email"),
       reviews: checks.filter((c) => c.group === "reviews"),
     };
@@ -343,7 +344,7 @@ export function IntegrationsAdmin({
             <p className="mt-1 text-xs text-[var(--muted)]">
               Storage: {data.storage.path}
               {data.storage.fileExists ? " (file present)" : " (no file yet)"}
-              {data.storage.writable ? "" : " · read-only host"}
+              {data.storage.writable ? "" : " · read-only"}
             </p>
             <ul className="mt-4 space-y-2">
               {(
@@ -352,6 +353,7 @@ export function IntegrationsAdmin({
                   "crm",
                   "calendar",
                   "media",
+                  "seo",
                   "email",
                   "reviews",
                   "pricing",
@@ -515,6 +517,93 @@ export function IntegrationsAdmin({
                       youtube: { ...f.youtube, channelId: e.target.value },
                     }))
                   }
+                />
+              </Field>
+            </section>
+
+            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+              <h2 className="text-lg font-semibold text-[var(--fg)]">
+                Google search &amp; measurement
+              </h2>
+              <p className="text-sm text-[var(--muted)]">
+                Sitemap is at /sitemap.xml. Robots allow Googlebot, image, video,
+                ads, and inspection crawlers. Title and description live in
+                Content CMS → SEO.
+              </p>
+              <Field
+                label="Search Console verification"
+                hint="From Search Console → HTML tag. Paste only the content value, not the full tag."
+              >
+                <input
+                  className={inputClass}
+                  value={form.seo?.searchConsoleVerification ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      seo: {
+                        ...(f.seo ?? DEFAULT_INTEGRATIONS.seo),
+                        searchConsoleVerification: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="abcDEF123…"
+                />
+              </Field>
+              <Field
+                label="Google Tag Manager ID"
+                hint="If set, GTM loads instead of GA4 below. Put Analytics inside GTM."
+              >
+                <input
+                  className={inputClass}
+                  value={form.seo?.gtmId ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      seo: {
+                        ...(f.seo ?? DEFAULT_INTEGRATIONS.seo),
+                        gtmId: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="GTM-XXXXXXX"
+                />
+              </Field>
+              <Field
+                label="Google Analytics 4 ID"
+                hint="Used when Tag Manager is empty."
+              >
+                <input
+                  className={inputClass}
+                  value={form.seo?.ga4Id ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      seo: {
+                        ...(f.seo ?? DEFAULT_INTEGRATIONS.seo),
+                        ga4Id: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="G-XXXXXXXX"
+                />
+              </Field>
+              <Field
+                label="Google Ads ID"
+                hint="Optional AW- conversion tag. Skip if it already lives in GTM."
+              >
+                <input
+                  className={inputClass}
+                  value={form.seo?.googleAdsId ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      seo: {
+                        ...(f.seo ?? DEFAULT_INTEGRATIONS.seo),
+                        googleAdsId: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="AW-000000000"
                 />
               </Field>
             </section>

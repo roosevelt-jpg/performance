@@ -16,20 +16,29 @@ export const DEFAULT_CMS: CmsContent = {
       title: "The Formula Performance | Watch. Chat. Apply.",
       description:
         "Watch Kane, then apply in chat for Pro or Elite — two minutes. If it isn't a fit, the 8-Week Challenge is ready.",
+      keywords:
+        "performance coaching, 1:1 coaching, Kane Mousah, The Formula Performance, 8 week challenge, online fitness coaching",
+      ogImageUrl: "/logo.png",
     },
   },
   chrome: {
     headerLogoHref: "/",
     nav: [
       {
+        id: "compare",
+        label: "Compare programmes",
+        href: "/#tiers",
+        visible: true,
+      },
+      {
         id: "video",
-        label: "Video",
+        label: "Watch the video",
         href: "/#vsl",
         visible: true,
       },
       {
         id: "apply",
-        label: "Apply",
+        label: "Apply for Pro coaching",
         href: "/book?tier=pro",
         visible: true,
       },
@@ -44,7 +53,7 @@ export const DEFAULT_CMS: CmsContent = {
     footerLinks: [
       {
         id: "apply",
-        label: "Apply",
+        label: "Apply for Pro coaching",
         href: "/book?tier=pro",
         visible: true,
       },
@@ -67,7 +76,7 @@ export const DEFAULT_CMS: CmsContent = {
       eyebrow: "1:1 coaching with Kane",
       headline: "Watch the video. If that's you, apply in the chat.",
       body: "Kane only takes people who will train at least three days a week. Two minutes in chat — then a call, or the 8-Week Challenge.",
-      cta: { label: "Start application", href: "/book?tier=pro" },
+      cta: { label: "Apply for Pro coaching", href: "/book?tier=pro" },
       ctaNote: "No card. No public prices. Kane reviews every application.",
       secondaryCta: { label: "Watch the video", href: "#vsl" },
       mediaType: "none",
@@ -87,7 +96,7 @@ export const DEFAULT_CMS: CmsContent = {
       thumbnailUrl: "",
       muteHint: "Tap to unmute",
       applyStepLabel: "Step 2",
-      applyCta: { label: "Continue in chat", href: "/book?tier=pro" },
+      applyCta: { label: "Apply for Pro coaching", href: "/book?tier=pro" },
       applyNote: "Two minutes. No card required.",
       requireWatch: true,
       gateTitle: "Hold up. Watch the video first.",
@@ -98,10 +107,10 @@ export const DEFAULT_CMS: CmsContent = {
     proof: {
       enabled: true,
       items: [
-        { id: "p1", value: "1:1", label: "Real human coach" },
-        { id: "p2", value: "Weekly", label: "reviews by Kane" },
-        { id: "p3", value: "24h", label: "application response" },
-        { id: "p4", value: "Limited", label: "Pro and Elite places" },
+        { id: "p1", value: "", label: "Clients coached" },
+        { id: "p2", value: "", label: "Weight lost" },
+        { id: "p3", value: "", label: "Muscle gained" },
+        { id: "p4", value: "1:1", label: "Real human coach" },
       ],
     },
     problem: {
@@ -251,7 +260,7 @@ export const DEFAULT_CMS: CmsContent = {
       enabled: true,
       title: "If the video sounded like you, start the chat.",
       body: "Two minutes. Kane's team reviews every application.",
-      primary: { label: "Apply in chat", href: "/book?tier=pro" },
+      primary: { label: "Book Your Call", href: "/book?tier=pro" },
       secondary: { label: "Join the Challenge", href: "/challenge" },
     },
     testimonials: {
@@ -335,13 +344,13 @@ export const DEFAULT_CMS: CmsContent = {
         enabled: false,
         delayMs: 28000,
         title: "What clients say after a few coached weeks",
-        ctaLabel: "Apply in chat",
+        ctaLabel: "Apply for Pro coaching",
         ctaHref: "/book?tier=pro",
       },
     },
     stickyCta: {
       enabled: true,
-      label: "Apply in chat",
+      label: "Apply for Pro",
       href: "/book?tier=pro",
     },
     imageSections: [

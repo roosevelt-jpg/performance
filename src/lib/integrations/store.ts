@@ -152,6 +152,13 @@ function fromEnv(): IntegrationsConfig {
       apiKey: process.env.YOUTUBE_API_KEY ?? "",
       channelId: process.env.YOUTUBE_CHANNEL_ID ?? "",
     },
+    seo: {
+      ga4Id: process.env.GOOGLE_GA4_ID ?? "",
+      gtmId: process.env.GOOGLE_GTM_ID ?? "",
+      googleAdsId: process.env.GOOGLE_ADS_ID ?? "",
+      searchConsoleVerification:
+        process.env.GOOGLE_SITE_VERIFICATION ?? "",
+    },
     email: {
       provider:
         process.env.EMAIL_PROVIDER === "mailchimp" ||
@@ -196,6 +203,7 @@ function mergeConfig(
         overlay.ghl?.workflowDisqualifiedId ?? base.ghl.workflowDisqualifiedId,
     },
     youtube: { ...base.youtube, ...overlay.youtube },
+    seo: { ...base.seo, ...overlay.seo },
     email: { ...base.email, ...overlay.email },
     shopify: { ...base.shopify, ...overlay.shopify },
     reviews: { ...base.reviews, ...overlay.reviews },
@@ -419,6 +427,21 @@ export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
         : "Optional — used to validate video IDs",
     },
     {
+      id: "google_search_console",
+      group: "seo",
+      label: "Google Search Console verification",
+      status: config.seo?.searchConsoleVerification ? "ready" : "optional",
+      detail: "Paste the content= value from Google's meta tag",
+    },
+    {
+      id: "google_analytics",
+      group: "seo",
+      label: "Google Analytics 4 or Tag Manager",
+      status:
+        config.seo?.gtmId || config.seo?.ga4Id ? "ready" : "optional",
+      detail: config.seo?.gtmId || config.seo?.ga4Id || "Not set",
+    },
+    {
       id: "email_provider",
       group: "email",
       label: `Email signup (${config.email.provider})`,
@@ -540,6 +563,10 @@ export function toEnvSnippet(config: IntegrationsConfig): string {
     `GHL_WORKFLOW_DISQUALIFIED_ID=${config.ghl.workflowDisqualifiedId}`,
     `YOUTUBE_API_KEY=${config.youtube.apiKey}`,
     `YOUTUBE_CHANNEL_ID=${config.youtube.channelId}`,
+    `GOOGLE_GA4_ID=${config.seo?.ga4Id ?? ""}`,
+    `GOOGLE_GTM_ID=${config.seo?.gtmId ?? ""}`,
+    `GOOGLE_ADS_ID=${config.seo?.googleAdsId ?? ""}`,
+    `GOOGLE_SITE_VERIFICATION=${config.seo?.searchConsoleVerification ?? ""}`,
     `EMAIL_PROVIDER=${config.email.provider}`,
     `EMAIL_API_KEY=${config.email.apiKey}`,
     `EMAIL_LIST_ID=${config.email.listId}`,

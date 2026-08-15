@@ -39,7 +39,7 @@ export function SiteHeader({ active }: Props) {
         >
           <BrandLogo />
         </Link>
-        <nav className="flex shrink-0 items-center justify-end gap-4 text-sm">
+        <nav className="hidden shrink-0 items-center justify-end gap-4 text-sm sm:flex">
           {links.map((link) => {
             const className = [
               "transition hover:text-[var(--accent)]",

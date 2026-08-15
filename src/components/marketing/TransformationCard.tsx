@@ -148,23 +148,19 @@ export function TransformationCard({
         </div>
       ) : null}
       <div className="flex min-h-[9rem] flex-1 flex-col p-5">
-        <p className="flex-1 text-sm leading-[1.55] text-[var(--muted)]">
-          {quote}
-        </p>
-        <div className="mt-4 flex items-center gap-2.5">
-          <span
-            aria-hidden
-            className="size-1.5 rounded-full bg-[var(--accent)]"
-          />
-          <p className="text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-[var(--fg)]">
-            {name}
+          <p className="flex-1 text-sm leading-[1.55] text-[var(--muted)]">
+            {quote}
           </p>
-          {result ? (
-            <p className="ml-auto text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
-              {result}
+          <div className="mt-4 space-y-1">
+            <p className="text-base font-semibold text-[var(--accent)]">
+              {name}
             </p>
-          ) : null}
-        </div>
+            {result ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--fg)]">
+                {result}
+              </p>
+            ) : null}
+          </div>
       </div>
     </article>
   );

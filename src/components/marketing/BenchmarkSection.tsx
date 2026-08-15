@@ -18,8 +18,10 @@ export function BenchmarkSection() {
         <p className="mt-4 max-w-2xl text-base leading-[1.7] text-[var(--muted)] sm:text-lg">
           {benchmarks.body}
         </p>
-        <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {benchmarks.items.map((item) => (
+        <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {benchmarks.items
+            .filter((item) => item.value.trim() || item.label.trim())
+            .map((item) => (
             <li
               key={item.id}
               className="card-depth rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-5"

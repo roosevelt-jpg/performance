@@ -150,6 +150,15 @@ function normalizeIncoming(
       apiKey: keepSecret(body.youtube?.apiKey, current.youtube.apiKey),
       channelId: body.youtube?.channelId ?? current.youtube.channelId,
     },
+    seo: {
+      ga4Id: body.seo?.ga4Id ?? current.seo?.ga4Id ?? "",
+      gtmId: body.seo?.gtmId ?? current.seo?.gtmId ?? "",
+      googleAdsId: body.seo?.googleAdsId ?? current.seo?.googleAdsId ?? "",
+      searchConsoleVerification:
+        body.seo?.searchConsoleVerification ??
+        current.seo?.searchConsoleVerification ??
+        "",
+    },
     email: {
       provider:
         body.email?.provider === "mailchimp" ||
@@ -221,7 +230,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Filesystem is not writable (common on serverless). Export as .env and set secrets on the host instead.",
+          "Configuration is read-only on this host. Copy the .env values into your hosting environment instead.",
       },
       { status: 503 },
     );

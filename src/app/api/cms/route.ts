@@ -34,7 +34,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Filesystem is not writable. Export CMS JSON and deploy as data/cms.local.json or host storage.",
+          "Content is read-only on this host. Save locally and deploy the CMS file, or connect writable storage.",
       },
       { status: 503 },
     );

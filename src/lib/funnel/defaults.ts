@@ -1,17 +1,17 @@
 import type { CmsFunnel, CmsFunnelLayout, CmsFunnelStep } from "@/lib/cms/types";
 
 export const DEFAULT_FUNNEL_LAYOUT: CmsFunnelLayout = {
-  phoneMockup: true,
+  phoneMockup: false,
   vsl: true,
-  proof: false,
+  proof: true,
   testimonials: true,
-  credentials: false,
-  problem: false,
-  whatsappCoach: false,
-  benchmarks: false,
-  howItWorks: false,
-  tiers: false,
-  faq: false,
+  credentials: true,
+  problem: true,
+  whatsappCoach: true,
+  benchmarks: true,
+  howItWorks: true,
+  tiers: true,
+  faq: true,
   finalCta: true,
 };
 

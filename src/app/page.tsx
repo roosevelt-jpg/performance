@@ -9,6 +9,7 @@ import { BenchmarkSection } from "@/components/marketing/BenchmarkSection";
 import { CredentialsSection } from "@/components/marketing/CredentialsSection";
 import { PhoneMockup } from "@/components/marketing/PhoneMockup";
 import { Testimonials } from "@/components/marketing/Testimonials";
+import { ProofStats } from "@/components/marketing/ProofStats";
 import { VslSection } from "@/components/marketing/VslSection";
 import { WhatsappCoachSection } from "@/components/marketing/WhatsappCoachSection";
 import { GatedLink } from "@/components/marketing/WatchGate";
@@ -85,35 +86,6 @@ function HeroMedia() {
   );
 }
 
-function ProofStrip() {
-  const { proof } = useCms().home;
-  if (!proof.enabled || !proof.items.length) return null;
-
-  return (
-    <section
-      aria-label="Proof points"
-      className="border-b border-[var(--border)] bg-[var(--surface)]"
-    >
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-[var(--border)] sm:grid-cols-4">
-        {proof.items.map((item, i) => (
-          <div
-            key={item.id}
-            className="bg-[var(--surface)] px-4 py-6 sm:px-6 sm:py-8"
-            style={{ animationDelay: `${120 + i * 80}ms` }}
-          >
-            <p className="animate-rise font-heading text-2xl text-[var(--accent)] sm:text-3xl">
-              {item.value}
-            </p>
-            <p className="animate-rise mt-1 text-sm text-[var(--muted)]">
-              {item.label}
-            </p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function ProblemSection() {
   const { problem } = useCms().home;
   if (!problem.enabled) return null;
@@ -148,8 +120,10 @@ function HowItWorks() {
         <p className="mt-3 max-w-xl text-base leading-[1.7] text-[var(--muted)]">
           {howItWorks.subhead}
         </p>
-        <ol className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-6">
-          {howItWorks.steps.map((step, i) => (
+        <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+          {howItWorks.steps
+            .filter((step) => step.title.trim() || step.body.trim())
+            .map((step, i) => (
             <li key={step.id} className="min-w-0">
               <p className="font-heading text-4xl text-[var(--accent)]">
                 {String(i + 1).padStart(2, "0")}
@@ -170,8 +144,11 @@ function HowItWorks() {
 
 function FaqSection() {
   const { faq } = useCms().home;
-  const [openId, setOpenId] = useState<string | null>(faq.items[0]?.id ?? null);
-  if (!faq.enabled || !faq.items.length) return null;
+  const items = faq.items.filter(
+    (item) => item.question.trim() && item.answer.trim(),
+  );
+  const [openId, setOpenId] = useState<string | null>(items[0]?.id ?? null);
+  if (!faq.enabled || !items.length) return null;
 
   return (
     <section className="border-b border-[var(--border)]">
@@ -180,7 +157,7 @@ function FaqSection() {
           {faq.heading}
         </h2>
         <ul className="mt-8 divide-y divide-[var(--border)] border-y border-[var(--border)]">
-          {faq.items.map((item) => {
+          {items.map((item) => {
             const open = openId === item.id;
             return (
               <li key={item.id}>
@@ -261,6 +238,7 @@ export default function HomePage() {
   const cms = useCms();
   const hero = cms.home.hero;
   const hasHeroMedia = hero.mediaType !== "none" && Boolean(hero.mediaUrl);
+  const showPhone = isFunnelSectionOn(cms, "phoneMockup");
 
   return (
     <main className="flex min-h-dvh flex-1 flex-col">
@@ -282,7 +260,12 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-8 px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8 min-[940px]:grid-cols-[1.06fr_0.94fr] min-[940px]:gap-12">
+        <div
+          className={[
+            "relative mx-auto grid w-full max-w-6xl items-center gap-8 px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8",
+            showPhone ? "min-[940px]:grid-cols-[1.06fr_0.94fr] min-[940px]:gap-12" : "",
+          ].join(" ")}
+        >
           <div>
             {hero.eyebrow ? (
               <p className="animate-rise text-xs font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
@@ -346,8 +329,18 @@ export default function HomePage() {
                 {hero.ctaNote}
               </p>
             ) : null}
+            {!showPhone && hero.portraitUrl ? (
+              <div className="animate-rise mt-8" style={{ animationDelay: "280ms" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={hero.portraitUrl}
+                  alt={hero.portraitAlt || ""}
+                  className="w-full max-w-xl rounded-[var(--radius)] object-cover object-[50%_18%] sm:max-w-lg"
+                />
+              </div>
+            ) : null}
           </div>
-          {isFunnelSectionOn(cms, "phoneMockup") && hero.portraitUrl ? (
+          {showPhone && hero.portraitUrl ? (
             <div className="animate-rise" style={{ animationDelay: "160ms" }}>
               <PhoneMockup
                 imageSrc={hero.portraitUrl}
@@ -364,7 +357,7 @@ export default function HomePage() {
       <MediaAt slot="after-hero" />
       {isFunnelSectionOn(cms, "vsl") ? <VslSection /> : null}
       <MediaAt slot="after-vsl" />
-      {isFunnelSectionOn(cms, "proof") ? <ProofStrip /> : null}
+      {isFunnelSectionOn(cms, "proof") ? <ProofStats /> : null}
       <MediaAt slot="after-proof" />
       {isFunnelSectionOn(cms, "testimonials") ? <Testimonials /> : null}
       <MediaAt slot="after-testimonials" />

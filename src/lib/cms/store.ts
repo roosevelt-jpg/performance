@@ -95,7 +95,7 @@ export function mergeCms(
   out.home.credentials = {
     ...base.home.credentials,
     ...out.home.credentials,
-    items: out.home.credentials.items?.length
+    items: Array.isArray(out.home.credentials.items)
       ? out.home.credentials.items
       : base.home.credentials.items,
   };
@@ -105,7 +105,7 @@ export function mergeCms(
   out.home.whatsappCoach = {
     ...base.home.whatsappCoach,
     ...out.home.whatsappCoach,
-    steps: out.home.whatsappCoach.steps?.length
+    steps: Array.isArray(out.home.whatsappCoach.steps)
       ? out.home.whatsappCoach.steps
       : base.home.whatsappCoach.steps,
   };
@@ -137,15 +137,15 @@ export function mergeCms(
       ...base.funnel,
       ...out.funnel,
       layout: { ...base.funnel.layout, ...out.funnel.layout },
-      steps:
-        Array.isArray(out.funnel.steps) && out.funnel.steps.length
-          ? out.funnel.steps
-          : structuredClone(base.funnel.steps),
+      steps: Array.isArray(out.funnel.steps)
+        ? out.funnel.steps
+        : structuredClone(base.funnel.steps),
     };
   }
   if (out.home.tiersSection.enabled === undefined) {
     out.home.tiersSection.enabled = base.home.tiersSection.enabled;
   }
+  out.site.seo = { ...base.site.seo, ...out.site.seo };
 
   return out;
 }

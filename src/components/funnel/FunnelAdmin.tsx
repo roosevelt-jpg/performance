@@ -10,6 +10,7 @@ import type {
   CmsFunnelLayout,
   CmsFunnelOpenOn,
   CmsFunnelStep,
+  CmsProofItem,
 } from "@/lib/cms/types";
 import { DEFAULT_FUNNEL, DEFAULT_FUNNEL_STEPS } from "@/lib/funnel/defaults";
 import { toPlainText } from "@/lib/text/plain";
@@ -38,7 +39,7 @@ const FIELD_OPTIONS: { id: CmsFunnelField; label: string }[] = [
 const LAYOUT_OPTIONS: { id: keyof CmsFunnelLayout; label: string }[] = [
   { id: "phoneMockup", label: "Hero phone / chat preview" },
   { id: "vsl", label: "Video" },
-  { id: "proof", label: "Proof strip" },
+  { id: "proof", label: "Live stats" },
   { id: "testimonials", label: "Transformations" },
   { id: "credentials", label: "Kane credentials" },
   { id: "problem", label: "Problem section" },
@@ -126,6 +127,31 @@ export function FunnelAdmin() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  function patchProof(patch: Partial<CmsContent["home"]["proof"]>) {
+    setForm((f) => ({
+      ...f,
+      home: {
+        ...f.home,
+        proof: { ...f.home.proof, ...patch },
+      },
+    }));
+  }
+
+  function patchProofItem(index: number, patch: Partial<CmsProofItem>) {
+    setForm((f) => ({
+      ...f,
+      home: {
+        ...f.home,
+        proof: {
+          ...f.home.proof,
+          items: f.home.proof.items.map((item, i) =>
+            i === index ? { ...item, ...patch } : item,
+          ),
+        },
+      },
+    }));
+  }
 
   function patchFunnel(patch: Partial<CmsFunnel>) {
     setForm((f) => ({
@@ -252,8 +278,7 @@ export function FunnelAdmin() {
       ) : null}
       {!writable ? (
         <p className="text-sm text-[var(--muted)]">
-          This host cannot write files. Export from Content CMS or set storage
-          before saving funnel changes.
+          This environment is read-only. Connect writable storage before saving funnel changes.
         </p>
       ) : null}
 
@@ -352,7 +377,7 @@ export function FunnelAdmin() {
 
       <Section
         title="Landing page"
-        hint="High-converting pages stay short. Tick only what a stranger needs before they talk. Copy for each block is in Content CMS."
+        hint="Landing order is locked: video, transformations, credentials, The Gap, WhatsApp coach, benchmarks, how it works, programmes, FAQ, final CTA. Untick only if you must hide a block. Copy lives in Content CMS."
       >
         <div className="grid gap-2 sm:grid-cols-2">
           {LAYOUT_OPTIONS.map((item) => (
@@ -370,6 +395,84 @@ export function FunnelAdmin() {
             </label>
           ))}
         </div>
+      </Section>
+
+      <Section
+        title="Live stats"
+        hint="Kane types the figures. Empty values stay off the page — nothing is pulled from GHL. Example: 2,400+ · Clients coached."
+      >
+        <label className="flex items-center gap-2 text-sm text-[var(--fg)]">
+          <input
+            type="checkbox"
+            className="accent-[var(--accent)]"
+            checked={Boolean(funnel.layout.proof)}
+            onChange={(e) => {
+              patchLayout("proof", e.target.checked);
+              patchProof({ enabled: e.target.checked });
+            }}
+          />
+          Show stats between the video and transformations
+        </label>
+        {form.home.proof.items.map((item, index) => (
+          <div
+            key={item.id}
+            className="grid grid-cols-1 gap-3 rounded-md border border-[var(--border)] p-3 sm:grid-cols-[1fr_1fr_auto]"
+          >
+            <Field label="Figure">
+              <input
+                className={inputClass}
+                value={item.value}
+                placeholder="e.g. 2,400+"
+                onChange={(e) =>
+                  patchProofItem(index, {
+                    value: toPlainText(e.target.value),
+                  })
+                }
+              />
+            </Field>
+            <Field label="Label">
+              <input
+                className={inputClass}
+                value={item.label}
+                placeholder="Clients coached"
+                onChange={(e) =>
+                  patchProofItem(index, {
+                    label: toPlainText(e.target.value),
+                  })
+                }
+              />
+            </Field>
+            <button
+              type="button"
+              className="self-end pb-2 text-sm text-red-400"
+              onClick={() =>
+                patchProof({
+                  items: form.home.proof.items.filter((_, i) => i !== index),
+                })
+              }
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-semibold"
+          onClick={() =>
+            patchProof({
+              items: [
+                ...form.home.proof.items,
+                {
+                  id: `p-${Date.now().toString(36)}`,
+                  value: "",
+                  label: "",
+                },
+              ],
+            })
+          }
+        >
+          Add stat
+        </button>
       </Section>
 
       <Section

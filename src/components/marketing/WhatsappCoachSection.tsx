@@ -29,7 +29,9 @@ export function WhatsappCoachSection() {
 
         <div className="mt-12 grid items-start gap-10 lg:grid-cols-2">
           <ol className="grid gap-8 sm:grid-cols-2">
-            {coach.steps.map((step, i) => (
+            {coach.steps
+              .filter((step) => step.title.trim() || step.body.trim())
+              .map((step, i) => (
               <li key={step.id}>
                 <p className="font-heading text-3xl text-[var(--accent)]">
                   {String(i + 1).padStart(2, "0")}

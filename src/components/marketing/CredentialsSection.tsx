@@ -48,8 +48,10 @@ export function CredentialsSection() {
           <p className="mt-4 max-w-2xl text-base leading-[1.7] text-[var(--muted)] sm:text-lg">
             {credentials.body}
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-6 min-[500px]:grid-cols-3">
-            {credentials.items.slice(0, 3).map((item) => (
+          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3">
+            {credentials.items
+              .filter((item) => item.value.trim() || item.label.trim())
+              .map((item) => (
               <div key={item.id}>
                 <p className="font-heading text-2xl text-[var(--accent)] sm:text-[1.7rem]">
                   {item.value}

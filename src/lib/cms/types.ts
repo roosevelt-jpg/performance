@@ -225,6 +225,8 @@ export type CmsContent = {
     seo: {
       title: string;
       description: string;
+      keywords: string;
+      ogImageUrl: string;
     };
   };
   chrome: {
