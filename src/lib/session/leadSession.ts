@@ -11,6 +11,14 @@ export type LeadFlowState = {
   evaluation?: EvaluateLeadResult;
   submissionId?: string;
   bookedAt?: string;
+  booking?: {
+    start: string;
+    end: string;
+    timeZone: string;
+    eventId: string;
+    htmlLink?: string;
+    platform: string;
+  };
 };
 
 export function saveLeadFlow(state: LeadFlowState): void {

@@ -1,4 +1,6 @@
-export type CalendarPlatform = "ghl" | "calendly";
+export type CalendarPlatform = "ghl" | "calendly" | "google";
+
+export type CalendarBookingMode = "auto" | "native" | "embed";
 
 /**
  * All go-live integrations in one schema.
@@ -24,10 +26,31 @@ export type IntegrationsConfig = {
   };
   calendar: {
     platform: CalendarPlatform;
+    /** auto = native calendar when an API is connected, otherwise iframe embed. */
+    bookingMode: CalendarBookingMode;
+    timezone: string;
+    workingHoursStart: string;
+    workingHoursEnd: string;
+    /** ISO weekday 1–7 (Mon–Sun). */
+    workingDays: number[];
+    bufferMinutes: number;
+    minNoticeHours: number;
+    daysAhead: number;
     ghlEmbedPro: string;
     ghlEmbedElite: string;
+    ghlCalendarIdPro: string;
+    ghlCalendarIdElite: string;
     calendlyEmbedPro: string;
     calendlyEmbedElite: string;
+    calendlyApiToken: string;
+    calendlyEventTypePro: string;
+    calendlyEventTypeElite: string;
+    calendlyLocationKind: string;
+    googleCalendarId: string;
+    googleClientId: string;
+    googleClientSecret: string;
+    googleRefreshToken: string;
+    googleServiceAccountJson: string;
   };
   ghl: {
     apiKey: string;
@@ -80,10 +103,29 @@ export const DEFAULT_INTEGRATIONS: IntegrationsConfig = {
   },
   calendar: {
     platform: "ghl",
+    bookingMode: "auto",
+    timezone: "Europe/London",
+    workingHoursStart: "09:00",
+    workingHoursEnd: "17:00",
+    workingDays: [1, 2, 3, 4, 5],
+    bufferMinutes: 10,
+    minNoticeHours: 4,
+    daysAhead: 21,
     ghlEmbedPro: "",
     ghlEmbedElite: "",
+    ghlCalendarIdPro: "",
+    ghlCalendarIdElite: "",
     calendlyEmbedPro: "",
     calendlyEmbedElite: "",
+    calendlyApiToken: "",
+    calendlyEventTypePro: "",
+    calendlyEventTypeElite: "",
+    calendlyLocationKind: "",
+    googleCalendarId: "primary",
+    googleClientId: "",
+    googleClientSecret: "",
+    googleRefreshToken: "",
+    googleServiceAccountJson: "",
   },
   ghl: {
     apiKey: "",
@@ -121,6 +163,10 @@ export type PublicIntegrationsView = {
     emailApiKey: boolean;
     shopifyToken: boolean;
     judgemeToken: boolean;
+    calendlyApiToken: boolean;
+    googleClientSecret: boolean;
+    googleRefreshToken: boolean;
+    googleServiceAccount: boolean;
   };
   checks: IntegrationCheck[];
   readyForLive: boolean;

@@ -5,6 +5,7 @@ import {
   buildChecks,
   getStorageMeta,
   isReadyForLive,
+  listSecretsSet,
   loadIntegrations,
   maskConfig,
   saveIntegrations,
@@ -53,18 +54,83 @@ function normalizeIncoming(
     calendar: {
       platform:
         body.calendar?.platform === "calendly" ||
-        body.calendar?.platform === "ghl"
+        body.calendar?.platform === "ghl" ||
+        body.calendar?.platform === "google"
           ? body.calendar.platform
           : current.calendar.platform,
+      bookingMode:
+        body.calendar?.bookingMode === "native" ||
+        body.calendar?.bookingMode === "embed" ||
+        body.calendar?.bookingMode === "auto"
+          ? body.calendar.bookingMode
+          : current.calendar.bookingMode,
+      timezone:
+        body.calendar?.timezone?.trim() || current.calendar.timezone,
+      workingHoursStart:
+        body.calendar?.workingHoursStart?.trim() ||
+        current.calendar.workingHoursStart,
+      workingHoursEnd:
+        body.calendar?.workingHoursEnd?.trim() ||
+        current.calendar.workingHoursEnd,
+      workingDays: Array.isArray(body.calendar?.workingDays)
+        ? body.calendar.workingDays.filter((n) => n >= 1 && n <= 7)
+        : current.calendar.workingDays,
+      bufferMinutes: Number(
+        body.calendar?.bufferMinutes ?? current.calendar.bufferMinutes,
+      ),
+      minNoticeHours: Number(
+        body.calendar?.minNoticeHours ?? current.calendar.minNoticeHours,
+      ),
+      daysAhead: Number(
+        body.calendar?.daysAhead ?? current.calendar.daysAhead,
+      ),
       ghlEmbedPro:
         body.calendar?.ghlEmbedPro ?? current.calendar.ghlEmbedPro,
       ghlEmbedElite:
         body.calendar?.ghlEmbedElite ?? current.calendar.ghlEmbedElite,
+      ghlCalendarIdPro:
+        body.calendar?.ghlCalendarIdPro ?? current.calendar.ghlCalendarIdPro,
+      ghlCalendarIdElite:
+        body.calendar?.ghlCalendarIdElite ??
+        current.calendar.ghlCalendarIdElite,
       calendlyEmbedPro:
         body.calendar?.calendlyEmbedPro ?? current.calendar.calendlyEmbedPro,
       calendlyEmbedElite:
         body.calendar?.calendlyEmbedElite ??
         current.calendar.calendlyEmbedElite,
+      calendlyApiToken: keepSecret(
+        body.calendar?.calendlyApiToken,
+        current.calendar.calendlyApiToken,
+      ),
+      calendlyEventTypePro:
+        body.calendar?.calendlyEventTypePro ??
+        current.calendar.calendlyEventTypePro,
+      calendlyEventTypeElite:
+        body.calendar?.calendlyEventTypeElite ??
+        current.calendar.calendlyEventTypeElite,
+      calendlyLocationKind:
+        body.calendar?.calendlyLocationKind ??
+        current.calendar.calendlyLocationKind,
+      googleCalendarId:
+        body.calendar?.googleCalendarId?.trim() ||
+        current.calendar.googleCalendarId,
+      googleClientId:
+        body.calendar?.googleClientId ?? current.calendar.googleClientId,
+      googleClientSecret: keepSecret(
+        body.calendar?.googleClientSecret,
+        current.calendar.googleClientSecret,
+      ),
+      googleRefreshToken: keepSecret(
+        body.calendar?.googleRefreshToken,
+        current.calendar.googleRefreshToken,
+      ),
+      googleServiceAccountJson:
+        body.calendar?.googleServiceAccountJson?.includes("••••")
+          ? current.calendar.googleServiceAccountJson
+          : keepSecret(
+              body.calendar?.googleServiceAccountJson,
+              current.calendar.googleServiceAccountJson,
+            ),
     },
     ghl: {
       apiKey: keepSecret(body.ghl?.apiKey, current.ghl.apiKey),
@@ -128,12 +194,8 @@ export async function GET(request: Request) {
   return NextResponse.json({
     config: maskConfig(config),
     secretsSet: {
-      ghlApiKey: Boolean(config.ghl.apiKey),
+      ...listSecretsSet(config),
       adminCredentials: Boolean(getAdminCredentials()),
-      youtubeApiKey: Boolean(config.youtube.apiKey),
-      emailApiKey: Boolean(config.email.apiKey),
-      shopifyToken: Boolean(config.shopify.storefrontToken),
-      judgemeToken: Boolean(config.reviews.judgemeApiToken),
     },
     checks,
     readyForLive: isReadyForLive(checks),
@@ -175,12 +237,8 @@ export async function PUT(request: Request) {
     ok: true,
     config: maskConfig(next),
     secretsSet: {
-      ghlApiKey: Boolean(next.ghl.apiKey),
+      ...listSecretsSet(next),
       adminCredentials: Boolean(getAdminCredentials()),
-      youtubeApiKey: Boolean(next.youtube.apiKey),
-      emailApiKey: Boolean(next.email.apiKey),
-      shopifyToken: Boolean(next.shopify.storefrontToken),
-      judgemeToken: Boolean(next.reviews.judgemeApiToken),
     },
     checks,
     readyForLive: isReadyForLive(checks),

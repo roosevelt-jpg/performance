@@ -75,29 +75,82 @@ export async function POST(request: Request) {
 
   if (target === "calendar") {
     const platform = config.calendar.platform;
-    const urls =
-      platform === "ghl"
-        ? [config.calendar.ghlEmbedPro, config.calendar.ghlEmbedElite]
-        : [
-            config.calendar.calendlyEmbedPro,
-            config.calendar.calendlyEmbedElite,
-          ];
+    try {
+      if (platform === "google") {
+        const { googlePing } = await import("@/lib/calendar/providers/google");
+        const name = await googlePing(config);
+        return NextResponse.json({
+          ok: true,
+          target,
+          platform,
+          message: `Google Calendar connected — ${name}`,
+        });
+      }
+      if (platform === "calendly") {
+        const { calendlyPing } = await import(
+          "@/lib/calendar/providers/calendly"
+        );
+        const name = await calendlyPing(config);
+        return NextResponse.json({
+          ok: true,
+          target,
+          platform,
+          message: `Calendly connected — ${name}`,
+        });
+      }
 
-    const missing = urls.filter((u) => !u.trim()).length;
-    if (missing > 0) {
+      if (config.calendar.ghlCalendarIdPro || config.calendar.ghlCalendarIdElite) {
+        const calendarId =
+          config.calendar.ghlCalendarIdPro ||
+          config.calendar.ghlCalendarIdElite;
+        const res = await fetch(
+          `${config.ghl.apiBaseUrl}/calendars/${encodeURIComponent(calendarId)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${config.ghl.apiKey}`,
+              Version: "2021-07-28",
+              Accept: "application/json",
+            },
+          },
+        );
+        if (!res.ok) {
+          const text = await res.text();
+          return NextResponse.json({
+            ok: false,
+            target,
+            error: text.slice(0, 400) || `GHL calendar HTTP ${res.status}`,
+          });
+        }
+        return NextResponse.json({
+          ok: true,
+          target,
+          platform,
+          message: "GHL calendar ID is reachable.",
+        });
+      }
+
+      const urls = [config.calendar.ghlEmbedPro, config.calendar.ghlEmbedElite];
+      const missing = urls.filter((u) => !u.trim()).length;
+      if (missing > 0) {
+        return NextResponse.json({
+          ok: false,
+          target,
+          error: `${missing} embed URL(s) missing for GHL. Add calendar IDs or embed URLs.`,
+        });
+      }
+      return NextResponse.json({
+        ok: true,
+        target,
+        platform,
+        message: "Both Pro and Elite embed URLs are set.",
+      });
+    } catch (error) {
       return NextResponse.json({
         ok: false,
         target,
-        error: `${missing} embed URL(s) missing for ${platform}.`,
+        error: error instanceof Error ? error.message : "Calendar test failed",
       });
     }
-
-    return NextResponse.json({
-      ok: true,
-      target,
-      platform,
-      message: "Both Pro and Elite embed URLs are set.",
-    });
   }
 
   if (target === "youtube") {

@@ -13,7 +13,7 @@ export const SECTION_8_ASSUMPTIONS = {
   },
   calendarPlatform: {
     status: "assumed" as const,
-    note: 'Default "ghl". Set NEXT_PUBLIC_CALENDAR_PLATFORM to "calendly" to swap via adapter.',
+    note: 'Default "ghl". Set NEXT_PUBLIC_CALENDAR_PLATFORM to "google" or "calendly" and add API credentials in Admin → Integrations for the native booking view.',
   },
   cardCopy: {
     status: "assumed" as const,

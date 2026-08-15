@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { BookingCalendar } from "@/components/calendar/BookingCalendar";
 import { useCms } from "@/components/cms/CmsProvider";
 import {
   resolveCalendarEmbed,
@@ -11,7 +12,15 @@ import type { QuestionnaireAnswers } from "@/types/lead";
 type Props = {
   tier: "pro" | "elite";
   answers: QuestionnaireAnswers;
-  onBooked?: () => void;
+  contactId?: string;
+  onBooked: (booking?: {
+    start: string;
+    end: string;
+    timeZone: string;
+    eventId: string;
+    htmlLink?: string;
+    platform: string;
+  }) => void;
 };
 
 function buildSrc(base: string, params: Record<string, string>): string {
@@ -27,10 +36,11 @@ function buildSrc(base: string, params: Record<string, string>): string {
   }
 }
 
-export function CalendarEmbed({ tier, answers, onBooked }: Props) {
+export function CalendarEmbed({ tier, answers, contactId, onBooked }: Props) {
   const cms = useCms();
   const cal = cms.calendar;
   const [runtime, setRuntime] = useState<CalendarRuntimeConfig | undefined>();
+  const [configLoaded, setConfigLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,12 +50,15 @@ export function CalendarEmbed({ tier, answers, onBooked }: Props) {
         (cfg: {
           calendar?: CalendarRuntimeConfig;
         }) => {
-          if (cancelled || !cfg.calendar) return;
-          setRuntime(cfg.calendar);
+          if (cancelled) return;
+          if (cfg.calendar) setRuntime(cfg.calendar);
         },
       )
       .catch(() => {
         /* env fallback inside resolveCalendarEmbed */
+      })
+      .finally(() => {
+        if (!cancelled) setConfigLoaded(true);
       });
     return () => {
       cancelled = true;
@@ -77,6 +90,10 @@ export function CalendarEmbed({ tier, answers, onBooked }: Props) {
     .replace("{duration}", String(embed.durationMinutes))
     .replace("{tier}", tierLabel);
   const missingBody = cal.missingBody.replace("{platform}", embed.platform);
+  const useNative =
+    tier === "pro"
+      ? Boolean(runtime?.nativeBookingPro)
+      : Boolean(runtime?.nativeBookingElite);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:py-10 lg:px-6">
@@ -90,7 +107,18 @@ export function CalendarEmbed({ tier, answers, onBooked }: Props) {
         <p className="mt-1 text-sm text-[var(--muted)]">{subhead}</p>
       </div>
 
-      {src ? (
+      {!configLoaded ? (
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-16 text-center text-sm text-[var(--muted)]">
+          Loading calendar…
+        </div>
+      ) : useNative ? (
+        <BookingCalendar
+          tier={tier}
+          answers={answers}
+          contactId={contactId}
+          onBooked={(booking) => onBooked(booking)}
+        />
+      ) : src ? (
         <div className="-mx-4 overflow-hidden border-y border-[var(--border)] bg-[var(--surface)] sm:mx-0 sm:rounded-lg sm:border">
           <iframe
             title={eventLabel}
@@ -105,7 +133,7 @@ export function CalendarEmbed({ tier, answers, onBooked }: Props) {
           <p className="mt-2 break-words">{missingBody}</p>
           <button
             type="button"
-            onClick={onBooked}
+            onClick={() => onBooked()}
             className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto sm:py-2.5"
           >
             {cal.devContinue}
@@ -113,11 +141,11 @@ export function CalendarEmbed({ tier, answers, onBooked }: Props) {
         </div>
       )}
 
-      {src ? (
+      {configLoaded && src && !useNative ? (
         <div className="mt-4">
           <button
             type="button"
-            onClick={onBooked}
+            onClick={() => onBooked()}
             className="w-full rounded-md border border-[var(--border)] px-4 py-3 text-sm font-medium text-[var(--accent)] sm:w-auto sm:border-0 sm:px-0 sm:py-0 sm:underline-offset-2 sm:hover:underline"
           >
             {cal.bookedContinue}

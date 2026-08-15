@@ -1,5 +1,13 @@
 import { loadIntegrations } from "./store";
-import type { CalendarPlatform, IntegrationsConfig } from "./types";
+import {
+  embedUrlForTier,
+  shouldUseNativeBooking,
+} from "@/lib/calendar/nativeReady";
+import type {
+  CalendarBookingMode,
+  CalendarPlatform,
+  IntegrationsConfig,
+} from "./types";
 
 /** Non-secret values safe to expose to the browser. */
 export type PublicRuntimeConfig = {
@@ -7,6 +15,11 @@ export type PublicRuntimeConfig = {
   product: IntegrationsConfig["product"];
   calendar: {
     platform: CalendarPlatform;
+    bookingMode: CalendarBookingMode;
+    nativeBooking: boolean;
+    nativeBookingPro: boolean;
+    nativeBookingElite: boolean;
+    timezone: string;
     embedPro: string;
     embedElite: string;
   };
@@ -18,14 +31,9 @@ export type PublicRuntimeConfig = {
 
 export async function getPublicRuntimeConfig(): Promise<PublicRuntimeConfig> {
   const config = await loadIntegrations();
-  const embedPro =
-    config.calendar.platform === "ghl"
-      ? config.calendar.ghlEmbedPro
-      : config.calendar.calendlyEmbedPro;
-  const embedElite =
-    config.calendar.platform === "ghl"
-      ? config.calendar.ghlEmbedElite
-      : config.calendar.calendlyEmbedElite;
+  const nativePro = shouldUseNativeBooking(config, "pro");
+  const nativeElite = shouldUseNativeBooking(config, "elite");
+  const nativeBooking = nativePro || nativeElite;
 
   const emailEnabled =
     config.email.provider === "ghl"
@@ -37,8 +45,13 @@ export async function getPublicRuntimeConfig(): Promise<PublicRuntimeConfig> {
     product: config.product,
     calendar: {
       platform: config.calendar.platform,
-      embedPro,
-      embedElite,
+      bookingMode: config.calendar.bookingMode,
+      nativeBooking,
+      nativeBookingPro: nativePro,
+      nativeBookingElite: nativeElite,
+      timezone: config.calendar.timezone,
+      embedPro: embedUrlForTier(config, "pro"),
+      embedElite: embedUrlForTier(config, "elite"),
     },
     emailSignup: {
       enabled: emailEnabled,

@@ -6,6 +6,10 @@ export type CalendarRuntimeConfig = {
   platform: CalendarPlatform;
   embedPro: string;
   embedElite: string;
+  nativeBooking?: boolean;
+  nativeBookingPro?: boolean;
+  nativeBookingElite?: boolean;
+  timezone?: string;
 };
 
 function embedForTier(
@@ -47,15 +51,21 @@ export function resolveCalendarEmbed(
     platform:
       process.env.NEXT_PUBLIC_CALENDAR_PLATFORM === "calendly"
         ? "calendly"
-        : "ghl",
+        : process.env.NEXT_PUBLIC_CALENDAR_PLATFORM === "google"
+          ? "google"
+          : "ghl",
     embedPro:
       process.env.NEXT_PUBLIC_CALENDAR_PLATFORM === "calendly"
         ? (process.env.NEXT_PUBLIC_CALENDLY_EMBED_PRO ?? "")
-        : (process.env.NEXT_PUBLIC_GHL_CALENDAR_EMBED_PRO ?? ""),
+        : process.env.NEXT_PUBLIC_CALENDAR_PLATFORM === "google"
+          ? ""
+          : (process.env.NEXT_PUBLIC_GHL_CALENDAR_EMBED_PRO ?? ""),
     embedElite:
       process.env.NEXT_PUBLIC_CALENDAR_PLATFORM === "calendly"
         ? (process.env.NEXT_PUBLIC_CALENDLY_EMBED_ELITE ?? "")
-        : (process.env.NEXT_PUBLIC_GHL_CALENDAR_EMBED_ELITE ?? ""),
+        : process.env.NEXT_PUBLIC_CALENDAR_PLATFORM === "google"
+          ? ""
+          : (process.env.NEXT_PUBLIC_GHL_CALENDAR_EMBED_ELITE ?? ""),
   };
 
   return buildAdapter(config).getEmbed(request);

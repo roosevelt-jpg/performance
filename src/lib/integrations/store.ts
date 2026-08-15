@@ -1,7 +1,13 @@
 import { promises as fs } from "fs";
 import path from "path";
 import {
+  embedUrlForTier,
+  nativeCalendarReadyForTier,
+} from "@/lib/calendar/nativeReady";
+import {
   DEFAULT_INTEGRATIONS,
+  type CalendarBookingMode,
+  type CalendarPlatform,
   type IntegrationCheck,
   type IntegrationsConfig,
 } from "./types";
@@ -15,6 +21,64 @@ export const INTEGRATIONS_FILE = path.join(
 function num(value: string | undefined, fallback: number): number {
   const n = Number(value);
   return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function intOr(value: string | undefined, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function parsePlatform(value: string | undefined): CalendarPlatform {
+  if (value === "calendly" || value === "google" || value === "ghl") {
+    return value;
+  }
+  return DEFAULT_INTEGRATIONS.calendar.platform;
+}
+
+function parseBookingMode(value: string | undefined): CalendarBookingMode {
+  if (value === "native" || value === "embed" || value === "auto") {
+    return value;
+  }
+  return DEFAULT_INTEGRATIONS.calendar.bookingMode;
+}
+
+function parseWorkingDays(value: string | undefined, fallback: number[]): number[] {
+  if (!value) return fallback;
+  const days = value
+    .split(",")
+    .map((part) => Number(part.trim()))
+    .filter((n) => Number.isInteger(n) && n >= 1 && n <= 7);
+  return days.length ? days : fallback;
+}
+
+function calendarDefaults(
+  overlay?: Partial<IntegrationsConfig["calendar"]> | null,
+): IntegrationsConfig["calendar"] {
+  const base = DEFAULT_INTEGRATIONS.calendar;
+  const merged = { ...base, ...overlay };
+  merged.workingDays =
+    Array.isArray(merged.workingDays) && merged.workingDays.length
+      ? merged.workingDays.filter((n) => n >= 1 && n <= 7)
+      : base.workingDays;
+  merged.platform = parsePlatform(merged.platform);
+  merged.bookingMode = parseBookingMode(merged.bookingMode);
+  merged.timezone = merged.timezone?.trim() || base.timezone;
+  merged.workingHoursStart =
+    merged.workingHoursStart?.trim() || base.workingHoursStart;
+  merged.workingHoursEnd =
+    merged.workingHoursEnd?.trim() || base.workingHoursEnd;
+  merged.bufferMinutes = Number.isFinite(merged.bufferMinutes)
+    ? merged.bufferMinutes
+    : base.bufferMinutes;
+  merged.minNoticeHours = Number.isFinite(merged.minNoticeHours)
+    ? merged.minNoticeHours
+    : base.minNoticeHours;
+  merged.daysAhead = Number.isFinite(merged.daysAhead)
+    ? merged.daysAhead
+    : base.daysAhead;
+  merged.googleCalendarId =
+    merged.googleCalendarId?.trim() || base.googleCalendarId;
+  return merged;
 }
 
 function fromEnv(): IntegrationsConfig {
@@ -38,16 +102,44 @@ function fromEnv(): IntegrationsConfig {
       challengeCheckoutOpenInNewTab:
         process.env.NEXT_PUBLIC_CHALLENGE_CHECKOUT_NEW_TAB !== "false",
     },
-    calendar: {
-      platform:
-        process.env.NEXT_PUBLIC_CALENDAR_PLATFORM === "calendly"
-          ? "calendly"
-          : "ghl",
+    calendar: calendarDefaults({
+      platform: parsePlatform(process.env.NEXT_PUBLIC_CALENDAR_PLATFORM),
+      bookingMode: parseBookingMode(process.env.CALENDAR_BOOKING_MODE),
+      timezone: process.env.CALENDAR_TIMEZONE,
+      workingHoursStart: process.env.CALENDAR_HOURS_START,
+      workingHoursEnd: process.env.CALENDAR_HOURS_END,
+      workingDays: parseWorkingDays(
+        process.env.CALENDAR_WORKING_DAYS,
+        DEFAULT_INTEGRATIONS.calendar.workingDays,
+      ),
+      bufferMinutes: intOr(
+        process.env.CALENDAR_BUFFER_MINUTES,
+        DEFAULT_INTEGRATIONS.calendar.bufferMinutes,
+      ),
+      minNoticeHours: intOr(
+        process.env.CALENDAR_MIN_NOTICE_HOURS,
+        DEFAULT_INTEGRATIONS.calendar.minNoticeHours,
+      ),
+      daysAhead: intOr(
+        process.env.CALENDAR_DAYS_AHEAD,
+        DEFAULT_INTEGRATIONS.calendar.daysAhead,
+      ),
       ghlEmbedPro: process.env.NEXT_PUBLIC_GHL_CALENDAR_EMBED_PRO ?? "",
       ghlEmbedElite: process.env.NEXT_PUBLIC_GHL_CALENDAR_EMBED_ELITE ?? "",
+      ghlCalendarIdPro: process.env.GHL_CALENDAR_ID_PRO ?? "",
+      ghlCalendarIdElite: process.env.GHL_CALENDAR_ID_ELITE ?? "",
       calendlyEmbedPro: process.env.NEXT_PUBLIC_CALENDLY_EMBED_PRO ?? "",
       calendlyEmbedElite: process.env.NEXT_PUBLIC_CALENDLY_EMBED_ELITE ?? "",
-    },
+      calendlyApiToken: process.env.CALENDLY_API_TOKEN ?? "",
+      calendlyEventTypePro: process.env.CALENDLY_EVENT_TYPE_PRO ?? "",
+      calendlyEventTypeElite: process.env.CALENDLY_EVENT_TYPE_ELITE ?? "",
+      calendlyLocationKind: process.env.CALENDLY_LOCATION_KIND ?? "",
+      googleCalendarId: process.env.GOOGLE_CALENDAR_ID ?? "primary",
+      googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      googleRefreshToken: process.env.GOOGLE_REFRESH_TOKEN ?? "",
+      googleServiceAccountJson: process.env.GOOGLE_SERVICE_ACCOUNT_JSON ?? "",
+    }),
     ghl: {
       apiKey: process.env.GHL_API_KEY ?? "",
       locationId: process.env.GHL_LOCATION_ID ?? "",
@@ -92,7 +184,7 @@ function mergeConfig(
     admin: { ...base.admin, ...overlay.admin },
     pricing: { ...base.pricing, ...overlay.pricing },
     product: { ...base.product, ...overlay.product },
-    calendar: { ...base.calendar, ...overlay.calendar },
+    calendar: calendarDefaults({ ...base.calendar, ...overlay.calendar }),
     ghl: { ...base.ghl, ...overlay.ghl },
     youtube: { ...base.youtube, ...overlay.youtube },
     email: { ...base.email, ...overlay.email },
@@ -136,6 +228,7 @@ export async function loadIntegrations(): Promise<IntegrationsConfig> {
   merged.email = { ...DEFAULT_INTEGRATIONS.email, ...merged.email };
   merged.shopify = { ...DEFAULT_INTEGRATIONS.shopify, ...merged.shopify };
   merged.reviews = { ...DEFAULT_INTEGRATIONS.reviews, ...merged.reviews };
+  merged.calendar = calendarDefaults(merged.calendar);
 
   return merged;
 }
@@ -181,16 +274,49 @@ export async function getStorageMeta(): Promise<{
   };
 }
 
+function calendarTierCheck(
+  config: IntegrationsConfig,
+  tier: "pro" | "elite",
+): { status: IntegrationCheck["status"]; detail: string } {
+  const native = nativeCalendarReadyForTier(config, tier);
+  const embed = embedUrlForTier(config, tier).trim();
+  const mode = config.calendar.bookingMode;
+  if (mode === "native") {
+    return native
+      ? { status: "ready", detail: "Native API connected" }
+      : {
+          status: "missing",
+          detail: "Add Google Calendar, Calendly, or GHL calendar API",
+        };
+  }
+  if (mode === "embed") {
+    return embed
+      ? { status: "ready", detail: "Embed URL" }
+      : { status: "missing", detail: "Add embed URL" };
+  }
+  if (native) return { status: "ready", detail: "Native API" };
+  if (embed) return { status: "ready", detail: "Embed fallback" };
+  return { status: "missing", detail: "Add API keys or an embed URL" };
+}
+
+export function listSecretsSet(config: IntegrationsConfig) {
+  return {
+    ghlApiKey: Boolean(config.ghl.apiKey),
+    youtubeApiKey: Boolean(config.youtube.apiKey),
+    emailApiKey: Boolean(config.email.apiKey),
+    shopifyToken: Boolean(config.shopify.storefrontToken),
+    judgemeToken: Boolean(config.reviews.judgemeApiToken),
+    calendlyApiToken: Boolean(config.calendar.calendlyApiToken),
+    googleClientSecret: Boolean(config.calendar.googleClientSecret),
+    googleRefreshToken: Boolean(config.calendar.googleRefreshToken),
+    googleServiceAccount: Boolean(config.calendar.googleServiceAccountJson),
+  };
+}
+
 export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
   const platform = config.calendar.platform;
-  const proEmbed =
-    platform === "ghl"
-      ? config.calendar.ghlEmbedPro
-      : config.calendar.calendlyEmbedPro;
-  const eliteEmbed =
-    platform === "ghl"
-      ? config.calendar.ghlEmbedElite
-      : config.calendar.calendlyEmbedElite;
+  const proCal = calendarTierCheck(config, "pro");
+  const eliteCal = calendarTierCheck(config, "elite");
 
   const checks: IntegrationCheck[] = [
     {
@@ -231,14 +357,16 @@ export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
     {
       id: "calendar_pro",
       group: "calendar",
-      label: "Pro call embed URL (20 min)",
-      status: proEmbed ? "ready" : "missing",
+      label: "Pro call (20 min)",
+      status: proCal.status,
+      detail: proCal.detail,
     },
     {
       id: "calendar_elite",
       group: "calendar",
-      label: "Elite call embed URL (30 min)",
-      status: eliteEmbed ? "ready" : "missing",
+      label: "Elite call (30 min)",
+      status: eliteCal.status,
+      detail: eliteCal.detail,
     },
     {
       id: "price_pro",
@@ -352,6 +480,15 @@ export function maskConfig(config: IntegrationsConfig): IntegrationsConfig {
       ...config.reviews,
       judgemeApiToken: maskSecret(config.reviews.judgemeApiToken),
     },
+    calendar: {
+      ...config.calendar,
+      calendlyApiToken: maskSecret(config.calendar.calendlyApiToken),
+      googleClientSecret: maskSecret(config.calendar.googleClientSecret),
+      googleRefreshToken: maskSecret(config.calendar.googleRefreshToken),
+      googleServiceAccountJson: config.calendar.googleServiceAccountJson
+        ? "••••••••json"
+        : "",
+    },
   };
 }
 
@@ -364,10 +501,29 @@ export function toEnvSnippet(config: IntegrationsConfig): string {
     `NEXT_PUBLIC_CHALLENGE_CHECKOUT_EMBED_URL=${config.product.challengeCheckoutEmbedUrl}`,
     `NEXT_PUBLIC_CHALLENGE_CHECKOUT_NEW_TAB=${config.product.challengeCheckoutOpenInNewTab}`,
     `NEXT_PUBLIC_CALENDAR_PLATFORM=${config.calendar.platform}`,
+    `CALENDAR_BOOKING_MODE=${config.calendar.bookingMode}`,
+    `CALENDAR_TIMEZONE=${config.calendar.timezone}`,
+    `CALENDAR_HOURS_START=${config.calendar.workingHoursStart}`,
+    `CALENDAR_HOURS_END=${config.calendar.workingHoursEnd}`,
+    `CALENDAR_WORKING_DAYS=${config.calendar.workingDays.join(",")}`,
+    `CALENDAR_BUFFER_MINUTES=${config.calendar.bufferMinutes}`,
+    `CALENDAR_MIN_NOTICE_HOURS=${config.calendar.minNoticeHours}`,
+    `CALENDAR_DAYS_AHEAD=${config.calendar.daysAhead}`,
     `NEXT_PUBLIC_GHL_CALENDAR_EMBED_PRO=${config.calendar.ghlEmbedPro}`,
     `NEXT_PUBLIC_GHL_CALENDAR_EMBED_ELITE=${config.calendar.ghlEmbedElite}`,
+    `GHL_CALENDAR_ID_PRO=${config.calendar.ghlCalendarIdPro}`,
+    `GHL_CALENDAR_ID_ELITE=${config.calendar.ghlCalendarIdElite}`,
     `NEXT_PUBLIC_CALENDLY_EMBED_PRO=${config.calendar.calendlyEmbedPro}`,
     `NEXT_PUBLIC_CALENDLY_EMBED_ELITE=${config.calendar.calendlyEmbedElite}`,
+    `CALENDLY_API_TOKEN=${config.calendar.calendlyApiToken}`,
+    `CALENDLY_EVENT_TYPE_PRO=${config.calendar.calendlyEventTypePro}`,
+    `CALENDLY_EVENT_TYPE_ELITE=${config.calendar.calendlyEventTypeElite}`,
+    `CALENDLY_LOCATION_KIND=${config.calendar.calendlyLocationKind}`,
+    `GOOGLE_CALENDAR_ID=${config.calendar.googleCalendarId}`,
+    `GOOGLE_CLIENT_ID=${config.calendar.googleClientId}`,
+    `GOOGLE_CLIENT_SECRET=${config.calendar.googleClientSecret}`,
+    `GOOGLE_REFRESH_TOKEN=${config.calendar.googleRefreshToken}`,
+    `GOOGLE_SERVICE_ACCOUNT_JSON=${config.calendar.googleServiceAccountJson}`,
     `GHL_API_KEY=${config.ghl.apiKey}`,
     `GHL_LOCATION_ID=${config.ghl.locationId}`,
     `GHL_API_BASE_URL=${config.ghl.apiBaseUrl}`,

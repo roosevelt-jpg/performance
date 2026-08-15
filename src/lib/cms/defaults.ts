@@ -586,9 +586,9 @@ export const DEFAULT_CMS: CmsContent = {
       "{duration}-minute call · event type set from your {tier} application.",
     proEventLabel: "Pro Call — 20 min",
     eliteEventLabel: "Elite Call — 30 min",
-    missingTitle: "Calendar embed URL not configured yet",
+    missingTitle: "Calendar is not connected yet",
     missingBody:
-      "Platform: {platform}. Add the Pro/Elite embed URLs on the Integrations page.",
+      "Platform: {platform}. In Admin → Integrations, add Google Calendar or Calendly API credentials (or a fallback embed URL).",
     bookedContinue: "I've booked my slot — continue",
     devContinue: "Continue to confirmation (dev)",
   },

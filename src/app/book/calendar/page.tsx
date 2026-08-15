@@ -35,8 +35,12 @@ export default function CalendarPage() {
           <CalendarEmbed
             tier={flow.tier}
             answers={flow.answers}
-            onBooked={() => {
-              mergeLeadFlow({ bookedAt: new Date().toISOString() });
+            contactId={flow.submissionId}
+            onBooked={(booking) => {
+              mergeLeadFlow({
+                bookedAt: booking?.start ?? new Date().toISOString(),
+                booking,
+              });
               router.push("/book/confirmation");
             }}
           />

@@ -12,7 +12,7 @@ export type CalendarEmbedRequest = {
 };
 
 export type CalendarEmbedResult = {
-  platform: "ghl" | "calendly";
+  platform: "ghl" | "calendly" | "google";
   eventTypeLabel: string;
   durationMinutes: number;
   embedUrl: string;

@@ -1,4 +1,6 @@
-export type CalendarPlatform = "ghl" | "calendly";
+import type { CalendarPlatform } from "@/lib/integrations/types";
+
+export type { CalendarPlatform };
 
 export const CALENDAR_PLATFORM = (process.env.NEXT_PUBLIC_CALENDAR_PLATFORM ??
   "ghl") as CalendarPlatform;

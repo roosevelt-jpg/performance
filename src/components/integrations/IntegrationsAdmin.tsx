@@ -18,6 +18,10 @@ type ApiPayload = {
     emailApiKey: boolean;
     shopifyToken: boolean;
     judgemeToken: boolean;
+    calendlyApiToken: boolean;
+    googleClientSecret: boolean;
+    googleRefreshToken: boolean;
+    googleServiceAccount: boolean;
   };
   checks: IntegrationCheck[];
   readyForLive: boolean;
@@ -76,6 +80,10 @@ export function IntegrationsAdmin({
   const [emailKeyDraft, setEmailKeyDraft] = useState("");
   const [shopifyTokenDraft, setShopifyTokenDraft] = useState("");
   const [judgemeTokenDraft, setJudgemeTokenDraft] = useState("");
+  const [calendlyTokenDraft, setCalendlyTokenDraft] = useState("");
+  const [googleSecretDraft, setGoogleSecretDraft] = useState("");
+  const [googleRefreshDraft, setGoogleRefreshDraft] = useState("");
+  const [googleSaDraft, setGoogleSaDraft] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -112,6 +120,10 @@ export function IntegrationsAdmin({
       setEmailKeyDraft("");
       setShopifyTokenDraft("");
       setJudgemeTokenDraft("");
+      setCalendlyTokenDraft("");
+      setGoogleSecretDraft("");
+      setGoogleRefreshDraft("");
+      setGoogleSaDraft("");
     } catch {
       setError("Failed to load integrations");
     } finally {
@@ -160,6 +172,17 @@ export function IntegrationsAdmin({
           judgemeApiToken:
             judgemeTokenDraft.trim() || form.reviews.judgemeApiToken,
         },
+        calendar: {
+          ...form.calendar,
+          calendlyApiToken:
+            calendlyTokenDraft.trim() || form.calendar.calendlyApiToken,
+          googleClientSecret:
+            googleSecretDraft.trim() || form.calendar.googleClientSecret,
+          googleRefreshToken:
+            googleRefreshDraft.trim() || form.calendar.googleRefreshToken,
+          googleServiceAccountJson:
+            googleSaDraft.trim() || form.calendar.googleServiceAccountJson,
+        },
       };
       const res = await fetch("/api/integrations", {
         method: "PUT",
@@ -179,6 +202,10 @@ export function IntegrationsAdmin({
       setEmailKeyDraft("");
       setShopifyTokenDraft("");
       setJudgemeTokenDraft("");
+      setCalendlyTokenDraft("");
+      setGoogleSecretDraft("");
+      setGoogleRefreshDraft("");
+      setGoogleSaDraft("");
       setMessage("Saved to data/integrations.local.json");
     } catch {
       setError("Save failed");
@@ -647,12 +674,17 @@ export function IntegrationsAdmin({
                   disabled={testing === "calendar"}
                   className="w-full rounded-md border border-[var(--border)] px-3 py-2.5 text-xs font-semibold text-[var(--fg)] hover:border-[var(--accent)] sm:w-auto sm:py-1.5"
                 >
-                  {testing === "calendar" ? "Checking…" : "Validate URLs"}
+                  {testing === "calendar" ? "Checking…" : "Test connection"}
                 </button>
               </div>
+              <p className="text-xs text-[var(--muted)]">
+                Applicants see a live availability calendar after they qualify.
+                Connect Google Calendar or Calendly here so booked times write
+                back and stay in sync. Embed URLs remain as a fallback.
+              </p>
               <Field
-                label="Platform"
-                hint="One shared availability pool — Pro 20min / Elite 30min event types."
+                label="Provider"
+                hint="Google Calendar is the native book-and-sync path. Calendly needs a paid plan for API booking."
               >
                 <select
                   className={inputClass}
@@ -662,54 +694,345 @@ export function IntegrationsAdmin({
                       ...f,
                       calendar: {
                         ...f.calendar,
-                        platform: e.target.value as "ghl" | "calendly",
+                        platform: e.target.value as
+                          | "ghl"
+                          | "calendly"
+                          | "google",
                       },
                     }))
                   }
                 >
-                  <option value="ghl">GoHighLevel native</option>
+                  <option value="google">Google Calendar</option>
                   <option value="calendly">Calendly</option>
+                  <option value="ghl">GoHighLevel</option>
                 </select>
               </Field>
+              <Field
+                label="Booking UI"
+                hint="Auto uses the native calendar when an API is connected, otherwise the embed."
+              >
+                <select
+                  className={inputClass}
+                  value={form.calendar.bookingMode}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      calendar: {
+                        ...f.calendar,
+                        bookingMode: e.target.value as
+                          | "auto"
+                          | "native"
+                          | "embed",
+                      },
+                    }))
+                  }
+                >
+                  <option value="auto">Auto (native if API is set)</option>
+                  <option value="native">Native availability only</option>
+                  <option value="embed">Embed iframe only</option>
+                </select>
+              </Field>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Field label="Timezone">
+                  <input
+                    className={inputClass}
+                    value={form.calendar.timezone}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        calendar: { ...f.calendar, timezone: e.target.value },
+                      }))
+                    }
+                    placeholder="Europe/London"
+                  />
+                </Field>
+                <Field label="Days ahead">
+                  <input
+                    type="number"
+                    min={1}
+                    max={60}
+                    className={inputClass}
+                    value={form.calendar.daysAhead}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        calendar: {
+                          ...f.calendar,
+                          daysAhead: Number(e.target.value),
+                        },
+                      }))
+                    }
+                  />
+                </Field>
+                <Field label="Hours start">
+                  <input
+                    className={inputClass}
+                    value={form.calendar.workingHoursStart}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        calendar: {
+                          ...f.calendar,
+                          workingHoursStart: e.target.value,
+                        },
+                      }))
+                    }
+                    placeholder="09:00"
+                  />
+                </Field>
+                <Field label="Hours end">
+                  <input
+                    className={inputClass}
+                    value={form.calendar.workingHoursEnd}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        calendar: {
+                          ...f.calendar,
+                          workingHoursEnd: e.target.value,
+                        },
+                      }))
+                    }
+                    placeholder="17:00"
+                  />
+                </Field>
+                <Field label="Buffer (minutes)">
+                  <input
+                    type="number"
+                    min={0}
+                    className={inputClass}
+                    value={form.calendar.bufferMinutes}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        calendar: {
+                          ...f.calendar,
+                          bufferMinutes: Number(e.target.value),
+                        },
+                      }))
+                    }
+                  />
+                </Field>
+                <Field label="Minimum notice (hours)">
+                  <input
+                    type="number"
+                    min={0}
+                    className={inputClass}
+                    value={form.calendar.minNoticeHours}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        calendar: {
+                          ...f.calendar,
+                          minNoticeHours: Number(e.target.value),
+                        },
+                      }))
+                    }
+                  />
+                </Field>
+              </div>
+              <fieldset>
+                <legend className="text-sm font-medium text-[var(--fg)]">
+                  Working days
+                </legend>
+                <div className="mt-2 flex flex-wrap gap-3 text-sm text-[var(--fg-soft)]">
+                  {([
+                    [1, "Mon"],
+                    [2, "Tue"],
+                    [3, "Wed"],
+                    [4, "Thu"],
+                    [5, "Fri"],
+                    [6, "Sat"],
+                    [7, "Sun"],
+                  ] as const).map(([id, label]) => {
+                    const checked = (form.calendar.workingDays ?? []).includes(id);
+                    return (
+                      <label key={id} className="inline-flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="accent-[var(--accent)]"
+                          checked={checked}
+                          onChange={() =>
+                            setForm((f) => {
+                              const set = new Set(f.calendar.workingDays ?? []);
+                              if (set.has(id)) set.delete(id);
+                              else set.add(id);
+                              return {
+                                ...f,
+                                calendar: {
+                                  ...f.calendar,
+                                  workingDays: [...set].sort((a, b) => a - b),
+                                },
+                              };
+                            })
+                          }
+                        />
+                        {label}
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
 
-              {form.calendar.platform === "ghl" ? (
+              {form.calendar.platform === "google" ? (
                 <>
-                  <Field label="GHL embed — Pro Call (20 min)">
+                  <Field
+                    label="Google Calendar ID"
+                    hint="Usually 'primary', or the calendar email. Share this calendar with a service account if you paste a JSON key."
+                  >
                     <input
                       className={inputClass}
-                      value={form.calendar.ghlEmbedPro}
+                      value={form.calendar.googleCalendarId}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
                           calendar: {
                             ...f.calendar,
-                            ghlEmbedPro: e.target.value,
+                            googleCalendarId: e.target.value,
                           },
                         }))
                       }
-                      placeholder="https://…"
+                      placeholder="primary"
                     />
                   </Field>
-                  <Field label="GHL embed — Elite Call (30 min)">
+                  <p className="text-xs font-medium text-[var(--fg)]">
+                    OAuth (personal Google Calendar)
+                  </p>
+                  <Field label="Client ID">
                     <input
                       className={inputClass}
-                      value={form.calendar.ghlEmbedElite}
+                      value={form.calendar.googleClientId}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
                           calendar: {
                             ...f.calendar,
-                            ghlEmbedElite: e.target.value,
+                            googleClientId: e.target.value,
                           },
                         }))
                       }
-                      placeholder="https://…"
+                    />
+                  </Field>
+                  <Field
+                    label="Client secret"
+                    hint={
+                      data.secretsSet.googleClientSecret
+                        ? "Saved (masked). Paste a new value only to replace."
+                        : undefined
+                    }
+                  >
+                    <input
+                      type="password"
+                      className={inputClass}
+                      value={googleSecretDraft}
+                      onChange={(e) => setGoogleSecretDraft(e.target.value)}
+                      autoComplete="off"
+                    />
+                  </Field>
+                  <Field
+                    label="Refresh token"
+                    hint={
+                      data.secretsSet.googleRefreshToken
+                        ? "Saved (masked). Paste a new value only to replace."
+                        : "From Google OAuth Playground: scope https://www.googleapis.com/auth/calendar"
+                    }
+                  >
+                    <input
+                      type="password"
+                      className={inputClass}
+                      value={googleRefreshDraft}
+                      onChange={(e) => setGoogleRefreshDraft(e.target.value)}
+                      autoComplete="off"
+                    />
+                  </Field>
+                  <Field
+                    label="Or paste service account JSON"
+                    hint={
+                      data.secretsSet.googleServiceAccount
+                        ? "Saved (masked). Paste a new JSON only to replace."
+                        : "Share Kane’s calendar with the service account email, then paste the JSON key."
+                    }
+                  >
+                    <textarea
+                      className={`${inputClass} min-h-28 font-mono text-xs`}
+                      value={googleSaDraft}
+                      onChange={(e) => setGoogleSaDraft(e.target.value)}
+                      placeholder='{"type":"service_account", ...}'
                     />
                   </Field>
                 </>
-              ) : (
+              ) : null}
+
+              {form.calendar.platform === "calendly" ? (
                 <>
-                  <Field label="Calendly embed — Pro Call (20 min)">
+                  <Field
+                    label="Calendly API token"
+                    hint={
+                      data.secretsSet.calendlyApiToken
+                        ? "Saved (masked). Paste a new token only to replace."
+                        : "Personal access token. Native booking via POST /invitees needs a paid Calendly plan."
+                    }
+                  >
+                    <input
+                      type="password"
+                      className={inputClass}
+                      value={calendlyTokenDraft}
+                      onChange={(e) => setCalendlyTokenDraft(e.target.value)}
+                      autoComplete="off"
+                    />
+                  </Field>
+                  <Field
+                    label="Event type URI — Pro (20 min)"
+                    hint="Full URI from Calendly, e.g. https://api.calendly.com/event_types/AAAA"
+                  >
+                    <input
+                      className={inputClass}
+                      value={form.calendar.calendlyEventTypePro}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          calendar: {
+                            ...f.calendar,
+                            calendlyEventTypePro: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field label="Event type URI — Elite (30 min)">
+                    <input
+                      className={inputClass}
+                      value={form.calendar.calendlyEventTypeElite}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          calendar: {
+                            ...f.calendar,
+                            calendlyEventTypeElite: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field
+                    label="Location kind (optional)"
+                    hint="google_conference, zoom_conference, outbound_call, inbound_call — leave blank if the event type already has a location."
+                  >
+                    <input
+                      className={inputClass}
+                      value={form.calendar.calendlyLocationKind}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          calendar: {
+                            ...f.calendar,
+                            calendlyLocationKind: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field label="Embed fallback — Pro Call">
                     <input
                       className={inputClass}
                       value={form.calendar.calendlyEmbedPro}
@@ -725,7 +1048,7 @@ export function IntegrationsAdmin({
                       placeholder="https://calendly.com/…"
                     />
                   </Field>
-                  <Field label="Calendly embed — Elite Call (30 min)">
+                  <Field label="Embed fallback — Elite Call">
                     <input
                       className={inputClass}
                       value={form.calendar.calendlyEmbedElite}
@@ -742,7 +1065,77 @@ export function IntegrationsAdmin({
                     />
                   </Field>
                 </>
-              )}
+              ) : null}
+
+              {form.calendar.platform === "ghl" ? (
+                <>
+                  <Field
+                    label="GHL calendar ID — Pro (20 min)"
+                    hint="From GHL calendars. Used for live free-slots + booking when an API key is set."
+                  >
+                    <input
+                      className={inputClass}
+                      value={form.calendar.ghlCalendarIdPro}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          calendar: {
+                            ...f.calendar,
+                            ghlCalendarIdPro: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field label="GHL calendar ID — Elite (30 min)">
+                    <input
+                      className={inputClass}
+                      value={form.calendar.ghlCalendarIdElite}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          calendar: {
+                            ...f.calendar,
+                            ghlCalendarIdElite: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field label="Embed fallback — Pro Call">
+                    <input
+                      className={inputClass}
+                      value={form.calendar.ghlEmbedPro}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          calendar: {
+                            ...f.calendar,
+                            ghlEmbedPro: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="https://…"
+                    />
+                  </Field>
+                  <Field label="Embed fallback — Elite Call">
+                    <input
+                      className={inputClass}
+                      value={form.calendar.ghlEmbedElite}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          calendar: {
+                            ...f.calendar,
+                            ghlEmbedElite: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="https://…"
+                    />
+                  </Field>
+                </>
+              ) : null}
             </section>
 
             <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">

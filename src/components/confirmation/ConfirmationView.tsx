@@ -14,6 +14,7 @@ export function ConfirmationView() {
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
   const [contactId, setContactId] = useState<string | null>(null);
+  const [bookingLabel, setBookingLabel] = useState<string | null>(null);
 
   useEffect(() => {
     const flow = loadLeadFlow();
@@ -22,6 +23,19 @@ export function ConfirmationView() {
       return;
     }
     setContactId(flow.submissionId ?? null);
+    if (flow.booking?.start) {
+      const zone = flow.booking.timeZone || "Europe/London";
+      setBookingLabel(
+        new Intl.DateTimeFormat("en-GB", {
+          timeZone: zone,
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date(flow.booking.start)),
+      );
+    }
     setReady(true);
   }, [router]);
 
@@ -65,6 +79,11 @@ export function ConfirmationView() {
       <p className="mt-4 text-base leading-relaxed text-[var(--fg-soft)]">
         {c.body}
       </p>
+      {bookingLabel ? (
+        <p className="mt-3 text-sm text-[var(--fg)]">
+          Call booked: {bookingLabel}
+        </p>
+      ) : null}
 
       <div className="mt-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
         <label className="flex cursor-pointer items-start gap-3 text-sm text-[var(--fg-soft)]">

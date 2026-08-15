@@ -14,6 +14,11 @@ const EMPTY: PublicRuntimeConfig = {
   },
   calendar: {
     platform: "ghl",
+    bookingMode: "auto",
+    nativeBooking: false,
+    nativeBookingPro: false,
+    nativeBookingElite: false,
+    timezone: "Europe/London",
     embedPro: "",
     embedElite: "",
   },
