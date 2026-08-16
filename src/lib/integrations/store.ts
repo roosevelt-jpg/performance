@@ -1,5 +1,9 @@
-import { promises as fs } from "fs";
 import path from "path";
+import {
+  persistMeta,
+  readPersistedJson,
+  writePersistedJson,
+} from "@/lib/persist/jsonFile";
 import {
   embedUrlForTier,
   nativeCalendarReadyForTier,
@@ -12,7 +16,7 @@ import {
   type IntegrationsConfig,
 } from "./types";
 import { isValidTimeZone } from "@/lib/i18n/timezones";
-import { normalizeStoreDomain } from "@/lib/shopify/domain";
+import { resolveStoreDomain } from "@/lib/shopify/domain";
 
 export const INTEGRATIONS_FILE = path.join(
   process.cwd(),
@@ -197,11 +201,7 @@ function fromEnv(): IntegrationsConfig {
       model: process.env.OPENAI_DNA_MODEL ?? "gpt-4o-mini",
     },
     shopify: {
-      storeDomain:
-        normalizeStoreDomain(
-          process.env.SHOPIFY_STORE_DOMAIN ??
-            DEFAULT_INTEGRATIONS.shopify.storeDomain,
-        ) || DEFAULT_INTEGRATIONS.shopify.storeDomain,
+      storeDomain: resolveStoreDomain(process.env.SHOPIFY_STORE_DOMAIN),
       storefrontToken: process.env.SHOPIFY_STOREFRONT_TOKEN ?? "",
     },
     reviews: {
@@ -242,22 +242,18 @@ function mergeConfig(
     shopify: {
       ...base.shopify,
       ...overlay.shopify,
-      storeDomain:
-        normalizeStoreDomain(
-          overlay.shopify?.storeDomain ?? base.shopify.storeDomain,
-        ) || DEFAULT_INTEGRATIONS.shopify.storeDomain,
+      storeDomain: resolveStoreDomain(
+        overlay.shopify?.storeDomain ?? base.shopify.storeDomain,
+      ),
     },
     reviews: { ...base.reviews, ...overlay.reviews },
   };
 }
 
 async function readFileConfig(): Promise<Partial<IntegrationsConfig> | null> {
-  try {
-    const raw = await fs.readFile(INTEGRATIONS_FILE, "utf8");
-    return JSON.parse(raw) as Partial<IntegrationsConfig>;
-  } catch {
-    return null;
-  }
+  return readPersistedJson<Partial<IntegrationsConfig>>(
+    "integrations.local.json",
+  );
 }
 
 /** Env defaults, then local file overrides (UI saves here). */
@@ -290,9 +286,7 @@ export async function loadIntegrations(): Promise<IntegrationsConfig> {
   merged.shopify = {
     ...DEFAULT_INTEGRATIONS.shopify,
     ...merged.shopify,
-    storeDomain:
-      normalizeStoreDomain(merged.shopify.storeDomain) ||
-      DEFAULT_INTEGRATIONS.shopify.storeDomain,
+    storeDomain: resolveStoreDomain(merged.shopify.storeDomain),
   };
   merged.reviews = { ...DEFAULT_INTEGRATIONS.reviews, ...merged.reviews };
   merged.calendar = calendarDefaults(merged.calendar);
@@ -302,43 +296,17 @@ export async function loadIntegrations(): Promise<IntegrationsConfig> {
 
 export async function saveIntegrations(
   next: IntegrationsConfig,
-): Promise<void> {
-  await fs.mkdir(path.dirname(INTEGRATIONS_FILE), { recursive: true });
-  await fs.writeFile(
-    INTEGRATIONS_FILE,
-    `${JSON.stringify(next, null, 2)}\n`,
-    "utf8",
-  );
+): Promise<{ durable: boolean; path: string; writable: boolean }> {
+  return writePersistedJson("integrations.local.json", next);
 }
 
 export async function getStorageMeta(): Promise<{
   fileExists: boolean;
   path: string;
   writable: boolean;
+  durable: boolean;
 }> {
-  let fileExists = false;
-  try {
-    await fs.access(INTEGRATIONS_FILE);
-    fileExists = true;
-  } catch {
-    fileExists = false;
-  }
-
-  let writable = true;
-  try {
-    await fs.mkdir(path.dirname(INTEGRATIONS_FILE), { recursive: true });
-    const probe = path.join(path.dirname(INTEGRATIONS_FILE), ".write-probe");
-    await fs.writeFile(probe, "ok");
-    await fs.unlink(probe);
-  } catch {
-    writable = false;
-  }
-
-  return {
-    fileExists,
-    path: "data/integrations.local.json",
-    writable,
-  };
+  return persistMeta("integrations.local.json");
 }
 
 function calendarTierCheck(

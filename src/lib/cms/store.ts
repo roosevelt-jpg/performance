@@ -1,5 +1,9 @@
-import { promises as fs } from "fs";
 import path from "path";
+import {
+  persistMeta,
+  readPersistedJson,
+  writePersistedJson,
+} from "@/lib/persist/jsonFile";
 import { DEFAULT_CMS } from "./defaults";
 import type { CmsContent } from "./types";
 
@@ -182,12 +186,7 @@ export function mergeCms(
 }
 
 async function readFileCms(): Promise<Partial<CmsContent> | null> {
-  try {
-    const raw = await fs.readFile(CMS_FILE, "utf8");
-    return JSON.parse(raw) as Partial<CmsContent>;
-  } catch {
-    return null;
-  }
+  return readPersistedJson<Partial<CmsContent>>("cms.local.json");
 }
 
 export async function loadCms(): Promise<CmsContent> {
@@ -196,36 +195,14 @@ export async function loadCms(): Promise<CmsContent> {
 }
 
 export async function saveCms(next: CmsContent): Promise<void> {
-  await fs.mkdir(path.dirname(CMS_FILE), { recursive: true });
-  await fs.writeFile(CMS_FILE, `${JSON.stringify(next, null, 2)}\n`, "utf8");
+  await writePersistedJson("cms.local.json", next);
 }
 
 export async function getCmsStorageMeta(): Promise<{
   fileExists: boolean;
   path: string;
   writable: boolean;
+  durable: boolean;
 }> {
-  let fileExists = false;
-  try {
-    await fs.access(CMS_FILE);
-    fileExists = true;
-  } catch {
-    fileExists = false;
-  }
-
-  let writable = true;
-  try {
-    await fs.mkdir(path.dirname(CMS_FILE), { recursive: true });
-    const probe = path.join(path.dirname(CMS_FILE), ".cms-write-probe");
-    await fs.writeFile(probe, "ok");
-    await fs.unlink(probe);
-  } catch {
-    writable = false;
-  }
-
-  return {
-    fileExists,
-    path: "data/cms.local.json",
-    writable,
-  };
+  return persistMeta("cms.local.json");
 }

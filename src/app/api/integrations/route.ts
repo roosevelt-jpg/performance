@@ -13,7 +13,7 @@ import {
 } from "@/lib/integrations/store";
 import { DEFAULT_INTEGRATIONS, type IntegrationsConfig } from "@/lib/integrations/types";
 import { isValidTimeZone } from "@/lib/i18n/timezones";
-import { normalizeStoreDomain } from "@/lib/shopify/domain";
+import { resolveStoreDomain } from "@/lib/shopify/domain";
 
 export const runtime = "nodejs";
 
@@ -219,10 +219,9 @@ function normalizeIncoming(
         DEFAULT_INTEGRATIONS.ai.model,
     },
     shopify: {
-      storeDomain:
-        normalizeStoreDomain(
-          body.shopify?.storeDomain ?? current.shopify.storeDomain,
-        ) || DEFAULT_INTEGRATIONS.shopify.storeDomain,
+      storeDomain: resolveStoreDomain(
+        body.shopify?.storeDomain ?? current.shopify.storeDomain,
+      ),
       storefrontToken: keepSecret(
         body.shopify?.storefrontToken,
         current.shopify.storefrontToken,
@@ -273,17 +272,6 @@ export async function PUT(request: Request) {
   const auth = authorizeIntegrationsRequest(request);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-
-  const storage = await getStorageMeta();
-  if (!storage.writable) {
-    return NextResponse.json(
-      {
-        error:
-          "Configuration is read-only on this host. Copy the .env values into your hosting environment instead.",
-      },
-      { status: 503 },
-    );
   }
 
   let body: Partial<IntegrationsConfig>;

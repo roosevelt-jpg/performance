@@ -48,3 +48,4 @@ next-env.d.ts
 /data/dna-reports/
 /data/.write-probe
 /data/.cms-write-probe
+/data/test-*.json

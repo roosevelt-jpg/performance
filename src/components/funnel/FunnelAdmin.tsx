@@ -102,7 +102,6 @@ export function FunnelAdmin() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [writable, setWritable] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -119,7 +118,6 @@ export function FunnelAdmin() {
         return;
       }
       if (json.content) setForm(json.content);
-      setWritable(json.storage?.writable ?? true);
     } catch {
       setError("Failed to load");
     } finally {
@@ -278,11 +276,6 @@ export function FunnelAdmin() {
       {error ? <p className="text-sm text-red-400">{error}</p> : null}
       {message ? (
         <p className="text-sm text-[var(--accent)]">{message}</p>
-      ) : null}
-      {!writable ? (
-        <p className="text-sm text-[var(--muted)]">
-          This environment is read-only. Connect writable storage before saving funnel changes.
-        </p>
       ) : null}
 
       <Section
@@ -657,7 +650,7 @@ export function FunnelAdmin() {
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          disabled={saving || !writable}
+          disabled={saving}
           className="rounded-md bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           onClick={() => void save()}
         >

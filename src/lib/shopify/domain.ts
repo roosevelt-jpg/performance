@@ -1,3 +1,5 @@
+import { DEFAULT_INTEGRATIONS } from "@/lib/integrations/types";
+
 /** Hostname only — accepts paste of https://theformulaperformance.com/ */
 export function normalizeStoreDomain(input: string | undefined | null): string {
   const raw = (input ?? "").trim();
@@ -12,4 +14,27 @@ export function normalizeStoreDomain(input: string | undefined | null): string {
       .replace(/^www\./i, "")
       .toLowerCase();
   }
+}
+
+/** Vercel Marketplace Shopify injects this — not Kane's live storefront. */
+export function isPlaceholderStoreDomain(domain: string): boolean {
+  const host = normalizeStoreDomain(domain);
+  if (!host) return true;
+  return (
+    /^vercel-store[-.].*\.myshopify\.com$/i.test(host) ||
+    host.endsWith(".vercel.app")
+  );
+}
+
+/**
+ * Live shop hostname. Drops Vercel placeholder shops so the checklist
+ * does not show vercel-store-….myshopify.com over the real domain.
+ */
+export function resolveStoreDomain(
+  input?: string | null,
+  fallback = DEFAULT_INTEGRATIONS.shopify.storeDomain,
+): string {
+  const host = normalizeStoreDomain(input);
+  if (!host || isPlaceholderStoreDomain(host)) return fallback;
+  return host;
 }

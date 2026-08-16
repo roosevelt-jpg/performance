@@ -250,5 +250,6 @@ export type PublicIntegrationsView = {
     fileExists: boolean;
     path: string;
     writable: boolean;
+    durable?: boolean;
   };
 };

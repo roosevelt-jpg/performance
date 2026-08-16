@@ -29,17 +29,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  const storage = await getCmsStorageMeta();
-  if (!storage.writable) {
-    return NextResponse.json(
-      {
-        error:
-          "Content is read-only on this host. Save locally and deploy the CMS file, or connect writable storage.",
-      },
-      { status: 503 },
-    );
-  }
-
   let body: { content?: CmsContent };
   try {
     body = await request.json();

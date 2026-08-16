@@ -166,7 +166,6 @@ export function CmsAdmin() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [writable, setWritable] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -183,7 +182,6 @@ export function CmsAdmin() {
         return;
       }
       if (json.content) setForm(json.content);
-      setWritable(json.storage?.writable ?? true);
     } catch {
       setError("Failed to load CMS");
     } finally {
@@ -4329,7 +4327,7 @@ export function CmsAdmin() {
         <button
           type="button"
           onClick={() => void save()}
-          disabled={saving || !writable}
+          disabled={saving}
           className="w-full rounded-md bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-fg)] disabled:opacity-50 sm:w-auto sm:py-2.5"
         >
           {saving ? "Saving…" : "Save CMS"}

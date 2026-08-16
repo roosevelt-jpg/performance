@@ -34,7 +34,12 @@ type ApiPayload = {
   };
   checks: IntegrationCheck[];
   readyForLive: boolean;
-  storage: { fileExists: boolean; path: string; writable: boolean };
+  storage: {
+    fileExists: boolean;
+    path: string;
+    writable: boolean;
+    durable?: boolean;
+  };
   envSnippet?: string;
   error?: string;
 };
@@ -257,7 +262,7 @@ export function IntegrationsAdmin({
       setWhatsappTokenDraft("");
       setGmailPasswordDraft("");
       setOpenaiDraft("");
-      setMessage("Saved to data/integrations.local.json");
+      setMessage("Saved. You can fill the rest later.");
     } catch {
       setError("Save failed");
     } finally {
@@ -339,8 +344,8 @@ export function IntegrationsAdmin({
               Integrations
             </h1>
             <p className="mt-2 max-w-xl text-sm text-[var(--muted)]">
-              Configure CRM, calendar, and pricing APIs before launch. Values
-              save to a local config file; export to env for production hosting.
+              Configure CRM, calendar, and pricing. Save as soon as you paste a
+              value — the missing list below is a checklist, not a lock.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm sm:gap-4">
@@ -379,6 +384,14 @@ export function IntegrationsAdmin({
         <p className="mb-4 text-sm text-[var(--accent)]">{message}</p>
       ) : null}
 
+      {data && !data.storage.durable ? (
+        <p className="mb-4 rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--muted)]">
+          Save works with incomplete details. This host may reset the file on
+          deploy, so also paste SHOPIFY_STORE_DOMAIN=theformulaperformance.com
+          into the host environment when you go live.
+        </p>
+      ) : null}
+
       {data ? (
         <>
           <div
@@ -397,7 +410,7 @@ export function IntegrationsAdmin({
             <p className="mt-1 text-xs text-[var(--muted)]">
               Storage: {data.storage.path}
               {data.storage.fileExists ? " (file present)" : " (no file yet)"}
-              {data.storage.writable ? "" : " · read-only"}
+              {data.storage.durable ? "" : " · file may reset on deploy"}
             </p>
             <ul className="mt-4 space-y-2">
               {(
@@ -744,12 +757,22 @@ export function IntegrationsAdmin({
             </section>
 
             <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                Shopify
-              </h2>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  Shopify
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => void save()}
+                  disabled={saving}
+                  className="w-full rounded-md bg-[var(--accent)] px-3 py-2.5 text-xs font-semibold text-[var(--accent-fg)] disabled:opacity-50 sm:w-auto sm:py-1.5"
+                >
+                  {saving ? "Saving…" : "Save integrations"}
+                </button>
+              </div>
               <Field
                 label="Store domain"
-                hint="Shopify shop. Paste https://theformulaperformance.com/ if you like — we save the hostname."
+                hint="Kane's live shop is theformulaperformance.com. Paste it and click Save — you do not have to fill the rest of this page first."
               >
                 <input
                   className={inputClass}
@@ -1693,11 +1716,11 @@ export function IntegrationsAdmin({
             </section>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 border-t border-[var(--border)] pt-6 sm:flex-row sm:flex-wrap">
+          <div className="sticky bottom-0 z-10 mt-8 flex flex-col gap-3 border-t border-[var(--border)] bg-[var(--bg)]/95 py-4 backdrop-blur sm:flex-row sm:flex-wrap">
             <button
               type="button"
               onClick={save}
-              disabled={saving || !data.storage.writable}
+              disabled={saving}
               className="w-full rounded-md bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-fg)] disabled:opacity-50 sm:w-auto sm:py-2.5"
             >
               {saving ? "Saving…" : "Save integrations"}
