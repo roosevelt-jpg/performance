@@ -1,5 +1,5 @@
 import { DNA_QUESTIONS } from "./questions";
-import type { DnaAnswers, DnaCategoryId, DnaResult } from "./types";
+import type { DnaAnswers, DnaCategoryId, DnaQuestion, DnaResult } from "./types";
 import { loadIntegrations } from "@/lib/integrations/store";
 
 type LlmCopy = {
@@ -17,8 +17,8 @@ const CATEGORIES: DnaCategoryId[] = [
   "mindset",
 ];
 
-function chosenLabels(answers: DnaAnswers): string[] {
-  return DNA_QUESTIONS.map((q) => {
+function chosenLabels(answers: DnaAnswers, questions: DnaQuestion[]): string[] {
+  return questions.map((q) => {
     const opt = q.options.find((o) => o.id === answers[q.id]);
     return `${q.category} / ${q.title} → ${opt?.label ?? answers[q.id]}`;
   });
@@ -38,6 +38,7 @@ export async function narrateDnaReport(params: {
   result: DnaResult;
   answers: DnaAnswers;
   name: string;
+  questions?: DnaQuestion[];
 }): Promise<DnaResult> {
   const config = await loadIntegrations();
   const key = config.ai?.openaiApiKey?.trim();
@@ -69,7 +70,7 @@ export async function narrateDnaReport(params: {
           `Primary leak: ${params.result.primaryLeak.label} (${params.result.primaryLeak.score})`,
           `Flags: ${params.result.flags.join(", ") || "none"}`,
           "Answers:",
-          ...chosenLabels(params.answers),
+          ...chosenLabels(params.answers, params.questions ?? DNA_QUESTIONS),
           "Return JSON: { \"summary\": string, \"nextStep\": string, \"insights\": { \"journey\": string, \"training\": string, \"nutrition\": string, \"routine\": string, \"health\": string, \"mindset\": string } }",
           "Each insight one or two sentences. Do not mention a different score than the locked numbers. Do not recommend Pro or Elite prices. Do not invent a different path.",
         ].join("\n"),

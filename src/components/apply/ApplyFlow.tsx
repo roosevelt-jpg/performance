@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApplyVideo } from "@/components/apply/ApplyVideo";
 import { BrandLogo } from "@/components/layout/SiteChrome";
 import { useCms } from "@/components/cms/CmsProvider";
-import { APPLY_QUESTIONS, DEFAULT_APPLY_FUNNEL } from "@/lib/apply/defaults";
+import { DEFAULT_APPLY_FUNNEL, DEFAULT_APPLY_QUESTIONS } from "@/lib/apply/defaults";
 import {
   applyOutcomeKey,
   applyTierFromRoute,
@@ -131,35 +131,45 @@ export function ApplyFlow() {
   const threshold = funnel.watchPct || 60;
   const ctaReady = watchPct >= threshold || !vsl.youtubeUrl;
 
-  const question = APPLY_QUESTIONS[qIndex];
-  const totalScreens = APPLY_QUESTIONS.length + 1;
+  const questions = funnel.questions?.length
+    ? funnel.questions
+    : DEFAULT_APPLY_QUESTIONS;
+  const question = questions[qIndex];
+  const totalScreens = questions.length + 1;
   const progress = Math.round(
-    ((Math.min(qIndex, APPLY_QUESTIONS.length) + 1) / totalScreens) * 100,
+    ((Math.min(qIndex, questions.length) + 1) / totalScreens) * 100,
   );
 
-  async function choose(value: string) {
-    if (!question) return;
-    let patch: Partial<ApplyAnswers> = {};
-    if (question.id === "goal") patch = { goal: value };
-    if (question.id === "startingPoint") patch = { startingPoint: value };
-    if (question.id === "days") patch = { days: value as ApplyDaysId };
-    if (question.id === "timeline") patch = { timeline: value as ApplyTimelineId };
-    if (question.id === "coachHistory") patch = { coachHistory: value };
-    if (question.id === "investment") patch = { investment: value as ApplyInvestId };
-    if (question.id === "obstacles") {
+  function patchChoice(value: string): Partial<ApplyAnswers> {
+    if (!question) return {};
+    if (question.multi || question.id === "obstacles") {
       const next = answers.obstacles.includes(value)
         ? answers.obstacles.filter((item) => item !== value)
         : [...answers.obstacles, value];
-      setAnswers((a) => ({ ...a, obstacles: next }));
+      return { obstacles: next };
+    }
+    if (question.id === "goal") return { goal: value };
+    if (question.id === "startingPoint") return { startingPoint: value };
+    if (question.id === "days") return { days: value as ApplyDaysId };
+    if (question.id === "timeline") return { timeline: value as ApplyTimelineId };
+    if (question.id === "coachHistory") return { coachHistory: value };
+    if (question.id === "investment") return { investment: value as ApplyInvestId };
+    return {};
+  }
+
+  async function choose(value: string) {
+    if (!question) return;
+    const patch = patchChoice(value);
+    if (question.multi || question.id === "obstacles") {
+      setAnswers((a) => ({ ...a, ...patch }));
       return;
     }
     setAnswers((a) => ({ ...a, ...patch }));
-    if (question.multi) return;
     await goNext({ ...answers, ...patch }, question.id);
   }
 
   async function goNext(nextAnswers = answers, droppedAt = question?.id) {
-    if (qIndex < APPLY_QUESTIONS.length - 1) {
+    if (qIndex < questions.length - 1) {
       setQIndex((i) => i + 1);
       void persist({
         step: "qualify",
@@ -168,7 +178,7 @@ export function ApplyFlow() {
       });
       return;
     }
-    setQIndex(APPLY_QUESTIONS.length);
+    setQIndex(questions.length);
     void persist({
       step: "qualify",
       patch: nextAnswers,
@@ -345,8 +355,8 @@ export function ApplyFlow() {
             <div className="mt-6 space-y-2">
               {optionLabels.map((opt) => {
                 const selected =
-                  question.id === "obstacles"
-                    ? answers.obstacles.includes(opt.label)
+                  question.multi || question.id === "obstacles"
+                    ? answers.obstacles.includes(opt.id)
                     : false;
                 return (
                   <button
@@ -387,10 +397,10 @@ export function ApplyFlow() {
               <div className="h-full w-full bg-[var(--accent)]" />
             </div>
             <h1 className="mt-6 font-heading text-[clamp(1.5rem,4vw,2.1rem)] text-[var(--fg)]">
-              Last thing. Where should we reach you?
+              {funnel.mobileTitle}
             </h1>
             <p className="mt-3 text-sm text-[var(--muted)]">
-              Call confirmation or the group invite lands here.
+              {funnel.mobileBody}
             </p>
             <label className="mt-8 block text-sm font-medium">
               Mobile, with country code
@@ -410,7 +420,7 @@ export function ApplyFlow() {
               disabled={saving}
               className="mt-6 inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--accent-fg)]"
             >
-              {saving ? "Routing…" : "See your next step"}
+              {saving ? "Routing…" : funnel.mobileCta}
             </button>
           </form>
         ) : null}

@@ -12,6 +12,7 @@ type Stage = "intro" | "quiz" | "contact" | "result";
 
 export function DnaFlow() {
   const copy = useCms().dna ?? DEFAULT_DNA;
+  const questions = copy.questions?.length ? copy.questions : DNA_QUESTIONS;
   const [stage, setStage] = useState<Stage>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -25,10 +26,10 @@ export function DnaFlow() {
   const [saving, setSaving] = useState(false);
   const [nextHref, setNextHref] = useState("/apply");
 
-  const question = DNA_QUESTIONS[index];
+  const question = questions[index];
   const { categories: liveScores, overall } = useMemo(
-    () => liveDnaBoard(answers),
-    [answers],
+    () => liveDnaBoard(answers, copy),
+    [answers, copy],
   );
 
   async function finish(e: React.FormEvent) {
@@ -112,13 +113,13 @@ export function DnaFlow() {
         {stage === "quiz" && question ? (
           <>
             <p className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-              {copy.eyebrow} · {index + 1}/{DNA_QUESTIONS.length}
+              {copy.eyebrow} · {index + 1}/{questions.length}
             </p>
             <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--border)]">
               <div
                 className="h-full bg-[var(--accent)]"
                 style={{
-                  width: `${Math.round(((index + 1) / DNA_QUESTIONS.length) * 100)}%`,
+                  width: `${Math.round(((index + 1) / questions.length) * 100)}%`,
                 }}
               />
             </div>
@@ -155,7 +156,7 @@ export function DnaFlow() {
                   type="button"
                   onClick={() => {
                     setAnswers((current) => ({ ...current, [question.id]: opt.id }));
-                    if (index < DNA_QUESTIONS.length - 1) {
+                    if (index < questions.length - 1) {
                       setIndex((i) => i + 1);
                     } else {
                       setStage("contact");

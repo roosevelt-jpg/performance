@@ -6,11 +6,20 @@ export type DnaCategoryId =
   | "health"
   | "mindset";
 
+export type DnaOptionFlag =
+  | "looking"
+  | "uncommitted"
+  | "no_accountability"
+  | "low_frequency"
+  | "nutrition_leak"
+  | "no_slot";
+
 export type DnaOption = {
   id: string;
   label: string;
   /** 0–3. Higher is closer to Kane's standard. */
   score: number;
+  flags?: DnaOptionFlag[];
 };
 
 export type DnaQuestion = {
@@ -27,6 +36,15 @@ export type DnaCoach = {
   forPath: "call" | "challenge" | "group";
 };
 
+export type DnaGates = {
+  callMinOverall: number;
+  callMinTraining: number;
+  callMinMindset: number;
+  challengeMinOverall: number;
+  challengeMinTraining: number;
+  challengeMinNutrition: number;
+};
+
 export type CmsDna = {
   enabled: boolean;
   eyebrow: string;
@@ -37,6 +55,9 @@ export type CmsDna = {
   resultHeading: string;
   sendingNote: string;
   coaches: DnaCoach[];
+  questions: DnaQuestion[];
+  weights: Record<DnaCategoryId, number>;
+  gates: DnaGates;
 };
 
 export type DnaAnswers = Record<string, string>;

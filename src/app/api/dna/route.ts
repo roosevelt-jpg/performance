@@ -33,7 +33,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
-  const unanswered = DNA_QUESTIONS.filter((q) => !answers[q.id]);
+  const cms = await loadCms();
+  const questions = cms.dna.questions?.length
+    ? cms.dna.questions
+    : DNA_QUESTIONS;
+  const unanswered = questions.filter((q) => !answers[q.id]);
   if (unanswered.length) {
     return NextResponse.json(
       { error: "Finish every question to get a score." },
@@ -41,12 +45,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const cms = await loadCms();
-  const locked = scoreDna(sanitizePlainDeep(answers), cms.dna.coaches);
+  const locked = scoreDna(sanitizePlainDeep(answers), cms.dna);
   const result = await narrateDnaReport({
     result: locked,
     answers: sanitizePlainDeep(answers),
     name,
+    questions,
   });
   const token = randomBytes(18).toString("hex");
   const record = await saveDnaReport({

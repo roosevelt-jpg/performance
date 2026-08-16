@@ -149,13 +149,29 @@ export function mergeCms(
     high: { ...base.applyFunnel.high, ...out.applyFunnel?.high },
     low: { ...base.applyFunnel.low, ...out.applyFunnel?.low },
     nurture: { ...base.applyFunnel.nurture, ...out.applyFunnel?.nurture },
+    routing: {
+      ...base.applyFunnel.routing,
+      ...out.applyFunnel?.routing,
+    },
+    questions:
+      Array.isArray(out.applyFunnel?.questions) &&
+      out.applyFunnel.questions.length
+        ? out.applyFunnel.questions
+        : structuredClone(base.applyFunnel.questions),
   };
   out.dna = {
     ...base.dna,
     ...(out.dna ?? {}),
-    coaches: Array.isArray(out.dna?.coaches)
-      ? out.dna.coaches
-      : structuredClone(base.dna.coaches),
+    coaches:
+      Array.isArray(out.dna?.coaches) && out.dna.coaches.length
+        ? out.dna.coaches
+        : structuredClone(base.dna.coaches),
+    questions:
+      Array.isArray(out.dna?.questions) && out.dna.questions.length
+        ? out.dna.questions
+        : structuredClone(base.dna.questions),
+    weights: { ...base.dna.weights, ...out.dna?.weights },
+    gates: { ...base.dna.gates, ...out.dna?.gates },
   };
   if (out.home.tiersSection.enabled === undefined) {
     out.home.tiersSection.enabled = base.home.tiersSection.enabled;

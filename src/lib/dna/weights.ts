@@ -16,12 +16,13 @@ export const DNA_WEIGHTS: Record<DnaCategoryId, number> = {
 
 export function weightedAverage(
   scores: Array<{ id: DnaCategoryId; score: number }>,
+  weights: Record<DnaCategoryId, number> = DNA_WEIGHTS,
 ): number {
   if (!scores.length) return 0;
   let sum = 0;
   let weight = 0;
   for (const row of scores) {
-    const w = DNA_WEIGHTS[row.id] ?? 1;
+    const w = weights[row.id] ?? 1;
     sum += row.score * w;
     weight += w;
   }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DNA_QUESTIONS } from "./questions";
+import { DEFAULT_DNA, DNA_QUESTIONS } from "./questions";
 import { scoreDna } from "./score";
 
 function fill(scoreId: string) {
@@ -69,5 +69,13 @@ describe("scoreDna", () => {
     const result = scoreDna({ ...fill("a"), m2: "c" });
     expect(result.path).toBe("challenge");
     expect(result.flags).toContain("uncommitted");
+  });
+
+  it("honours CMS gate overlay from Funnel", () => {
+    const result = scoreDna(fill("a"), {
+      ...DEFAULT_DNA,
+      gates: { ...DEFAULT_DNA.gates, callMinOverall: 101 },
+    });
+    expect(result.path).toBe("challenge");
   });
 });

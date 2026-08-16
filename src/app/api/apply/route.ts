@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { newApplyId, upsertApplyLead, getApplyLead } from "@/lib/apply/store";
 import { applyTierFromRoute, routeApplyLead } from "@/lib/apply/routeLead";
 import type { ApplyAnswers, ApplyLead } from "@/lib/apply/types";
+import { loadCms } from "@/lib/cms/store";
 import { loadIntegrations } from "@/lib/integrations/store";
 import { sanitizePlainDeep } from "@/lib/text/plain";
 
@@ -55,7 +56,9 @@ export async function POST(request: Request) {
   });
 
   const finish = Boolean(body.finish);
-  const route = finish ? routeApplyLead(answers) : existing?.route || "";
+  const route = finish
+    ? routeApplyLead(answers, (await loadCms()).applyFunnel.routing)
+    : existing?.route || "";
   const lead: ApplyLead = {
     id: existing?.id || body.id || newApplyId(),
     createdAt: existing?.createdAt || now,

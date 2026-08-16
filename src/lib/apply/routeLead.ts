@@ -1,24 +1,30 @@
-import type { ApplyAnswers, ApplyInvestId, ApplyRoute } from "./types";
-
-const HIGH_BUDGET: ApplyInvestId[] = ["500_1000", "1000_plus"];
+import { DEFAULT_APPLY_ROUTING } from "./defaults";
+import type { ApplyAnswers, ApplyRoute, ApplyRouting } from "./types";
 
 /**
  * Spec 2 routing. First match wins.
  * Rule 4 sends high-budget, sub-2-day applicants to the Challenge
  * so 1:1 stays for people who can actually train.
  */
-export function routeApplyLead(answers: ApplyAnswers): ApplyRoute {
-  if (answers.investment === "under_150") return "nurture";
-  if (answers.timeline === "looking") return "nurture";
-  if (answers.investment === "150_500") return "low";
+export function routeApplyLead(
+  answers: ApplyAnswers,
+  routing: ApplyRouting = DEFAULT_APPLY_ROUTING,
+): ApplyRoute {
+  const investment = answers.investment;
+  const timeline = answers.timeline;
+  const days = answers.days;
+
+  if (routing.nurtureInvestmentIds.includes(investment)) return "nurture";
+  if (routing.nurtureTimelineIds.includes(timeline)) return "nurture";
+  if (routing.lowInvestmentIds.includes(investment)) return "low";
   if (
-    HIGH_BUDGET.includes(answers.investment as ApplyInvestId) &&
-    answers.days === "under_two"
+    routing.highBudgetInvestmentIds.includes(investment) &&
+    routing.lowDaysIds.includes(days)
   ) {
     return "low";
   }
-  if (answers.investment === "500_1000") return "high_pro";
-  if (answers.investment === "1000_plus") return "high_elite";
+  if (routing.highProInvestmentIds.includes(investment)) return "high_pro";
+  if (routing.highEliteInvestmentIds.includes(investment)) return "high_elite";
   return "nurture";
 }
 

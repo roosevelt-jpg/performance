@@ -1,4 +1,99 @@
-import type { CmsApplyFunnel } from "./types";
+import type {
+  ApplyQuestion,
+  ApplyRouting,
+  CmsApplyFunnel,
+} from "./types";
+
+export const DEFAULT_APPLY_ROUTING: ApplyRouting = {
+  nurtureInvestmentIds: ["under_150"],
+  nurtureTimelineIds: ["looking"],
+  lowInvestmentIds: ["150_500"],
+  highBudgetInvestmentIds: ["500_1000", "1000_plus"],
+  lowDaysIds: ["under_two"],
+  highProInvestmentIds: ["500_1000"],
+  highEliteInvestmentIds: ["1000_plus"],
+};
+
+export const DEFAULT_APPLY_QUESTIONS: ApplyQuestion[] = [
+  {
+    id: "goal",
+    title: "What are you trying to change?",
+    options: [
+      { id: "Lose fat", label: "Lose fat" },
+      { id: "Build muscle", label: "Build muscle" },
+      { id: "Get stronger and fitter", label: "Get stronger and fitter" },
+      {
+        id: "Rebuild after a break or injury",
+        label: "Rebuild after a break or injury",
+      },
+    ],
+  },
+  {
+    id: "startingPoint",
+    title: "Where are you starting from?",
+    options: [
+      { id: "I train consistently already", label: "I train consistently already" },
+      { id: "I train on and off", label: "I train on and off" },
+      { id: "I have stopped completely", label: "I have stopped completely" },
+      {
+        id: "I have never trained properly",
+        label: "I have never trained properly",
+      },
+    ],
+  },
+  {
+    id: "days",
+    title: "Realistically, how many days a week can you train?",
+    options: [
+      { id: "five_plus", label: "Five or more" },
+      { id: "three_four", label: "Three to four" },
+      { id: "two", label: "Two" },
+      { id: "under_two", label: "Fewer than two" },
+    ],
+  },
+  {
+    id: "obstacles",
+    title: "What has got in the way before? Choose any that apply.",
+    multi: true,
+    options: [
+      { id: "Staying consistent", label: "Staying consistent" },
+      { id: "Not knowing what to do", label: "Not knowing what to do" },
+      { id: "Nutrition", label: "Nutrition" },
+      { id: "Time", label: "Time" },
+      { id: "Injury", label: "Injury" },
+    ],
+  },
+  {
+    id: "timeline",
+    title: "How soon do you want to start?",
+    options: [
+      { id: "immediately", label: "Immediately" },
+      { id: "two_weeks", label: "Within two weeks" },
+      { id: "month", label: "Within a month" },
+      { id: "looking", label: "Just looking for now" },
+    ],
+  },
+  {
+    id: "coachHistory",
+    title: "Have you worked with a coach before?",
+    options: [
+      { id: "Yes, I have one now", label: "Yes, I have one now" },
+      { id: "Yes, in the past", label: "Yes, in the past" },
+      { id: "Never", label: "Never" },
+    ],
+  },
+  {
+    id: "investment",
+    title:
+      "Coaching with Kane directly starts in the hundreds per month. If we agree it is the right fit, what are you ready to put into getting this right?",
+    options: [
+      { id: "1000_plus", label: "£1,000 or more" },
+      { id: "500_1000", label: "£500 to £1,000" },
+      { id: "150_500", label: "£150 to £500" },
+      { id: "under_150", label: "Under £150 right now" },
+    ],
+  },
+];
 
 export const DEFAULT_APPLY_FUNNEL: CmsApplyFunnel = {
   enabled: true,
@@ -12,6 +107,9 @@ export const DEFAULT_APPLY_FUNNEL: CmsApplyFunnel = {
   vslCta: "See if you qualify",
   escapeHatchLabel: "Not ready for coaching? Join the free group.",
   progressLabel: "Application opens shortly",
+  mobileTitle: "Last thing. Where should we reach you?",
+  mobileBody: "Call confirmation or the group invite lands here.",
+  mobileCta: "See your next step",
   high: {
     heading: "You qualify, {name}. Book your call.",
     body: "Kane reviews every application himself and will be briefed on your answers before you join. Pick a time that works. Twenty minutes, no pressure, and a straight answer either way on whether this is right for you.",
@@ -36,81 +134,9 @@ export const DEFAULT_APPLY_FUNNEL: CmsApplyFunnel = {
     secondaryLabel: "Run your Performance DNA",
     secondaryHref: "/dna",
   },
+  questions: DEFAULT_APPLY_QUESTIONS,
+  routing: DEFAULT_APPLY_ROUTING,
 };
 
-export const APPLY_QUESTIONS = [
-  {
-    id: "goal",
-    title: "What are you trying to change?",
-    multi: false,
-    options: [
-      "Lose fat",
-      "Build muscle",
-      "Get stronger and fitter",
-      "Rebuild after a break or injury",
-    ],
-  },
-  {
-    id: "startingPoint",
-    title: "Where are you starting from?",
-    multi: false,
-    options: [
-      "I train consistently already",
-      "I train on and off",
-      "I have stopped completely",
-      "I have never trained properly",
-    ],
-  },
-  {
-    id: "days",
-    title: "Realistically, how many days a week can you train?",
-    multi: false,
-    options: [
-      { id: "five_plus", label: "Five or more" },
-      { id: "three_four", label: "Three to four" },
-      { id: "two", label: "Two" },
-      { id: "under_two", label: "Fewer than two" },
-    ],
-  },
-  {
-    id: "obstacles",
-    title: "What has got in the way before? Choose any that apply.",
-    multi: true,
-    options: [
-      "Staying consistent",
-      "Not knowing what to do",
-      "Nutrition",
-      "Time",
-      "Injury",
-    ],
-  },
-  {
-    id: "timeline",
-    title: "How soon do you want to start?",
-    multi: false,
-    options: [
-      { id: "immediately", label: "Immediately" },
-      { id: "two_weeks", label: "Within two weeks" },
-      { id: "month", label: "Within a month" },
-      { id: "looking", label: "Just looking for now" },
-    ],
-  },
-  {
-    id: "coachHistory",
-    title: "Have you worked with a coach before?",
-    multi: false,
-    options: ["Yes, I have one now", "Yes, in the past", "Never"],
-  },
-  {
-    id: "investment",
-    title:
-      "Coaching with Kane directly starts in the hundreds per month. If we agree it is the right fit, what are you ready to put into getting this right?",
-    multi: false,
-    options: [
-      { id: "1000_plus", label: "£1,000 or more" },
-      { id: "500_1000", label: "£500 to £1,000" },
-      { id: "150_500", label: "£150 to £500" },
-      { id: "under_150", label: "Under £150 right now" },
-    ],
-  },
-] as const;
+/** @deprecated use DEFAULT_APPLY_QUESTIONS / CMS applyFunnel.questions */
+export const APPLY_QUESTIONS = DEFAULT_APPLY_QUESTIONS;

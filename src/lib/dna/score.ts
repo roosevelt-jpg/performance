@@ -1,32 +1,67 @@
-import { DNA_CATEGORY_LABELS, DNA_QUESTIONS, DEFAULT_DNA } from "./questions";
+import {
+  DNA_CATEGORY_LABELS,
+  DNA_QUESTIONS,
+  DEFAULT_DNA,
+  DEFAULT_DNA_GATES,
+} from "./questions";
 import { insightFor } from "./insights";
-import { weightedAverage } from "./weights";
+import { DNA_WEIGHTS, weightedAverage } from "./weights";
 import type {
   CmsDna,
   DnaAnswers,
   DnaCategoryId,
   DnaCategoryScore,
+  DnaGates,
   DnaLiveBoard,
+  DnaOptionFlag,
+  DnaQuestion,
   DnaResult,
 } from "./types";
 
 export { DNA_WEIGHTS, weightedAverage } from "./weights";
 
-function optionScore(questionId: string, optionId: string | undefined): number {
-  const q = DNA_QUESTIONS.find((item) => item.id === questionId);
-  const chosen = q?.options.find((opt) => opt.id === optionId);
-  return chosen ? (chosen.score / 3) * 100 : 0;
+function dnaConfig(overlay?: CmsDna): CmsDna {
+  if (!overlay) return DEFAULT_DNA;
+  return {
+    ...DEFAULT_DNA,
+    ...overlay,
+    coaches: overlay.coaches?.length ? overlay.coaches : DEFAULT_DNA.coaches,
+    questions: overlay.questions?.length
+      ? overlay.questions
+      : DEFAULT_DNA.questions,
+    weights: { ...DEFAULT_DNA.weights, ...overlay.weights },
+    gates: { ...DEFAULT_DNA.gates, ...overlay.gates },
+  };
 }
 
-function optionId(questionId: string, answers: DnaAnswers): string {
-  return answers[questionId] || "";
+function questionsOf(cms: CmsDna): DnaQuestion[] {
+  return cms.questions?.length ? cms.questions : DNA_QUESTIONS;
+}
+
+function weightsOf(cms: CmsDna) {
+  return { ...DNA_WEIGHTS, ...cms.weights };
+}
+
+function gatesOf(cms: CmsDna): DnaGates {
+  return { ...DEFAULT_DNA_GATES, ...cms.gates };
+}
+
+function selectedFlags(questions: DnaQuestion[], answers: DnaAnswers): Set<DnaOptionFlag> {
+  const flags = new Set<DnaOptionFlag>();
+  for (const q of questions) {
+    const chosen = q.options.find((opt) => opt.id === answers[q.id]);
+    for (const flag of chosen?.flags ?? []) flags.add(flag);
+  }
+  return flags;
 }
 
 export function categoryScoresFromAnswers(
   answers: DnaAnswers,
+  cms?: CmsDna,
 ): DnaCategoryScore[] {
+  const questions = questionsOf(dnaConfig(cms));
   const groups = new Map<DnaCategoryId, { scores: number[]; ids: string[] }>();
-  for (const q of DNA_QUESTIONS) {
+  for (const q of questions) {
     const chosen = q.options.find((opt) => opt.id === answers[q.id]);
     if (!chosen) continue;
     const row = groups.get(q.category) ?? { scores: [], ids: [] };
@@ -47,17 +82,26 @@ export function categoryScoresFromAnswers(
           id,
           label: DNA_CATEGORY_LABELS[id],
           score,
-          insight: insightFor(id, row.ids[0] || "", row.ids[1] || row.ids[0] || "", score),
+          insight: insightFor(
+            id,
+            row.ids[0] || "",
+            row.ids[1] || row.ids[0] || "",
+            score,
+          ),
         },
       ];
     },
   );
 }
 
-export function liveDnaBoard(answers: DnaAnswers): DnaLiveBoard {
+export function liveDnaBoard(
+  answers: DnaAnswers,
+  cms?: CmsDna,
+): DnaLiveBoard {
+  const conf = dnaConfig(cms);
   const categories = (Object.keys(DNA_CATEGORY_LABELS) as DnaCategoryId[]).map(
     (id) => {
-      const row = categoryScoresFromAnswers(answers).find((c) => c.id === id);
+      const row = categoryScoresFromAnswers(answers, conf).find((c) => c.id === id);
       return {
         id,
         label: DNA_CATEGORY_LABELS[id],
@@ -70,63 +114,54 @@ export function liveDnaBoard(answers: DnaAnswers): DnaLiveBoard {
     .map((c) => ({ id: c.id, score: c.score as number }));
   return {
     categories,
-    overall: weightedAverage(scored),
+    overall: weightedAverage(scored, weightsOf(conf)),
   };
 }
 
 function routePath(
-  answers: DnaAnswers,
+  flags: Set<DnaOptionFlag>,
   categories: DnaCategoryScore[],
   overall: number,
+  gates: DnaGates,
 ): DnaResult["path"] {
-  const looking = optionId("m2", answers) === "d";
-  const refusesAccountability = optionId("m1", answers) === "d";
-  const uncommitted =
-    optionId("m2", answers) === "c" || optionId("m2", answers) === "d";
-  const lowFrequency =
-    optionId("t1", answers) === "c" || optionId("t1", answers) === "d";
   const training = categories.find((c) => c.id === "training")?.score ?? 0;
   const mindset = categories.find((c) => c.id === "mindset")?.score ?? 0;
   const nutrition = categories.find((c) => c.id === "nutrition")?.score ?? 0;
 
-  // Wanting the product matters more than a high average.
-  if (looking || refusesAccountability) return "group";
+  if (flags.has("looking") || flags.has("no_accountability")) return "group";
 
-  // Sub-3 real sessions cannot deliver 1:1. Same logic as apply Rule 4.
-  if (lowFrequency) {
-    return overall >= 40 || training >= 40 || nutrition >= 50
+  if (flags.has("low_frequency")) {
+    return overall >= gates.challengeMinOverall ||
+      training >= gates.challengeMinTraining ||
+      nutrition >= gates.challengeMinNutrition
       ? "challenge"
       : "group";
   }
 
   if (
-    overall >= 72 &&
-    training >= 60 &&
-    mindset >= 55 &&
-    !uncommitted
+    overall >= gates.callMinOverall &&
+    training >= gates.callMinTraining &&
+    mindset >= gates.callMinMindset &&
+    !flags.has("uncommitted")
   ) {
     return "call";
   }
 
-  if (overall >= 40 || training >= 40) return "challenge";
+  if (overall >= gates.challengeMinOverall || training >= gates.challengeMinTraining) {
+    return "challenge";
+  }
   return "group";
 }
 
-function flagsFor(answers: DnaAnswers): string[] {
-  const flags: string[] = [];
-  if (optionId("m2", answers) === "d") flags.push("just_looking");
-  if (optionId("m2", answers) === "c") flags.push("uncommitted");
-  if (optionId("m1", answers) === "d") flags.push("no_accountability");
-  if (optionId("t1", answers) === "c" || optionId("t1", answers) === "d") {
-    flags.push("low_frequency");
-  }
-  if (optionId("n1", answers) === "c" || optionId("n1", answers) === "d") {
-    flags.push("nutrition_leak");
-  }
-  if (optionId("r1", answers) === "c" || optionId("r1", answers) === "d") {
-    flags.push("no_slot");
-  }
-  return flags;
+function flagsList(flags: Set<DnaOptionFlag>): string[] {
+  const out: string[] = [];
+  if (flags.has("looking")) out.push("just_looking");
+  if (flags.has("uncommitted")) out.push("uncommitted");
+  if (flags.has("no_accountability")) out.push("no_accountability");
+  if (flags.has("low_frequency")) out.push("low_frequency");
+  if (flags.has("nutrition_leak")) out.push("nutrition_leak");
+  if (flags.has("no_slot")) out.push("no_slot");
+  return out;
 }
 
 function primaryLeak(categories: DnaCategoryScore[]): DnaCategoryScore {
@@ -174,18 +209,25 @@ function nextStepFor(
 
 export function scoreDna(
   answers: DnaAnswers,
-  coaches = DEFAULT_DNA.coaches,
+  overlay?: CmsDna,
 ): DnaResult {
+  const cms = dnaConfig(overlay);
+  const questions = questionsOf(cms);
   const filled: DnaAnswers = { ...answers };
-  for (const q of DNA_QUESTIONS) {
-    if (!filled[q.id]) filled[q.id] = "d";
+  for (const q of questions) {
+    if (!filled[q.id]) {
+      filled[q.id] = q.options[q.options.length - 1]?.id ?? "d";
+    }
   }
 
   const categories = (Object.keys(DNA_CATEGORY_LABELS) as DnaCategoryId[]).map(
     (id) => {
-      const qs = DNA_QUESTIONS.filter((q) => q.category === id);
-      const vals = qs.map((q) => optionScore(q.id, filled[q.id]));
-      const ids = qs.map((q) => filled[q.id] || "d");
+      const qs = questions.filter((q) => q.category === id);
+      const vals = qs.map((q) => {
+        const chosen = q.options.find((opt) => opt.id === filled[q.id]);
+        return chosen ? (chosen.score / 3) * 100 : 0;
+      });
+      const ids = qs.map((q) => filled[q.id] || "");
       const score = Math.round(
         vals.reduce((sum, n) => sum + n, 0) / Math.max(vals.length, 1),
       );
@@ -198,12 +240,13 @@ export function scoreDna(
     },
   );
 
-  const overall = weightedAverage(categories);
+  const overall = weightedAverage(categories, weightsOf(cms));
   const leak = primaryLeak(categories);
-  const path = routePath(filled, categories, overall);
+  const flags = selectedFlags(questions, filled);
+  const path = routePath(flags, categories, overall, gatesOf(cms));
   const coach =
-    coaches.find((c) => c.forPath === path) ??
-    coaches[coaches.length - 1] ??
+    cms.coaches.find((c) => c.forPath === path) ??
+    cms.coaches[cms.coaches.length - 1] ??
     DEFAULT_DNA.coaches[0];
 
   return {
@@ -214,7 +257,7 @@ export function scoreDna(
     summary: summaryFor(overall, path, leak),
     nextStep: nextStepFor(path, leak),
     primaryLeak: { id: leak.id, label: leak.label, score: leak.score },
-    flags: flagsFor(filled),
+    flags: flagsList(flags),
     copySource: "native",
   };
 }

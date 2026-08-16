@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_APPLY_ROUTING } from "./defaults";
 import { routeApplyLead } from "./routeLead";
 import type { ApplyAnswers } from "./types";
 
@@ -54,5 +55,17 @@ describe("routeApplyLead", () => {
     expect(routeApplyLead({ ...base, investment: "1000_plus" })).toBe(
       "high_elite",
     );
+  });
+
+  it("uses CMS routing overlay for custom investment ids", () => {
+    expect(
+      routeApplyLead(
+        { ...base, investment: "premium" },
+        {
+          ...DEFAULT_APPLY_ROUTING,
+          highEliteInvestmentIds: ["premium"],
+        },
+      ),
+    ).toBe("high_elite");
   });
 });

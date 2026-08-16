@@ -1,4 +1,5 @@
-import type { CmsDna, DnaQuestion } from "./types";
+import type { CmsDna, DnaGates, DnaQuestion } from "./types";
+import { DNA_WEIGHTS } from "./weights";
 
 export const DNA_CATEGORY_LABELS = {
   journey: "Journey",
@@ -9,37 +10,15 @@ export const DNA_CATEGORY_LABELS = {
   mindset: "Mindset",
 } as const;
 
-export const DEFAULT_DNA: CmsDna = {
-  enabled: true,
-  eyebrow: "Performance DNA",
-  heading: "Find out exactly where follow-through is leaking.",
-  body: "Two minutes. Training, nutrition, routine, health and mindset — then a score, a next step, and a coach from Kane's team. The report lands on WhatsApp and email.",
-  ctaLabel: "Run your Performance DNA",
-  href: "/dna",
-  resultHeading: "Your Performance DNA",
-  sendingNote:
-    "We'll send the full PDF to your WhatsApp and email as soon as those channels are connected.",
-  coaches: [
-    {
-      id: "kane",
-      name: "Kane Mousah",
-      role: "Head coach · 1:1",
-      forPath: "call",
-    },
-    {
-      id: "team",
-      name: "Kane's performance team",
-      role: "8-Week Challenge coach",
-      forPath: "challenge",
-    },
-    {
-      id: "community",
-      name: "The Formula community",
-      role: "Free group standard",
-      forPath: "group",
-    },
-  ],
+export const DEFAULT_DNA_GATES: DnaGates = {
+  callMinOverall: 72,
+  callMinTraining: 60,
+  callMinMindset: 55,
+  challengeMinOverall: 40,
+  challengeMinTraining: 40,
+  challengeMinNutrition: 50,
 };
+
 
 export const DNA_QUESTIONS: DnaQuestion[] = [
   {
@@ -71,8 +50,8 @@ export const DNA_QUESTIONS: DnaQuestion[] = [
     options: [
       { id: "a", label: "Five or more", score: 3 },
       { id: "b", label: "Three to four", score: 2 },
-      { id: "c", label: "One or two", score: 1 },
-      { id: "d", label: "None I can count on", score: 0 },
+      { id: "c", label: "One or two", score: 1, flags: ["low_frequency"] },
+      { id: "d", label: "None I can count on", score: 0, flags: ["low_frequency"] },
     ],
   },
   {
@@ -93,8 +72,8 @@ export const DNA_QUESTIONS: DnaQuestion[] = [
     options: [
       { id: "a", label: "Protein, portions and a plan I actually follow", score: 3 },
       { id: "b", label: "Good most days, messy on weekends", score: 2 },
-      { id: "c", label: "I know what to do. I don't do it", score: 1 },
-      { id: "d", label: "No structure at all", score: 0 },
+      { id: "c", label: "I know what to do. I don't do it", score: 1, flags: ["nutrition_leak"] },
+      { id: "d", label: "No structure at all", score: 0, flags: ["nutrition_leak"] },
     ],
   },
   {
@@ -115,8 +94,8 @@ export const DNA_QUESTIONS: DnaQuestion[] = [
     options: [
       { id: "a", label: "Yes — days and times are locked", score: 3 },
       { id: "b", label: "Roughly — I fit it in", score: 2 },
-      { id: "c", label: "Only when I feel like it", score: 1 },
-      { id: "d", label: "Not at all", score: 0 },
+      { id: "c", label: "Only when I feel like it", score: 1, flags: ["no_slot"] },
+      { id: "d", label: "Not at all", score: 0, flags: ["no_slot"] },
     ],
   },
   {
@@ -160,7 +139,7 @@ export const DNA_QUESTIONS: DnaQuestion[] = [
       { id: "a", label: "A coach, and it works", score: 3 },
       { id: "b", label: "Me — some weeks", score: 2 },
       { id: "c", label: "Nobody. That's the gap", score: 1 },
-      { id: "d", label: "I don't want to be held accountable yet", score: 0 },
+      { id: "d", label: "I don't want to be held accountable yet", score: 0, flags: ["no_accountability"] },
     ],
   },
   {
@@ -170,8 +149,44 @@ export const DNA_QUESTIONS: DnaQuestion[] = [
     options: [
       { id: "a", label: "Ready now. I want the standard", score: 3 },
       { id: "b", label: "Ready if the fit is right", score: 2 },
-      { id: "c", label: "Curious — not committed yet", score: 1 },
-      { id: "d", label: "Just looking", score: 0 },
+      { id: "c", label: "Curious — not committed yet", score: 1, flags: ["uncommitted"] },
+      { id: "d", label: "Just looking", score: 0, flags: ["looking"] },
     ],
   },
 ];
+
+export const DEFAULT_DNA: CmsDna = {
+  enabled: true,
+  eyebrow: "Performance DNA",
+  heading: "Find out exactly where follow-through is leaking.",
+  body: "Two minutes. Training, nutrition, routine, health and mindset — then a score, a next step, and a coach from Kane's team. The report lands on WhatsApp and email.",
+  ctaLabel: "Run your Performance DNA",
+  href: "/dna",
+  resultHeading: "Your Performance DNA",
+  sendingNote:
+    "We'll send the full PDF to your WhatsApp and email as soon as those channels are connected.",
+  coaches: [
+    {
+      id: "kane",
+      name: "Kane Mousah",
+      role: "Head coach · 1:1",
+      forPath: "call",
+    },
+    {
+      id: "team",
+      name: "Kane's performance team",
+      role: "8-Week Challenge coach",
+      forPath: "challenge",
+    },
+    {
+      id: "community",
+      name: "The Formula community",
+      role: "Free group standard",
+      forPath: "group",
+    },
+  ],
+  questions: DNA_QUESTIONS,
+  weights: { ...DNA_WEIGHTS },
+  gates: { ...DEFAULT_DNA_GATES },
+};
+

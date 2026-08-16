@@ -1,12 +1,18 @@
 export type ApplyRoute = "high_pro" | "high_elite" | "low" | "nurture";
 
-export type ApplyDaysId = "five_plus" | "three_four" | "two" | "under_two";
+export type ApplyDaysId = "five_plus" | "three_four" | "two" | "under_two" | string;
 export type ApplyTimelineId =
   | "immediately"
   | "two_weeks"
   | "month"
-  | "looking";
-export type ApplyInvestId = "1000_plus" | "500_1000" | "150_500" | "under_150";
+  | "looking"
+  | string;
+export type ApplyInvestId =
+  | "1000_plus"
+  | "500_1000"
+  | "150_500"
+  | "under_150"
+  | string;
 
 export type ApplyAnswers = {
   name: string;
@@ -42,6 +48,29 @@ export type ApplyOutcomeCopy = {
   secondaryHref: string;
 };
 
+export type ApplyQuestionOption = {
+  id: string;
+  label: string;
+};
+
+export type ApplyQuestion = {
+  id: string;
+  title: string;
+  multi?: boolean;
+  options: ApplyQuestionOption[];
+};
+
+/** First match wins. IDs must match option ids on the questions. */
+export type ApplyRouting = {
+  nurtureInvestmentIds: string[];
+  nurtureTimelineIds: string[];
+  lowInvestmentIds: string[];
+  highBudgetInvestmentIds: string[];
+  lowDaysIds: string[];
+  highProInvestmentIds: string[];
+  highEliteInvestmentIds: string[];
+};
+
 export type CmsApplyFunnel = {
   enabled: boolean;
   gateEnabled: boolean;
@@ -53,7 +82,12 @@ export type CmsApplyFunnel = {
   vslCta: string;
   escapeHatchLabel: string;
   progressLabel: string;
+  mobileTitle: string;
+  mobileBody: string;
+  mobileCta: string;
   high: ApplyOutcomeCopy;
   low: ApplyOutcomeCopy;
   nurture: ApplyOutcomeCopy;
+  questions: ApplyQuestion[];
+  routing: ApplyRouting;
 };
