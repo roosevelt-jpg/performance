@@ -1,0 +1,137 @@
+/**
+ * WhatsApp Cloud API template language codes.
+ * The value saved here must match the language of the approved template
+ * in WhatsApp Manager. Extra languages need extra templates on Meta's side.
+ * @see https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates/supported-languages
+ */
+export type WhatsAppTemplateLanguage = {
+  code: string;
+  label: string;
+};
+
+export const WHATSAPP_TEMPLATE_LANGUAGES: WhatsAppTemplateLanguage[] = [
+  { code: "af", label: "Afrikaans" },
+  { code: "sq", label: "Albanian" },
+  { code: "ar", label: "Arabic" },
+  { code: "ar_AE", label: "Arabic (UAE)" },
+  { code: "ar_EG", label: "Arabic (Egypt)" },
+  { code: "ar_LB", label: "Arabic (Lebanon)" },
+  { code: "ar_MA", label: "Arabic (Morocco)" },
+  { code: "ar_SA", label: "Arabic (Saudi Arabia)" },
+  { code: "az", label: "Azerbaijani" },
+  { code: "bn", label: "Bengali" },
+  { code: "bg", label: "Bulgarian" },
+  { code: "ca", label: "Catalan" },
+  { code: "zh_CN", label: "Chinese (China)" },
+  { code: "zh_HK", label: "Chinese (Hong Kong)" },
+  { code: "zh_TW", label: "Chinese (Taiwan)" },
+  { code: "hr", label: "Croatian" },
+  { code: "cs", label: "Czech" },
+  { code: "da", label: "Danish" },
+  { code: "prs_AF", label: "Dari" },
+  { code: "nl", label: "Dutch" },
+  { code: "nl_BE", label: "Dutch (Belgium)" },
+  { code: "en", label: "English" },
+  { code: "en_US", label: "English (US)" },
+  { code: "en_GB", label: "English (UK)" },
+  { code: "en_AE", label: "English (UAE)" },
+  { code: "en_AU", label: "English (Australia)" },
+  { code: "en_CA", label: "English (Canada)" },
+  { code: "en_IN", label: "English (India)" },
+  { code: "en_NZ", label: "English (New Zealand)" },
+  { code: "en_ZA", label: "English (South Africa)" },
+  { code: "et", label: "Estonian" },
+  { code: "fil", label: "Filipino" },
+  { code: "fi", label: "Finnish" },
+  { code: "fr", label: "French" },
+  { code: "fr_BE", label: "French (Belgium)" },
+  { code: "fr_CA", label: "French (Canada)" },
+  { code: "fr_CH", label: "French (Switzerland)" },
+  { code: "ka", label: "Georgian" },
+  { code: "de", label: "German" },
+  { code: "de_AT", label: "German (Austria)" },
+  { code: "de_CH", label: "German (Switzerland)" },
+  { code: "el", label: "Greek" },
+  { code: "gu", label: "Gujarati" },
+  { code: "ha", label: "Hausa" },
+  { code: "he", label: "Hebrew" },
+  { code: "he_IL", label: "Hebrew (Israel)" },
+  { code: "hi", label: "Hindi" },
+  { code: "hi_IN", label: "Hindi (India)" },
+  { code: "hu", label: "Hungarian" },
+  { code: "id", label: "Indonesian" },
+  { code: "id_ID", label: "Indonesian (Indonesia)" },
+  { code: "ga", label: "Irish" },
+  { code: "it", label: "Italian" },
+  { code: "it_IT", label: "Italian (Italy)" },
+  { code: "ja", label: "Japanese" },
+  { code: "ja_JP", label: "Japanese (Japan)" },
+  { code: "kn", label: "Kannada" },
+  { code: "kk", label: "Kazakh" },
+  { code: "rw", label: "Kinyarwanda" },
+  { code: "ko", label: "Korean" },
+  { code: "ko_KR", label: "Korean (Korea)" },
+  { code: "ky", label: "Kyrgyz" },
+  { code: "lo", label: "Lao" },
+  { code: "lv", label: "Latvian" },
+  { code: "lt", label: "Lithuanian" },
+  { code: "mk", label: "Macedonian" },
+  { code: "ms", label: "Malay" },
+  { code: "ms_MY", label: "Malay (Malaysia)" },
+  { code: "ml", label: "Malayalam" },
+  { code: "mr", label: "Marathi" },
+  { code: "nb", label: "Norwegian" },
+  { code: "nb_NO", label: "Norwegian (Norway)" },
+  { code: "ps", label: "Pashto" },
+  { code: "fa", label: "Persian" },
+  { code: "pl", label: "Polish" },
+  { code: "pl_PL", label: "Polish (Poland)" },
+  { code: "pt_BR", label: "Portuguese (Brazil)" },
+  { code: "pt_PT", label: "Portuguese (Portugal)" },
+  { code: "pa", label: "Punjabi" },
+  { code: "ro", label: "Romanian" },
+  { code: "ro_RO", label: "Romanian (Romania)" },
+  { code: "ru", label: "Russian" },
+  { code: "ru_RU", label: "Russian (Russia)" },
+  { code: "sr", label: "Serbian" },
+  { code: "si", label: "Sinhala" },
+  { code: "sk", label: "Slovak" },
+  { code: "sl", label: "Slovenian" },
+  { code: "es", label: "Spanish" },
+  { code: "es_AR", label: "Spanish (Argentina)" },
+  { code: "es_CL", label: "Spanish (Chile)" },
+  { code: "es_CO", label: "Spanish (Colombia)" },
+  { code: "es_ES", label: "Spanish (Spain)" },
+  { code: "es_MX", label: "Spanish (Mexico)" },
+  { code: "es_PE", label: "Spanish (Peru)" },
+  { code: "es_US", label: "Spanish (US)" },
+  { code: "sw", label: "Swahili" },
+  { code: "sv", label: "Swedish" },
+  { code: "ta", label: "Tamil" },
+  { code: "te", label: "Telugu" },
+  { code: "th", label: "Thai" },
+  { code: "th_TH", label: "Thai (Thailand)" },
+  { code: "tr", label: "Turkish" },
+  { code: "tr_TR", label: "Turkish (Turkey)" },
+  { code: "uk", label: "Ukrainian" },
+  { code: "uk_UA", label: "Ukrainian (Ukraine)" },
+  { code: "ur", label: "Urdu" },
+  { code: "uz", label: "Uzbek" },
+  { code: "vi", label: "Vietnamese" },
+  { code: "vi_VN", label: "Vietnamese (Vietnam)" },
+  { code: "zu", label: "Zulu" },
+];
+
+const CODE_SET = new Set(
+  WHATSAPP_TEMPLATE_LANGUAGES.map((row) => row.code),
+);
+
+export function isWhatsAppTemplateLanguage(code: string): boolean {
+  return CODE_SET.has(code.trim());
+}
+
+export function whatsappLanguageOptions(extra?: string): WhatsAppTemplateLanguage[] {
+  const code = extra?.trim();
+  if (!code || CODE_SET.has(code)) return WHATSAPP_TEMPLATE_LANGUAGES;
+  return [{ code, label: `${code} (saved)` }, ...WHATSAPP_TEMPLATE_LANGUAGES];
+}

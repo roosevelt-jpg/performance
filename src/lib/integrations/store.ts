@@ -11,6 +11,8 @@ import {
   type IntegrationCheck,
   type IntegrationsConfig,
 } from "./types";
+import { isValidTimeZone } from "@/lib/i18n/timezones";
+import { normalizeStoreDomain } from "@/lib/shopify/domain";
 
 export const INTEGRATIONS_FILE = path.join(
   process.cwd(),
@@ -62,7 +64,9 @@ function calendarDefaults(
       : base.workingDays;
   merged.platform = parsePlatform(merged.platform);
   merged.bookingMode = parseBookingMode(merged.bookingMode);
-  merged.timezone = merged.timezone?.trim() || base.timezone;
+  merged.timezone = isValidTimeZone(merged.timezone)
+    ? merged.timezone.trim()
+    : base.timezone;
   merged.workingHoursStart =
     merged.workingHoursStart?.trim() || base.workingHoursStart;
   merged.workingHoursEnd =
@@ -194,8 +198,10 @@ function fromEnv(): IntegrationsConfig {
     },
     shopify: {
       storeDomain:
-        process.env.SHOPIFY_STORE_DOMAIN ??
-        DEFAULT_INTEGRATIONS.shopify.storeDomain,
+        normalizeStoreDomain(
+          process.env.SHOPIFY_STORE_DOMAIN ??
+            DEFAULT_INTEGRATIONS.shopify.storeDomain,
+        ) || DEFAULT_INTEGRATIONS.shopify.storeDomain,
       storefrontToken: process.env.SHOPIFY_STOREFRONT_TOKEN ?? "",
     },
     reviews: {
@@ -233,7 +239,14 @@ function mergeConfig(
     stripe: { ...base.stripe, ...overlay.stripe },
     whatsapp: { ...base.whatsapp, ...overlay.whatsapp },
     ai: { ...base.ai, ...overlay.ai },
-    shopify: { ...base.shopify, ...overlay.shopify },
+    shopify: {
+      ...base.shopify,
+      ...overlay.shopify,
+      storeDomain:
+        normalizeStoreDomain(
+          overlay.shopify?.storeDomain ?? base.shopify.storeDomain,
+        ) || DEFAULT_INTEGRATIONS.shopify.storeDomain,
+    },
     reviews: { ...base.reviews, ...overlay.reviews },
   };
 }
@@ -274,7 +287,13 @@ export async function loadIntegrations(): Promise<IntegrationsConfig> {
   merged.stripe = { ...DEFAULT_INTEGRATIONS.stripe, ...merged.stripe };
   merged.whatsapp = { ...DEFAULT_INTEGRATIONS.whatsapp, ...merged.whatsapp };
   merged.ai = { ...DEFAULT_INTEGRATIONS.ai, ...merged.ai };
-  merged.shopify = { ...DEFAULT_INTEGRATIONS.shopify, ...merged.shopify };
+  merged.shopify = {
+    ...DEFAULT_INTEGRATIONS.shopify,
+    ...merged.shopify,
+    storeDomain:
+      normalizeStoreDomain(merged.shopify.storeDomain) ||
+      DEFAULT_INTEGRATIONS.shopify.storeDomain,
+  };
   merged.reviews = { ...DEFAULT_INTEGRATIONS.reviews, ...merged.reviews };
   merged.calendar = calendarDefaults(merged.calendar);
 

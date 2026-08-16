@@ -11,10 +11,9 @@ import {
   saveIntegrations,
   toEnvSnippet,
 } from "@/lib/integrations/store";
-import {
-  DEFAULT_INTEGRATIONS,
-  type IntegrationsConfig,
-} from "@/lib/integrations/types";
+import { DEFAULT_INTEGRATIONS, type IntegrationsConfig } from "@/lib/integrations/types";
+import { isValidTimeZone } from "@/lib/i18n/timezones";
+import { normalizeStoreDomain } from "@/lib/shopify/domain";
 
 export const runtime = "nodejs";
 
@@ -64,8 +63,9 @@ function normalizeIncoming(
         body.calendar?.bookingMode === "auto"
           ? body.calendar.bookingMode
           : current.calendar.bookingMode,
-      timezone:
-        body.calendar?.timezone?.trim() || current.calendar.timezone,
+      timezone: isValidTimeZone(body.calendar?.timezone)
+        ? body.calendar!.timezone.trim()
+        : current.calendar.timezone,
       workingHoursStart:
         body.calendar?.workingHoursStart?.trim() ||
         current.calendar.workingHoursStart,
@@ -219,7 +219,10 @@ function normalizeIncoming(
         DEFAULT_INTEGRATIONS.ai.model,
     },
     shopify: {
-      storeDomain: body.shopify?.storeDomain ?? current.shopify.storeDomain,
+      storeDomain:
+        normalizeStoreDomain(
+          body.shopify?.storeDomain ?? current.shopify.storeDomain,
+        ) || DEFAULT_INTEGRATIONS.shopify.storeDomain,
       storefrontToken: keepSecret(
         body.shopify?.storefrontToken,
         current.shopify.storefrontToken,

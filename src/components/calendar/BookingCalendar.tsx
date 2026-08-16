@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { TimezoneSelect } from "@/components/forms/I18nSelects";
 import type { QuestionnaireAnswers } from "@/types/lead";
 
 type Slot = { start: string; end: string };
@@ -88,10 +89,11 @@ export function BookingCalendar({
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const visitorZone = useMemo(
+  const detectedZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     [],
   );
+  const [displayZone, setDisplayZone] = useState(detectedZone);
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -136,7 +138,8 @@ export function BookingCalendar({
     }
   }, [data, selectedSlot]);
 
-  const zone = data?.timeZone ?? "Europe/London";
+  const kaneZone = data?.timeZone ?? "Europe/London";
+  const zone = displayZone || kaneZone;
   const slotsByDay = useMemo(() => {
     const map = new Map<string, Slot[]>();
     for (const slot of data?.slots ?? []) {
@@ -196,7 +199,7 @@ export function BookingCalendar({
           name: answers.name,
           email: answers.email,
           phone: answers.mobile,
-          timezone: visitorZone,
+          timezone: displayZone,
           contactId,
           notes: [
             `Goal: ${answers.mainGoal}`,
@@ -244,7 +247,7 @@ export function BookingCalendar({
           <p className="mt-1 text-xs text-[var(--muted)]">
             {platformLabel}
             {data?.syncedAt
-              ? ` · updated ${formatTime(data.syncedAt, visitorZone)}`
+              ? ` · updated ${formatTime(data.syncedAt, zone)}`
               : " · syncing…"}
             {loading ? " · checking" : ""}
           </p>
@@ -330,10 +333,25 @@ export function BookingCalendar({
       <div className="mt-5">
         <p className="text-sm font-medium text-[var(--fg)]">
           {selectedDay ? "Available times" : "Choose a day"}
-          <span className="ml-2 text-xs font-normal text-[var(--muted)]">
-            {zone.replace("_", " ")} time
-          </span>
         </p>
+        <div className="mt-3">
+          <p className="mb-1 text-xs text-[var(--muted)]">Your timezone</p>
+          <TimezoneSelect
+            className="w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--fg)] outline-none focus:border-[var(--accent)]"
+            value={displayZone}
+            onChange={(next) => {
+              setDisplayZone(next);
+              setSelectedDay(null);
+              setSelectedSlot(null);
+            }}
+          />
+        </div>
+        {kaneZone !== zone ? (
+          <p className="mt-2 text-xs text-[var(--muted)]">
+            Kane&apos;s hours are in {kaneZone.replaceAll("_", " ")}. Times below
+            are in your zone.
+          </p>
+        ) : null}
         {selectedDay && daySlots.length === 0 ? (
           <p className="mt-2 text-sm text-[var(--muted)]">
             No times left this day. Pick another.
@@ -355,9 +373,9 @@ export function BookingCalendar({
                 ].join(" ")}
               >
                 {formatTime(slot.start, zone)}
-                {visitorZone !== zone ? (
+                {kaneZone !== zone ? (
                   <span className="mt-0.5 block text-[11px] font-normal text-[var(--muted)]">
-                    {formatTime(slot.start, visitorZone)} your time
+                    {formatTime(slot.start, kaneZone)} Kane&apos;s time
                   </span>
                 ) : null}
               </button>

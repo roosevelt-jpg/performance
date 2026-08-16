@@ -8,6 +8,10 @@ import type {
   IntegrationsConfig,
 } from "@/lib/integrations/types";
 import { DEFAULT_INTEGRATIONS } from "@/lib/integrations/types";
+import {
+  TimezoneSelect,
+  WhatsAppLanguageSelect,
+} from "@/components/forms/I18nSelects";
 
 type ApiPayload = {
   config: IntegrationsConfig;
@@ -51,13 +55,13 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block space-y-1.5">
+    <div className="block space-y-1.5">
       <span className="text-sm font-medium text-[var(--fg)]">{label}</span>
       {hint ? (
         <span className="block text-xs text-[var(--muted)]">{hint}</span>
       ) : null}
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -743,7 +747,10 @@ export function IntegrationsAdmin({
               <h2 className="text-lg font-semibold text-[var(--fg)]">
                 Shopify
               </h2>
-              <Field label="Store domain">
+              <Field
+                label="Store domain"
+                hint="Shopify shop. Paste https://theformulaperformance.com/ if you like — we save the hostname."
+              >
                 <input
                   className={inputClass}
                   value={form.shopify.storeDomain}
@@ -753,6 +760,7 @@ export function IntegrationsAdmin({
                       shopify: { ...f.shopify, storeDomain: e.target.value },
                     }))
                   }
+                  placeholder="https://theformulaperformance.com/"
                 />
               </Field>
               <Field
@@ -905,17 +913,19 @@ export function IntegrationsAdmin({
                 </select>
               </Field>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label="Timezone">
-                  <input
+                <Field
+                  label="Timezone"
+                  hint="Kane's working hours. Applicants still pick any IANA zone on the booking calendar."
+                >
+                  <TimezoneSelect
                     className={inputClass}
                     value={form.calendar.timezone}
-                    onChange={(e) =>
+                    onChange={(timezone) =>
                       setForm((f) => ({
                         ...f,
-                        calendar: { ...f.calendar, timezone: e.target.value },
+                        calendar: { ...f.calendar, timezone },
                       }))
                     }
-                    placeholder="Europe/London"
                   />
                 </Field>
                 <Field label="Days ahead">
@@ -1646,20 +1656,22 @@ export function IntegrationsAdmin({
                   placeholder="performance_dna_report"
                 />
               </Field>
-              <Field label="Template language">
-                <input
+              <Field
+                label="Template language"
+                hint="Must match the language of the approved template in WhatsApp Manager. Search the full Meta language list. Extra languages need their own approved templates."
+              >
+                <WhatsAppLanguageSelect
                   className={inputClass}
                   value={form.whatsapp?.templateLanguage ?? "en"}
-                  onChange={(e) =>
+                  onChange={(templateLanguage) =>
                     setForm((f) => ({
                       ...f,
                       whatsapp: {
                         ...(f.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
-                        templateLanguage: e.target.value,
+                        templateLanguage,
                       },
                     }))
                   }
-                  placeholder="en"
                 />
               </Field>
             </section>
