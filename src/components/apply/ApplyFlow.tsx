@@ -6,10 +6,12 @@ import { ApplyVideo } from "@/components/apply/ApplyVideo";
 import { BrandLogo } from "@/components/layout/SiteChrome";
 import { useCms } from "@/components/cms/CmsProvider";
 import { DEFAULT_APPLY_FUNNEL, DEFAULT_APPLY_QUESTIONS } from "@/lib/apply/defaults";
+import { leadFlowFromApply } from "@/lib/apply/toLeadFlow";
 import {
   applyOutcomeKey,
   applyTierFromRoute,
 } from "@/lib/apply/routeLead";
+import { saveLeadFlow } from "@/lib/session/leadSession";
 import type {
   ApplyAnswers,
   ApplyDaysId,
@@ -196,7 +198,15 @@ export function ApplyFlow() {
         patch: answers,
         droppedAt: "routed",
       });
-      if (json.route) setRoute(json.route);
+      if (json.route) {
+        setRoute(json.route);
+        const flow = leadFlowFromApply({
+          answers,
+          route: json.route,
+          submissionId: json.id || leadId,
+        });
+        if (flow) saveLeadFlow(flow);
+      }
       setStage("result");
     } finally {
       setSaving(false);
