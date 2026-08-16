@@ -398,6 +398,8 @@ export type CmsContent = {
   };
   /** Autonomous apply chat + short-landing layout. Admin → Funnel. */
   funnel: CmsFunnel;
+  applyFunnel: import("@/lib/apply/types").CmsApplyFunnel;
+  dna: import("@/lib/dna/types").CmsDna;
 };
 
 export type CmsFunnelField =

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specification 2 of 2: Gated VSL Funnel and Qualification Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a; --surface:#121110; --surface-2:#171513;
+  --text:#f4f1ec; --text-muted:#9a938c; --text-dim:#827c76;
+  --red:#d8231c; --red-bright:#ea3a2e;
+  --hairline:#211f1d; --hairline-strong:#322e2a;
+  --good:#3ba776; --warn:#e8913a; --info:#5b8dd6;
+  --font-display:"Newsreader",Georgia,serif;
+  --font-body:"Poppins",system-ui,sans-serif;
+  --maxw:1100px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+h1,h2,h3{font-family:var(--font-display);font-weight:500;letter-spacing:-.018em;line-height:1.12}
+h1{font-size:clamp(2.1rem,5.6vw,3.4rem)}
+h2{font-size:clamp(1.7rem,4.2vw,2.5rem);margin-bottom:.5rem}
+h3{font-size:clamp(1.08rem,2.4vw,1.3rem)}
+.eyebrow{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:600;font-family:var(--font-body)}
+.eyebrow.n{color:var(--text-dim)}
+header.top{border-bottom:1px solid var(--hairline);padding:clamp(44px,7vw,84px) 0 clamp(34px,5vw,56px);background:radial-gradient(80% 60% at 50% 0%,#1a0605 0%,transparent 60%)}
+header.top p.lede{color:var(--text-muted);max-width:58ch;margin-top:1.1rem;font-size:1.05rem}
+.meta{margin-top:1.9rem;display:flex;flex-wrap:wrap;gap:.5rem}
+.pill{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;border:1px solid var(--hairline-strong);border-radius:2px;padding:.34rem .7rem;color:var(--text-dim)}
+section{padding:clamp(42px,6vw,74px) 0;border-bottom:1px solid var(--hairline)}
+.sec-head{margin-bottom:1.8rem}
+.sec-head p{color:var(--text-muted);max-width:66ch;margin-top:.6rem}
+
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--hairline);border-radius:6px;margin-top:1rem}
+table{width:100%;border-collapse:collapse;font-size:.89rem;min-width:640px}
+th,td{text-align:left;padding:.7rem .85rem;border-bottom:1px solid var(--hairline);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.tok{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.81rem;background:var(--surface-2);border:1px solid var(--hairline-strong);border-radius:2px;padding:.08rem .35rem;color:#e8c9a0}
+
+.tag{display:inline-block;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:.2rem .48rem;border-radius:2px;white-space:nowrap}
+.t-high{background:#d8231c;color:#fff}
+.t-low{background:#e8913a;color:#1a1a1a}
+.t-nurture{background:#5b8dd6;color:#0a0a0a}
+
+.note{border:1px solid var(--hairline-strong);border-left:3px solid var(--warn);background:var(--surface);border-radius:6px;padding:1.05rem 1.25rem;margin-top:1.3rem}
+.note.red{border-left-color:var(--red)}
+.note.good{border-left-color:var(--good)}
+.note.info{border-left-color:var(--info)}
+.note strong{color:var(--text);font-weight:600}
+.note p{color:var(--text-muted);font-size:.92rem}
+.note p+p{margin-top:.55rem}
+
+.flow{display:grid;gap:.7rem;margin-top:1.4rem}
+.step{background:var(--surface);border:1px solid var(--hairline-strong);border-radius:6px;padding:1rem 1.2rem;position:relative;padding-left:3.4rem}
+.step .n{position:absolute;left:1.1rem;top:1rem;font-size:.72rem;font-weight:700;color:var(--red);font-family:var(--font-body);letter-spacing:.06em}
+.step h3{margin-bottom:.2rem}
+.step p{color:var(--text-muted);font-size:.9rem}
+.exits{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:.7rem}
+@media(max-width:760px){.exits{grid-template-columns:1fr}}
+.exit{border-radius:6px;padding:.95rem 1.1rem;border:1px solid var(--hairline-strong);background:var(--surface)}
+.exit.h{border-top:3px solid var(--red)}
+.exit.l{border-top:3px solid var(--warn)}
+.exit.n{border-top:3px solid var(--info)}
+.exit h4{font-family:var(--font-body);font-weight:600;font-size:.9rem;margin-bottom:.3rem}
+.exit p{font-size:.84rem;color:var(--text-muted)}
+
+.q{background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:1.1rem 1.3rem;margin-top:.8rem}
+.q .qn{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--red);font-weight:600;margin-bottom:.35rem}
+.q .qt{font-family:var(--font-display);font-size:1.16rem;font-weight:500;line-height:1.25;margin-bottom:.7rem}
+.q ul{list-style:none}
+.q li{padding:.35rem 0 .35rem 1.5rem;position:relative;font-size:.9rem;color:var(--text-muted);border-bottom:1px solid var(--hairline)}
+.q li:last-child{border-bottom:0}
+.q li::before{content:"○";position:absolute;left:.25rem;top:.35rem;color:var(--text-dim);font-size:.8rem}
+.q .why{margin-top:.7rem;font-size:.82rem;color:var(--text-dim);border-top:1px solid var(--hairline);padding-top:.6rem}
+.q .why b{color:var(--text-muted);font-weight:600}
+.scorepill{float:right;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding:.14rem .4rem;border-radius:2px;background:#ffffff10;color:var(--text-dim);border:1px solid var(--hairline-strong)}
+
+.copy{background:#0e0d0c;border:1px solid var(--hairline-strong);border-radius:6px;padding:1.1rem 1.3rem;margin-top:.8rem}
+.copy .lbl{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);font-weight:600;margin-bottom:.5rem}
+.copy .hl{font-family:var(--font-display);font-size:1.3rem;font-weight:500;line-height:1.2;margin-bottom:.5rem}
+.copy p{color:var(--text-muted);font-size:.92rem}
+.copy .btn{display:inline-block;margin-top:.8rem;background:var(--red);color:#fff;font-size:.82rem;font-weight:600;padding:.5rem 1.1rem;border-radius:2px}
+.copy .btn.sec{background:transparent;border:1px solid var(--hairline-strong);color:var(--text-muted)}
+
+footer{padding:clamp(38px,5vw,60px) 0;color:var(--text-dim);font-size:.85rem}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Specification 2 of 2 &middot; 15 August 2026</div>
+    <h1>Gated VSL funnel and<br>the qualification form</h1>
+    <p class="lede">A restructure of the page into a gated four-step funnel with three exits. Qualification is financial and sits at the end rather than the start. Nobody is turned away: the two routes that do not qualify for one-to-one are directed to the Challenge or to a free group.</p>
+    <div class="meta">
+      <span class="pill">Target &middot; test.myflynai.com</span>
+      <span class="pill">Structural reference &middot; viralcoach.com</span>
+      <span class="pill">Follows specification 1</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">Read first</div>
+      <h2>How this relates to the brand specification</h2>
+    </div>
+    <div class="note red">
+      <p>You have received two documents. They do different things and one partly overrides the other, so please read this before either.</p>
+      <p><strong>Specification 1, the brand and build spec</strong>, asked you not to alter section order, CTA count or CTA wording. That instruction was written to protect the conversion structure while we changed colour, type and imagery. <strong>Everything in that document about brand tokens, the P0 build defects and the missing content still stands in full and is unchanged.</strong></p>
+      <p><strong>This document supersedes only the funnel-lock portion of it.</strong> We are now deliberately restructuring the funnel, which changes section order, adds a gate ahead of the video, and changes the CTA sequence. Where the two documents disagree on funnel structure, this one wins. Where they touch anything else, specification 1 wins.</p>
+      <p>Order of work is unchanged: the P0 items in specification 1 come first, starting with admin provisioning, because nothing else can be populated until that is working.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">01</div>
+      <h2>The funnel</h2>
+      <p>Four steps, three exits. The contact is captured before the video rather than after it.</p>
+    </div>
+    <div class="flow">
+      <div class="step"><div class="n">00</div>
+        <h3>The gate</h3>
+        <p>Landing state. Headline, one line of proof, and a two-field form. No video visible, no navigation, no pricing. The only available action is to enter a name and email.</p>
+      </div>
+      <div class="step"><div class="n">01</div>
+        <h3>The VSL</h3>
+        <p>Unlocks on submit. Full video explaining the offer end to end. One CTA beneath it, revealed at a set watch percentage rather than on load.</p>
+      </div>
+      <div class="step"><div class="n">02</div>
+        <h3>The qualifier</h3>
+        <p>Eight questions, one per screen, progress bar visible throughout. Goal and situation first, money last.</p>
+      </div>
+      <div class="step"><div class="n">03</div>
+        <h3>The routing</h3>
+        <p>Route computed on submit. One of three outcome screens renders. No dead ends.</p>
+      </div>
+    </div>
+    <div class="exits">
+      <div class="exit h"><h4><span class="tag t-high">High</span></h4><p>Qualifies for one-to-one. Straight to the calendar. Tier and price are confirmed on the call, never on the page.</p></div>
+      <div class="exit l"><h4><span class="tag t-low">Low</span></h4><p>Not right for one-to-one today. Directed to the 8-Week Challenge as the correct starting point.</p></div>
+      <div class="exit n"><h4><span class="tag t-nurture">Nurture</span></h4><p>Not ready to invest. Directed into a free WhatsApp group.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">02</div>
+      <h2>Step 00: the gate</h2>
+    </div>
+    <div class="copy">
+      <div class="lbl">Screen copy, final</div>
+      <div class="hl">Watch the full breakdown before you decide anything.</div>
+      <p>Kane explains how the coaching works, who it is for, and who it is not for. Enter your details and the video unlocks.</p>
+      <span class="btn">Unlock the video</span>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>First name</td><td class="tok">text</td><td>Yes</td><td>Used to personalise every later screen</td></tr>
+        <tr><td>Email</td><td class="tok">email</td><td>Yes</td><td>Validate format on blur rather than on submit</td></tr>
+        <tr><td>Mobile</td><td class="tok">tel</td><td><strong>No</strong></td><td>Deliberately deferred to question 8</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note">
+      <p><strong>Two fields, not three.</strong> Every field at a gate costs opt-ins, and a phone number has no obvious justification before the visitor has watched anything. It is asked later, where the reason is self-evident, which should give us the same data at a materially better completion rate.</p>
+    </div>
+    <div class="note info">
+      <p><strong>Build the gate so it can be switched off.</strong> Gating reduces the number of people who reach the video, in exchange for capturing every one who passes through. That is the right trade for an application funnel, but we want to measure it rather than assume it. Please make the gate a configurable toggle in the admin so we can run gated against ungated as a split test once the page is live, without a redeploy.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">03</div>
+      <h2>Step 01: the VSL</h2>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Element</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td>Autoplay</td><td>Muted autoplay with a persistent "Tap for sound" overlay</td></tr>
+        <tr><td>Controls</td><td>Scrub bar hidden on first view. Pause and volume available</td></tr>
+        <tr><td>CTA reveal</td><td>Application CTA appears at <strong>60% watched</strong>, not on load. Before that the area holds a progress line reading "Application opens shortly"</td></tr>
+        <tr><td>CTA wording</td><td><code>See if you qualify</code></td></tr>
+        <tr><td>Escape hatch</td><td>One low-emphasis text link below: "Not ready for coaching? Join the free group." Routes directly to the nurture exit</td></tr>
+        <tr><td>Tracking</td><td>Fire watch events at 25 / 50 / 60 / 90 / 100 percent against the captured contact</td></tr>
+        <tr><td>Watch threshold</td><td>Make the 60% value admin-editable so we can tune it</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note good">
+      <p><strong>The escape hatch matters more than it looks.</strong> Without it, anyone who realises early that coaching is out of reach simply closes the tab and is lost. With it, they self-select into the free group and stay in the ecosystem. It costs a small number of applications and recovers a much larger number of contacts.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">04</div>
+      <h2>Step 02: the qualifier</h2>
+      <p>Eight questions, one per screen, progress bar throughout. The order is deliberate. By the time the investment question appears the visitor has answered six things and is invested in finishing. Please do not reorder them.</p>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 1 <span class="scorepill">Routing: none</span></div>
+      <div class="qt">What are you trying to change?</div>
+      <ul><li>Lose fat</li><li>Build muscle</li><li>Get stronger and fitter</li><li>Rebuild after a break or injury</li></ul>
+      <div class="why"><b>Purpose:</b> Opens with the easiest possible question. Does not route. Feeds the call brief and the follow-up segmentation.</div>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 2 <span class="scorepill">Routing: none</span></div>
+      <div class="qt">Where are you starting from?</div>
+      <ul><li>I train consistently already</li><li>I train on and off</li><li>I have stopped completely</li><li>I have never trained properly</li></ul>
+      <div class="why"><b>Purpose:</b> Establishes the gap the coaching closes. Feeds the call brief.</div>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 3 <span class="scorepill">Routing: conditional</span></div>
+      <div class="qt">Realistically, how many days a week can you train?</div>
+      <ul><li>Five or more</li><li>Three to four</li><li>Two</li><li>Fewer than two</li></ul>
+      <div class="why"><b>Purpose:</b> "Fewer than two" sets a flag used by routing rule 4 below. It does not disqualify on its own.</div>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 4 <span class="scorepill">Routing: none</span></div>
+      <div class="qt">What has got in the way before? Choose any that apply.</div>
+      <ul><li>Staying consistent</li><li>Not knowing what to do</li><li>Nutrition</li><li>Time</li><li>Injury</li></ul>
+      <div class="why"><b>Purpose:</b> Multi-select. Store as an array. Whatever is selected is what the call opens with.</div>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 5 <span class="scorepill">Routing: hard</span></div>
+      <div class="qt">How soon do you want to start?</div>
+      <ul><li>Immediately</li><li>Within two weeks</li><li>Within a month</li><li>Just looking for now</li></ul>
+      <div class="why"><b>Purpose:</b> "Just looking" routes to nurture regardless of the investment answer.</div>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 6 <span class="scorepill">Routing: none</span></div>
+      <div class="qt">Have you worked with a coach before?</div>
+      <ul><li>Yes, I have one now</li><li>Yes, in the past</li><li>Never</li></ul>
+      <div class="why"><b>Purpose:</b> Determines which of three very different calls Kane runs.</div>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 7 <span class="scorepill">Routing: primary</span></div>
+      <div class="qt">Coaching with Kane directly starts in the hundreds per month. If we agree it is the right fit, what are you ready to put into getting this right?</div>
+      <ul><li>£1,000 or more</li><li>£500 to £1,000</li><li>£150 to £500</li><li>Under £150 right now</li></ul>
+      <div class="why"><b>Purpose:</b> The primary routing question, deliberately last. Framed as readiness to invest rather than ability to pay, banded rather than exact, and stated after price context. Expect this to be the largest drop-off point in the form. That is intended.</div>
+    </div>
+
+    <div class="q">
+      <div class="qn">Question 8 <span class="scorepill">Routing: none</span></div>
+      <div class="qt">Last thing. Where should we reach you?</div>
+      <ul><li>Mobile number, with country code</li></ul>
+      <div class="why"><b>Purpose:</b> Label the screen so the reason is explicit: this is where the call confirmation or the group invite is sent.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">05</div>
+      <h2>Routing logic</h2>
+      <p>Evaluated top to bottom. First match wins. All threshold values should be admin-editable.</p>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>#</th><th>Condition</th><th>Route</th><th>Destination</th></tr></thead>
+      <tbody>
+        <tr><td class="tok">1</td><td class="tok">Q7 = "Under £150"</td><td><span class="tag t-nurture">Nurture</span></td><td>Free WhatsApp group</td></tr>
+        <tr><td class="tok">2</td><td class="tok">Q5 = "Just looking"</td><td><span class="tag t-nurture">Nurture</span></td><td>Free WhatsApp group</td></tr>
+        <tr><td class="tok">3</td><td class="tok">Q7 = "£150 to £500"</td><td><span class="tag t-low">Low</span></td><td>8-Week Challenge</td></tr>
+        <tr><td class="tok">4</td><td class="tok">Q7 &ge; "£500" AND Q3 = "Fewer than two"</td><td><span class="tag t-low">Low</span></td><td>8-Week Challenge</td></tr>
+        <tr><td class="tok">5</td><td class="tok">Q7 = "£500 to £1,000"</td><td><span class="tag t-high">High</span></td><td>Calendar, Pro track</td></tr>
+        <tr><td class="tok">6</td><td class="tok">Q7 = "£1,000 or more"</td><td><span class="tag t-high">High</span></td><td>Calendar, Elite track</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note info">
+      <p><strong>Rule 4 is a deliberate choice and we would welcome your view on it.</strong> Somebody with the budget but training fewer than two days a week cannot get the result the programme promises, so we route them to the Challenge instead. It protects the client and the completion rate at the cost of some one-to-one revenue. If you think that is the wrong call for conversion, say so before you build it.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">06</div>
+      <h2>The three outcome screens</h2>
+      <p>Copy below is final. Please implement it as written. The two non-qualifying screens matter more than the qualifying one, because that is where the brand is either respected or resented.</p>
+    </div>
+
+    <div class="copy" style="border-left:3px solid var(--red)">
+      <div class="lbl"><span class="tag t-high">High</span> &nbsp;Qualifies for one-to-one</div>
+      <div class="hl">You qualify, [First name]. Book your call.</div>
+      <p>Kane reviews every application himself and will be briefed on your answers before you join. Pick a time that works. Twenty minutes, no pressure, and a straight answer either way on whether this is right for you.</p>
+      <span class="btn">Choose your time</span>
+    </div>
+
+    <div class="copy" style="border-left:3px solid var(--warn)">
+      <div class="lbl"><span class="tag t-low">Low</span> &nbsp;Directed to the Challenge</div>
+      <div class="hl">One-to-one is not the right move for you yet. This is.</div>
+      <p>Based on your answers, the 8-Week Challenge is where you should start. It is the same training system and the same Performance Coach in WhatsApp, without the one-to-one price. Build eight weeks of consistency on it, and the one-to-one conversation becomes a very different one.</p>
+      <span class="btn">Start the 8-Week Challenge</span>
+      <span class="btn sec">Join the free group instead</span>
+    </div>
+
+    <div class="copy" style="border-left:3px solid var(--info)">
+      <div class="lbl"><span class="tag t-nurture">Nurture</span> &nbsp;Directed to the free group</div>
+      <div class="hl">Not the right time to pay for coaching. Come and train with us anyway.</div>
+      <p>The free group is where a few thousand people train alongside each other. Sessions, questions answered, and the same standard Kane holds his paying clients to. No cost, no card, and no catch. When you are ready for more, you will already know how we work.</p>
+      <span class="btn">Join the group</span>
+    </div>
+
+    <div class="note good">
+      <p><strong>The visitor is never told they have failed.</strong> The Low screen says one-to-one is not the right move yet and positions the Challenge as the correct next step rather than a consolation prize. Both non-qualifying screens carry a second option, so neither is a dead end. Please keep both buttons on both screens.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow n">07</div>
+      <h2>Data capture</h2>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Field</th><th>Source</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="tok">first_name, email</td><td>Gate</td><td>Contact record</td></tr>
+        <tr><td class="tok">mobile</td><td>Q8</td><td>Call confirmation or group invite</td></tr>
+        <tr><td class="tok">goal, starting_point, days_per_week, obstacles[], timeline, coach_history</td><td>Q1 to Q6</td><td>Call brief and follow-up segmentation</td></tr>
+        <tr><td class="tok">investment_band</td><td>Q7</td><td>Primary routing value</td></tr>
+        <tr><td class="tok">route</td><td>Computed</td><td><code>high</code> / <code>low</code> / <code>nurture</code></td></tr>
+        <tr><td class="tok">vsl_watch_pct</td><td>Step 01</td><td>Highest percentage reached</td></tr>
+        <tr><td class="tok">dropped_at</td><td>Computed</td><td>Last question answered if abandoned</td></tr>
+        <tr><td class="tok">utm_*</td><td>URL</td><td>Persist through every step and attach to the contact</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note red">
+      <p><strong>Write the contact record on gate submit, not on form completion.</strong> If it is only written at the end, everyone who abandons mid-form is lost, and those are precisely the people worth following up. Create on gate submit, then update the record as they progress. <code>dropped_at</code> tells us which question is costing us people.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Over to you</div>
+      <h2>What we need from you</h2>
+    </div>
+    <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Item</th><th>Question</th></tr></thead>
+      <tbody>
+        <tr><td>Feasibility</td><td>Is any of this structurally difficult on the current build? We would rather adjust the spec than have it half-implemented.</td></tr>
+        <tr><td>Rule 4</td><td>Your view on routing high-budget, low-frequency applicants to the Challenge rather than the calendar.</td></tr>
+        <tr><td>Gate toggle</td><td>Can the gate be made switchable from the admin so we can split test it without a deploy?</td></tr>
+        <tr><td>Admin-editable values</td><td>Confirm the investment bands, the routing thresholds and the 60% watch trigger can all be changed without a deploy.</td></tr>
+        <tr><td>Calendar</td><td>What booking system do you want to integrate for the High route, and do you need anything from us to set it up?</td></tr>
+        <tr><td>Contact storage</td><td>Where do captured contacts land, and can they be pushed to an external CRM?</td></tr>
+        <tr><td>Estimate</td><td>Rough turnaround for this alongside the specification 1 items.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note">
+      <p><strong>Two things are still being finalised our side and should be built as placeholders.</strong> The destination for the free group is not yet confirmed, so build the nurture route to a configurable URL. The investment bands in question 7 are a first pass and will be revisited once we can see the real distribution of answers, so please keep them editable rather than hard-coded.</p>
+    </div>
+    <div class="note good">
+      <p><strong>As with the first document, push back before you build.</strong> You designed the conversion structure and we are now changing it deliberately. If any part of this would work against conversion in your judgement, we want that on the record now rather than after implementation.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>The Formula Performance &middot; 15 August 2026 &middot; Specification 2 of 2</p>
+    <p style="margin-top:.4rem">Structural model observed from viralcoach.com. Questions, routing, thresholds and copy are original.</p>
+  </div>
+</footer>
+
+</body>
+</html>

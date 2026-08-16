@@ -12,6 +12,7 @@ import { Testimonials } from "@/components/marketing/Testimonials";
 import { ProofStats } from "@/components/marketing/ProofStats";
 import { VslSection } from "@/components/marketing/VslSection";
 import { WhatsappCoachSection } from "@/components/marketing/WhatsappCoachSection";
+import { DnaTeaser } from "@/components/dna/DnaTeaser";
 import { GatedLink } from "@/components/marketing/WatchGate";
 import { TierRow } from "@/components/tiers/TierRow";
 import { HERO_CHAT } from "@/content/hero-chat";
@@ -369,6 +370,7 @@ export default function HomePage() {
       <MediaAt slot="after-testimonials" />
       {isFunnelSectionOn(cms, "credentials") ? <CredentialsSection /> : null}
       {isFunnelSectionOn(cms, "problem") ? <ProblemSection /> : null}
+      <DnaTeaser />
       <MediaAt slot="after-problem" />
       {isFunnelSectionOn(cms, "whatsappCoach") ? <WhatsappCoachSection /> : null}
       {isFunnelSectionOn(cms, "benchmarks") ? <BenchmarkSection /> : null}

@@ -26,6 +26,7 @@ const EMPTY: PublicRuntimeConfig = {
     enabled: false,
     provider: "ghl",
   },
+  stripe: { enabled: false, publishableKey: "" },
 };
 
 export function usePublicConfig() {
@@ -44,6 +45,7 @@ export function usePublicConfig() {
         pricing: { ...EMPTY.pricing, ...data.pricing },
         calendar: { ...EMPTY.calendar, ...data.calendar },
         emailSignup: { ...EMPTY.emailSignup, ...data.emailSignup },
+        stripe: { ...EMPTY.stripe, ...data.stripe },
       });
     } catch {
       /* keep last / defaults */

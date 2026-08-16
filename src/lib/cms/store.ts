@@ -143,6 +143,20 @@ export function mergeCms(
         : structuredClone(base.funnel.steps),
     };
   }
+  out.applyFunnel = {
+    ...base.applyFunnel,
+    ...(out.applyFunnel ?? {}),
+    high: { ...base.applyFunnel.high, ...out.applyFunnel?.high },
+    low: { ...base.applyFunnel.low, ...out.applyFunnel?.low },
+    nurture: { ...base.applyFunnel.nurture, ...out.applyFunnel?.nurture },
+  };
+  out.dna = {
+    ...base.dna,
+    ...(out.dna ?? {}),
+    coaches: Array.isArray(out.dna?.coaches)
+      ? out.dna.coaches
+      : structuredClone(base.dna.coaches),
+  };
   if (out.home.tiersSection.enabled === undefined) {
     out.home.tiersSection.enabled = base.home.tiersSection.enabled;
   }

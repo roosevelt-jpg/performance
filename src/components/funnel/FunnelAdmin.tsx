@@ -12,6 +12,8 @@ import type {
   CmsFunnelStep,
   CmsProofItem,
 } from "@/lib/cms/types";
+import { DEFAULT_APPLY_FUNNEL } from "@/lib/apply/defaults";
+import { DEFAULT_DNA } from "@/lib/dna/questions";
 import { DEFAULT_FUNNEL, DEFAULT_FUNNEL_STEPS } from "@/lib/funnel/defaults";
 import { toPlainText } from "@/lib/text/plain";
 
@@ -639,6 +641,101 @@ export function FunnelAdmin() {
             />
           </Field>
         </div>
+      </Section>
+
+      <Section
+        title="Gated VSL apply"
+        hint="New conversion path at /apply. The homepage chat apply stays as it is. Toggle the name/email gate for a split test without a redeploy."
+      >
+        {(() => {
+          const apply = form.applyFunnel ?? DEFAULT_APPLY_FUNNEL;
+          const patch = (partial: Partial<typeof apply>) =>
+            setForm((f) => ({
+              ...f,
+              applyFunnel: { ...(f.applyFunnel ?? DEFAULT_APPLY_FUNNEL), ...partial },
+            }));
+          return (
+            <>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="accent-[var(--accent)]"
+                  checked={apply.enabled}
+                  onChange={(e) => patch({ enabled: e.target.checked })}
+                />
+                Enable /apply funnel
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="accent-[var(--accent)]"
+                  checked={apply.gateEnabled}
+                  onChange={(e) => patch({ gateEnabled: e.target.checked })}
+                />
+                Require name + email before the video
+              </label>
+              <Field label="Watch % before apply CTA (default 60)">
+                <input
+                  type="number"
+                  min={10}
+                  max={100}
+                  className={inputClass}
+                  value={apply.watchPct}
+                  onChange={(e) => patch({ watchPct: Number(e.target.value) })}
+                />
+              </Field>
+              <Field label="Free-group URL (nurture exit)">
+                <input
+                  className={inputClass}
+                  value={apply.nurtureUrl}
+                  onChange={(e) => patch({ nurtureUrl: e.target.value })}
+                  placeholder="https://chat.whatsapp.com/…"
+                />
+              </Field>
+            </>
+          );
+        })()}
+      </Section>
+
+      <Section
+        title="Performance DNA"
+        hint="New /dna scoreboard. Native Kane scoresheet first. Optional OpenAI key in Integrations only rewrites PDF copy — never the numbers."
+      >
+        {(() => {
+          const dna = form.dna ?? DEFAULT_DNA;
+          const patch = (partial: Partial<typeof dna>) =>
+            setForm((f) => ({
+              ...f,
+              dna: { ...(f.dna ?? DEFAULT_DNA), ...partial },
+            }));
+          return (
+            <>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="accent-[var(--accent)]"
+                  checked={dna.enabled}
+                  onChange={(e) => patch({ enabled: e.target.checked })}
+                />
+                Show DNA on the site
+              </label>
+              <Field label="Heading">
+                <input
+                  className={inputClass}
+                  value={dna.heading}
+                  onChange={(e) => patch({ heading: e.target.value })}
+                />
+              </Field>
+              <Field label="Section body">
+                <textarea
+                  className={`${inputClass} min-h-16`}
+                  value={dna.body}
+                  onChange={(e) => patch({ body: e.target.value })}
+                />
+              </Field>
+            </>
+          );
+        })()}
       </Section>
 
       <div className="flex flex-wrap gap-3">

@@ -75,6 +75,28 @@ export type IntegrationsConfig = {
     apiKey: string;
     listId: string;
     serverPrefix: string;
+    /** Gmail / Google Workspace address used as SMTP login and From. */
+    fromEmail: string;
+    fromName: string;
+    /** Google App Password (not the Gmail login). Spaces are stripped. */
+    gmailAppPassword: string;
+  };
+  stripe: {
+    publishableKey: string;
+    secretKey: string;
+    webhookSecret: string;
+    challengePriceId: string;
+  };
+  whatsapp: {
+    phoneNumberId: string;
+    accessToken: string;
+    graphVersion: string;
+    templateName: string;
+    templateLanguage: string;
+  };
+  ai: {
+    openaiApiKey: string;
+    model: string;
   };
   shopify: {
     storeDomain: string;
@@ -91,7 +113,19 @@ export type IntegrationFieldStatus = "ready" | "missing" | "optional";
 
 export type IntegrationCheck = {
   id: string;
-  group: "crm" | "calendar" | "pricing" | "product" | "security" | "media" | "email" | "reviews" | "seo";
+  group:
+    | "crm"
+    | "calendar"
+    | "pricing"
+    | "product"
+    | "security"
+    | "media"
+    | "email"
+    | "reviews"
+    | "seo"
+    | "payments"
+    | "messaging"
+    | "ai";
   label: string;
   status: IntegrationFieldStatus;
   detail?: string;
@@ -158,6 +192,26 @@ export const DEFAULT_INTEGRATIONS: IntegrationsConfig = {
     apiKey: "",
     listId: "",
     serverPrefix: "",
+    fromEmail: "",
+    fromName: "The Formula Performance",
+    gmailAppPassword: "",
+  },
+  stripe: {
+    publishableKey: "",
+    secretKey: "",
+    webhookSecret: "",
+    challengePriceId: "",
+  },
+  whatsapp: {
+    phoneNumberId: "",
+    accessToken: "",
+    graphVersion: "v21.0",
+    templateName: "",
+    templateLanguage: "en",
+  },
+  ai: {
+    openaiApiKey: "",
+    model: "gpt-4o-mini",
   },
   shopify: {
     storeDomain: "theformulaperformance.com",
@@ -184,6 +238,11 @@ export type PublicIntegrationsView = {
     googleClientSecret: boolean;
     googleRefreshToken: boolean;
     googleServiceAccount: boolean;
+    stripeSecretKey: boolean;
+    stripeWebhookSecret: boolean;
+    whatsappAccessToken: boolean;
+    gmailAppPassword: boolean;
+    openaiApiKey: boolean;
   };
   checks: IntegrationCheck[];
   readyForLive: boolean;

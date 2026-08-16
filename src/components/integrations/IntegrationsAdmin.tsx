@@ -22,6 +22,11 @@ type ApiPayload = {
     googleClientSecret: boolean;
     googleRefreshToken: boolean;
     googleServiceAccount: boolean;
+    stripeSecretKey?: boolean;
+    stripeWebhookSecret?: boolean;
+    whatsappAccessToken?: boolean;
+    gmailAppPassword?: boolean;
+    openaiApiKey?: boolean;
   };
   checks: IntegrationCheck[];
   readyForLive: boolean;
@@ -84,6 +89,11 @@ export function IntegrationsAdmin({
   const [googleSecretDraft, setGoogleSecretDraft] = useState("");
   const [googleRefreshDraft, setGoogleRefreshDraft] = useState("");
   const [googleSaDraft, setGoogleSaDraft] = useState("");
+  const [stripeSecretDraft, setStripeSecretDraft] = useState("");
+  const [stripeWebhookDraft, setStripeWebhookDraft] = useState("");
+  const [whatsappTokenDraft, setWhatsappTokenDraft] = useState("");
+  const [gmailPasswordDraft, setGmailPasswordDraft] = useState("");
+  const [openaiDraft, setOpenaiDraft] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -124,6 +134,11 @@ export function IntegrationsAdmin({
       setGoogleSecretDraft("");
       setGoogleRefreshDraft("");
       setGoogleSaDraft("");
+      setStripeSecretDraft("");
+      setStripeWebhookDraft("");
+      setWhatsappTokenDraft("");
+      setGmailPasswordDraft("");
+      setOpenaiDraft("");
     } catch {
       setError("Failed to load integrations");
     } finally {
@@ -158,10 +173,6 @@ export function IntegrationsAdmin({
           ...form.youtube,
           apiKey: youtubeKeyDraft.trim() || form.youtube.apiKey,
         },
-        email: {
-          ...form.email,
-          apiKey: emailKeyDraft.trim() || form.email.apiKey,
-        },
         shopify: {
           ...form.shopify,
           storefrontToken:
@@ -182,6 +193,37 @@ export function IntegrationsAdmin({
             googleRefreshDraft.trim() || form.calendar.googleRefreshToken,
           googleServiceAccountJson:
             googleSaDraft.trim() || form.calendar.googleServiceAccountJson,
+        },
+        email: {
+          ...form.email,
+          apiKey: emailKeyDraft.trim() || form.email.apiKey,
+          gmailAppPassword:
+            gmailPasswordDraft.trim() || form.email.gmailAppPassword,
+        },
+        stripe: {
+          ...(form.stripe ?? DEFAULT_INTEGRATIONS.stripe),
+          secretKey:
+            stripeSecretDraft.trim() ||
+            form.stripe?.secretKey ||
+            DEFAULT_INTEGRATIONS.stripe.secretKey,
+          webhookSecret:
+            stripeWebhookDraft.trim() ||
+            form.stripe?.webhookSecret ||
+            DEFAULT_INTEGRATIONS.stripe.webhookSecret,
+        },
+        whatsapp: {
+          ...(form.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
+          accessToken:
+            whatsappTokenDraft.trim() ||
+            form.whatsapp?.accessToken ||
+            DEFAULT_INTEGRATIONS.whatsapp.accessToken,
+        },
+        ai: {
+          ...(form.ai ?? DEFAULT_INTEGRATIONS.ai),
+          openaiApiKey:
+            openaiDraft.trim() ||
+            form.ai?.openaiApiKey ||
+            DEFAULT_INTEGRATIONS.ai.openaiApiKey,
         },
       };
       const res = await fetch("/api/integrations", {
@@ -206,6 +248,11 @@ export function IntegrationsAdmin({
       setGoogleSecretDraft("");
       setGoogleRefreshDraft("");
       setGoogleSaDraft("");
+      setStripeSecretDraft("");
+      setStripeWebhookDraft("");
+      setWhatsappTokenDraft("");
+      setGmailPasswordDraft("");
+      setOpenaiDraft("");
       setMessage("Saved to data/integrations.local.json");
     } catch {
       setError("Save failed");
@@ -265,6 +312,8 @@ export function IntegrationsAdmin({
       seo: checks.filter((c) => c.group === "seo"),
       email: checks.filter((c) => c.group === "email"),
       reviews: checks.filter((c) => c.group === "reviews"),
+      payments: checks.filter((c) => c.group === "payments"),
+      messaging: checks.filter((c) => c.group === "messaging"),
     };
   }, [data]);
 
@@ -356,6 +405,8 @@ export function IntegrationsAdmin({
                   "seo",
                   "email",
                   "reviews",
+                  "payments",
+                  "messaging",
                   "pricing",
                   "product",
                 ] as const
@@ -1376,6 +1427,244 @@ export function IntegrationsAdmin({
                   Show entry tier below Challenge (4th card — no booking CTA)
                 </span>
               </label>
+            </section>
+
+            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+              <h2 className="text-lg font-semibold text-[var(--fg)]">
+                Stripe (all card checkouts)
+              </h2>
+              <p className="text-sm text-[var(--muted)]">
+                The 8-Week Challenge is the only public checkout. Pro and Elite stay application-only.
+              </p>
+              <Field
+                label="Publishable key"
+                hint="Starts with pk_"
+              >
+                <input
+                  className={inputClass}
+                  value={form.stripe?.publishableKey ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      stripe: {
+                        ...(f.stripe ?? DEFAULT_INTEGRATIONS.stripe),
+                        publishableKey: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="pk_live_…"
+                  autoComplete="off"
+                />
+              </Field>
+              <Field
+                label="Secret key"
+                hint={
+                  data.secretsSet.stripeSecretKey
+                    ? "Saved (masked). Paste a new key only to replace."
+                    : "Starts with sk_"
+                }
+              >
+                <input
+                  type="password"
+                  className={inputClass}
+                  value={stripeSecretDraft}
+                  onChange={(e) => setStripeSecretDraft(e.target.value)}
+                  autoComplete="off"
+                  placeholder="sk_live_…"
+                />
+              </Field>
+              <Field
+                label="Webhook secret"
+                hint="For /api/stripe/webhook — optional until you want paid events."
+              >
+                <input
+                  type="password"
+                  className={inputClass}
+                  value={stripeWebhookDraft}
+                  onChange={(e) => setStripeWebhookDraft(e.target.value)}
+                  autoComplete="off"
+                  placeholder="whsec_…"
+                />
+              </Field>
+              <Field
+                label="Challenge Price ID"
+                hint="Stripe Price for the 8-Week Challenge. Create the product in Stripe, paste price_… here."
+              >
+                <input
+                  className={inputClass}
+                  value={form.stripe?.challengePriceId ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      stripe: {
+                        ...(f.stripe ?? DEFAULT_INTEGRATIONS.stripe),
+                        challengePriceId: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="price_…"
+                />
+              </Field>
+            </section>
+
+            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+              <h2 className="text-lg font-semibold text-[var(--fg)]">
+                DNA report delivery
+              </h2>
+              <Field
+                label="OpenAI API key"
+                hint={
+                  data.secretsSet.openaiApiKey
+                    ? "Saved. Optional — only rewrites report copy. Scores stay native even if this is empty."
+                    : "Optional. Rewrites DNA PDF copy in Kane's voice. Leave blank for native copy. Never used for the score."
+                }
+              >
+                <input
+                  type="password"
+                  className={inputClass}
+                  value={openaiDraft}
+                  onChange={(e) => setOpenaiDraft(e.target.value)}
+                  autoComplete="off"
+                  placeholder="sk-…"
+                />
+              </Field>
+              <Field label="Copy model">
+                <input
+                  className={inputClass}
+                  value={form.ai?.model ?? "gpt-4o-mini"}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      ai: {
+                        ...(f.ai ?? DEFAULT_INTEGRATIONS.ai),
+                        model: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="gpt-4o-mini"
+                />
+              </Field>
+              <Field
+                label="Gmail address"
+                hint="The Gmail or Google Workspace mailbox that will send the DNA PDF. This is both the SMTP login and the From address."
+              >
+                <input
+                  className={inputClass}
+                  type="email"
+                  value={form.email.fromEmail ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      email: { ...f.email, fromEmail: e.target.value },
+                    }))
+                  }
+                  placeholder="kane@gmail.com"
+                  autoComplete="off"
+                />
+              </Field>
+              <Field
+                label="Gmail App Password"
+                hint={
+                  data.secretsSet.gmailAppPassword
+                    ? "Saved. Paste a new 16-character App Password only to replace it. Not your Gmail login."
+                    : "Google Account → Security → 2-Step Verification → App passwords. Paste the 16-character password, not the Gmail login."
+                }
+              >
+                <input
+                  type="password"
+                  className={inputClass}
+                  value={gmailPasswordDraft}
+                  onChange={(e) => setGmailPasswordDraft(e.target.value)}
+                  autoComplete="off"
+                  placeholder="xxxx xxxx xxxx xxxx"
+                />
+              </Field>
+              <Field label="From name">
+                <input
+                  className={inputClass}
+                  value={form.email.fromName ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      email: { ...f.email, fromName: e.target.value },
+                    }))
+                  }
+                />
+              </Field>
+              <Field
+                label="WhatsApp Phone number ID"
+                hint="Meta for Developers → WhatsApp → API Setup. Numeric ID, not the phone number."
+              >
+                <input
+                  className={inputClass}
+                  value={form.whatsapp?.phoneNumberId ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      whatsapp: {
+                        ...(f.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
+                        phoneNumberId: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="123456789012345"
+                  autoComplete="off"
+                />
+              </Field>
+              <Field
+                label="WhatsApp access token"
+                hint={
+                  data.secretsSet.whatsappAccessToken
+                    ? "Saved. Paste a new permanent token only to replace."
+                    : "Permanent system-user token from Meta Business. Temporary tokens expire."
+                }
+              >
+                <input
+                  type="password"
+                  className={inputClass}
+                  value={whatsappTokenDraft}
+                  onChange={(e) => setWhatsappTokenDraft(e.target.value)}
+                  autoComplete="off"
+                />
+              </Field>
+              <Field
+                label="Utility template name"
+                hint="Required for first-contact sends. Create a UTILITY template in WhatsApp Manager. Body variables: 1 first name, 2 score, 3 PDF link. Leave empty to send a session document (only works if they already messaged you)."
+              >
+                <input
+                  className={inputClass}
+                  value={form.whatsapp?.templateName ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      whatsapp: {
+                        ...(f.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
+                        templateName: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="performance_dna_report"
+                />
+              </Field>
+              <Field label="Template language">
+                <input
+                  className={inputClass}
+                  value={form.whatsapp?.templateLanguage ?? "en"}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      whatsapp: {
+                        ...(f.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
+                        templateLanguage: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="en"
+                />
+              </Field>
+            </section>
+
+            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
               <Field label="Internal notes">
                 <textarea
                   className={`${inputClass} min-h-24`}

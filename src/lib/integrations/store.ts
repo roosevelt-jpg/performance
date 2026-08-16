@@ -169,6 +169,28 @@ function fromEnv(): IntegrationsConfig {
       apiKey: process.env.EMAIL_API_KEY ?? "",
       listId: process.env.EMAIL_LIST_ID ?? "",
       serverPrefix: process.env.MAILCHIMP_SERVER_PREFIX ?? "",
+      fromEmail: process.env.EMAIL_FROM ?? process.env.GMAIL_USER ?? "",
+      fromName:
+        process.env.EMAIL_FROM_NAME ??
+        DEFAULT_INTEGRATIONS.email.fromName,
+      gmailAppPassword: process.env.GMAIL_APP_PASSWORD ?? "",
+    },
+    stripe: {
+      publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
+      secretKey: process.env.STRIPE_SECRET_KEY ?? "",
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+      challengePriceId: process.env.STRIPE_CHALLENGE_PRICE_ID ?? "",
+    },
+    whatsapp: {
+      phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID ?? "",
+      accessToken: process.env.WHATSAPP_ACCESS_TOKEN ?? "",
+      graphVersion: process.env.WHATSAPP_GRAPH_VERSION ?? "v21.0",
+      templateName: process.env.WHATSAPP_TEMPLATE_NAME ?? "",
+      templateLanguage: process.env.WHATSAPP_TEMPLATE_LANGUAGE ?? "en",
+    },
+    ai: {
+      openaiApiKey: process.env.OPENAI_API_KEY ?? "",
+      model: process.env.OPENAI_DNA_MODEL ?? "gpt-4o-mini",
     },
     shopify: {
       storeDomain:
@@ -204,7 +226,13 @@ function mergeConfig(
     },
     youtube: { ...base.youtube, ...overlay.youtube },
     seo: { ...base.seo, ...overlay.seo },
-    email: { ...base.email, ...overlay.email },
+    email: {
+      ...base.email,
+      ...overlay.email,
+    },
+    stripe: { ...base.stripe, ...overlay.stripe },
+    whatsapp: { ...base.whatsapp, ...overlay.whatsapp },
+    ai: { ...base.ai, ...overlay.ai },
     shopify: { ...base.shopify, ...overlay.shopify },
     reviews: { ...base.reviews, ...overlay.reviews },
   };
@@ -243,6 +271,9 @@ export async function loadIntegrations(): Promise<IntegrationsConfig> {
   }
   merged.youtube = { ...DEFAULT_INTEGRATIONS.youtube, ...merged.youtube };
   merged.email = { ...DEFAULT_INTEGRATIONS.email, ...merged.email };
+  merged.stripe = { ...DEFAULT_INTEGRATIONS.stripe, ...merged.stripe };
+  merged.whatsapp = { ...DEFAULT_INTEGRATIONS.whatsapp, ...merged.whatsapp };
+  merged.ai = { ...DEFAULT_INTEGRATIONS.ai, ...merged.ai };
   merged.shopify = { ...DEFAULT_INTEGRATIONS.shopify, ...merged.shopify };
   merged.reviews = { ...DEFAULT_INTEGRATIONS.reviews, ...merged.reviews };
   merged.calendar = calendarDefaults(merged.calendar);
@@ -327,6 +358,11 @@ export function listSecretsSet(config: IntegrationsConfig) {
     googleClientSecret: Boolean(config.calendar.googleClientSecret),
     googleRefreshToken: Boolean(config.calendar.googleRefreshToken),
     googleServiceAccount: Boolean(config.calendar.googleServiceAccountJson),
+    stripeSecretKey: Boolean(config.stripe?.secretKey),
+    stripeWebhookSecret: Boolean(config.stripe?.webhookSecret),
+    whatsappAccessToken: Boolean(config.whatsapp?.accessToken),
+    gmailAppPassword: Boolean(config.email?.gmailAppPassword),
+    openaiApiKey: Boolean(config.ai?.openaiApiKey),
   };
 }
 
@@ -402,13 +438,17 @@ export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
     {
       id: "challenge_checkout",
       group: "product",
-      label: "Challenge checkout URL",
+      label: "Challenge checkout",
       status:
-        config.product.challengeCheckoutUrl &&
-        !config.product.challengeCheckoutUrl.startsWith("/challenge")
+        (config.stripe?.secretKey && config.stripe?.challengePriceId) ||
+        (config.product.challengeCheckoutUrl &&
+          !config.product.challengeCheckoutUrl.startsWith("/challenge"))
           ? "ready"
           : "missing",
-      detail: config.product.challengeCheckoutUrl,
+      detail:
+        config.stripe?.challengePriceId
+          ? "Stripe Price ID"
+          : config.product.challengeCheckoutUrl,
     },
     {
       id: "challenge_checkout_embed",
@@ -416,6 +456,18 @@ export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
       label: "Challenge checkout embed (optional)",
       status: config.product.challengeCheckoutEmbedUrl ? "ready" : "optional",
       detail: config.product.challengeCheckoutEmbedUrl || "Button-only checkout",
+    },
+    {
+      id: "stripe",
+      group: "payments",
+      label: "Stripe Challenge checkout",
+      status:
+        config.stripe?.secretKey && config.stripe?.challengePriceId
+          ? "ready"
+          : "optional",
+      detail: config.stripe?.challengePriceId
+        ? "Price ID set — Challenge pays through Stripe"
+        : "Add secret key + Challenge Price ID to take card payments here",
     },
     {
       id: "youtube_api",
@@ -464,6 +516,43 @@ export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
       detail: config.shopify.storeDomain,
     },
     {
+      id: "gmail_smtp",
+      group: "email",
+      label: "Gmail SMTP (DNA reports)",
+      status:
+        config.email.fromEmail && config.email.gmailAppPassword
+          ? "ready"
+          : "optional",
+      detail: config.email.fromEmail
+        ? config.email.gmailAppPassword
+          ? config.email.fromEmail
+          : "Address set — add a Google App Password"
+        : "Needed to email the Performance DNA PDF",
+    },
+    {
+      id: "whatsapp_cloud",
+      group: "messaging",
+      label: "WhatsApp Cloud API (DNA reports)",
+      status:
+        config.whatsapp?.phoneNumberId && config.whatsapp?.accessToken
+          ? "ready"
+          : "optional",
+      detail: config.whatsapp?.templateName
+        ? `Template ${config.whatsapp.templateName}`
+        : config.whatsapp?.phoneNumberId
+          ? "Connected — add a utility template for first-contact sends"
+          : "Phone number ID + access token from Meta for Developers",
+    },
+    {
+      id: "openai_dna_copy",
+      group: "ai",
+      label: "OpenAI (DNA report copy only)",
+      status: config.ai?.openaiApiKey ? "ready" : "optional",
+      detail: config.ai?.openaiApiKey
+        ? `Model ${config.ai.model || "gpt-4o-mini"} — scores stay native`
+        : "Leave empty to keep native Kane copy. Never used for the score.",
+    },
+    {
       id: "reviews_provider",
       group: "reviews",
       label: `Reviews (${config.reviews.provider})`,
@@ -503,6 +592,22 @@ export function maskConfig(config: IntegrationsConfig): IntegrationsConfig {
     email: {
       ...config.email,
       apiKey: maskSecret(config.email.apiKey),
+      gmailAppPassword: maskSecret(config.email.gmailAppPassword ?? ""),
+    },
+    stripe: {
+      ...config.stripe,
+      secretKey: maskSecret(config.stripe?.secretKey ?? ""),
+      webhookSecret: maskSecret(config.stripe?.webhookSecret ?? ""),
+    },
+    whatsapp: {
+      ...DEFAULT_INTEGRATIONS.whatsapp,
+      ...config.whatsapp,
+      accessToken: maskSecret(config.whatsapp?.accessToken ?? ""),
+    },
+    ai: {
+      ...DEFAULT_INTEGRATIONS.ai,
+      ...config.ai,
+      openaiApiKey: maskSecret(config.ai?.openaiApiKey ?? ""),
     },
     shopify: {
       ...config.shopify,
@@ -571,6 +676,21 @@ export function toEnvSnippet(config: IntegrationsConfig): string {
     `EMAIL_API_KEY=${config.email.apiKey}`,
     `EMAIL_LIST_ID=${config.email.listId}`,
     `MAILCHIMP_SERVER_PREFIX=${config.email.serverPrefix}`,
+    `GMAIL_USER=${config.email.fromEmail}`,
+    `GMAIL_APP_PASSWORD=${config.email.gmailAppPassword}`,
+    `EMAIL_FROM=${config.email.fromEmail}`,
+    `EMAIL_FROM_NAME=${config.email.fromName}`,
+    `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${config.stripe.publishableKey}`,
+    `STRIPE_SECRET_KEY=${config.stripe.secretKey}`,
+    `STRIPE_WEBHOOK_SECRET=${config.stripe.webhookSecret}`,
+    `STRIPE_CHALLENGE_PRICE_ID=${config.stripe.challengePriceId}`,
+    `WHATSAPP_PHONE_NUMBER_ID=${config.whatsapp?.phoneNumberId ?? ""}`,
+    `WHATSAPP_ACCESS_TOKEN=${config.whatsapp?.accessToken ?? ""}`,
+    `WHATSAPP_GRAPH_VERSION=${config.whatsapp?.graphVersion ?? "v21.0"}`,
+    `WHATSAPP_TEMPLATE_NAME=${config.whatsapp?.templateName ?? ""}`,
+    `WHATSAPP_TEMPLATE_LANGUAGE=${config.whatsapp?.templateLanguage ?? "en"}`,
+    `OPENAI_API_KEY=${config.ai?.openaiApiKey ?? ""}`,
+    `OPENAI_DNA_MODEL=${config.ai?.model ?? "gpt-4o-mini"}`,
     `SHOPIFY_STORE_DOMAIN=${config.shopify.storeDomain}`,
     `SHOPIFY_STOREFRONT_TOKEN=${config.shopify.storefrontToken}`,
     `REVIEWS_PROVIDER=${config.reviews.provider}`,

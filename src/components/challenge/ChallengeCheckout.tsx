@@ -49,7 +49,30 @@ export function ChallengeCheckout() {
         <p className="mt-6 text-sm text-[var(--muted)]">Loading checkout…</p>
       ) : null}
 
-      {!loading && !ready && !showEmbed ? (
+      {!loading && config.stripe.enabled ? (
+        <div className="mt-6">
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] sm:w-auto"
+            onClick={async () => {
+              const res = await fetch("/api/stripe/checkout", { method: "POST" });
+              const json = (await res.json()) as { url?: string; error?: string };
+              if (json.url) {
+                window.location.href = json.url;
+                return;
+              }
+              window.alert(json.error || "Could not start Stripe checkout");
+            }}
+          >
+            {ch.cta.label} · Pay with Stripe
+          </button>
+          <p className="mt-3 text-xs text-[var(--muted)] sm:max-w-xs">
+            Secure checkout via Stripe. Pro and Elite stay application-only — never sold here.
+          </p>
+        </div>
+      ) : null}
+
+      {!loading && !config.stripe.enabled && !ready && !showEmbed ? (
         <p className="mt-6 rounded-md border border-dashed border-[var(--border)] p-4 text-sm text-[var(--muted)]">
           Set the Challenge checkout URL in{" "}
           <a
@@ -62,7 +85,7 @@ export function ChallengeCheckout() {
         </p>
       ) : null}
 
-      {showEmbed ? (
+      {showEmbed && !config.stripe.enabled ? (
         <div className="mt-6 overflow-hidden border border-[var(--border)] bg-black">
           <iframe
             title="Challenge checkout"
@@ -75,7 +98,7 @@ export function ChallengeCheckout() {
         </div>
       ) : null}
 
-      {ready ? (
+      {ready && !config.stripe.enabled ? (
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <a
             href={checkoutUrl}

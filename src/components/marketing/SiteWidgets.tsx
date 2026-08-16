@@ -81,7 +81,13 @@ function useDeferredPopup(enabled: boolean) {
 
 export function SiteWidgets() {
   const pathname = usePathname();
-  if (pathname.startsWith("/admin")) return null;
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/apply") ||
+    pathname.startsWith("/dna")
+  ) {
+    return null;
+  }
   return (
     <>
       <EmailPopup />

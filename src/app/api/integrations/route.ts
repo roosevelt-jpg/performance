@@ -170,6 +170,53 @@ function normalizeIncoming(
       apiKey: keepSecret(body.email?.apiKey, current.email.apiKey),
       listId: body.email?.listId ?? current.email.listId,
       serverPrefix: body.email?.serverPrefix ?? current.email.serverPrefix,
+      gmailAppPassword: keepSecret(
+        body.email?.gmailAppPassword,
+        current.email.gmailAppPassword,
+      ),
+      fromEmail: body.email?.fromEmail ?? current.email.fromEmail,
+      fromName: body.email?.fromName ?? current.email.fromName,
+    },
+    stripe: {
+      publishableKey:
+        body.stripe?.publishableKey ?? current.stripe.publishableKey,
+      secretKey: keepSecret(body.stripe?.secretKey, current.stripe.secretKey),
+      webhookSecret: keepSecret(
+        body.stripe?.webhookSecret,
+        current.stripe.webhookSecret,
+      ),
+      challengePriceId:
+        body.stripe?.challengePriceId ?? current.stripe.challengePriceId,
+    },
+    whatsapp: {
+      phoneNumberId:
+        body.whatsapp?.phoneNumberId ??
+        current.whatsapp?.phoneNumberId ??
+        "",
+      accessToken: keepSecret(
+        body.whatsapp?.accessToken,
+        current.whatsapp?.accessToken ?? "",
+      ),
+      graphVersion:
+        body.whatsapp?.graphVersion?.trim() ||
+        current.whatsapp?.graphVersion ||
+        DEFAULT_INTEGRATIONS.whatsapp.graphVersion,
+      templateName:
+        body.whatsapp?.templateName ?? current.whatsapp?.templateName ?? "",
+      templateLanguage:
+        body.whatsapp?.templateLanguage?.trim() ||
+        current.whatsapp?.templateLanguage ||
+        "en",
+    },
+    ai: {
+      openaiApiKey: keepSecret(
+        body.ai?.openaiApiKey,
+        current.ai?.openaiApiKey ?? "",
+      ),
+      model:
+        body.ai?.model?.trim() ||
+        current.ai?.model ||
+        DEFAULT_INTEGRATIONS.ai.model,
     },
     shopify: {
       storeDomain: body.shopify?.storeDomain ?? current.shopify.storeDomain,

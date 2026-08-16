@@ -27,6 +27,10 @@ export type PublicRuntimeConfig = {
     enabled: boolean;
     provider: IntegrationsConfig["email"]["provider"];
   };
+  stripe: {
+    enabled: boolean;
+    publishableKey: string;
+  };
 };
 
 export async function getPublicRuntimeConfig(): Promise<PublicRuntimeConfig> {
@@ -56,6 +60,12 @@ export async function getPublicRuntimeConfig(): Promise<PublicRuntimeConfig> {
     emailSignup: {
       enabled: emailEnabled,
       provider: config.email.provider,
+    },
+    stripe: {
+      enabled: Boolean(
+        config.stripe?.secretKey && config.stripe?.challengePriceId,
+      ),
+      publishableKey: config.stripe?.publishableKey ?? "",
     },
   };
 }

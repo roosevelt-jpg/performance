@@ -1,3 +1,5 @@
+import { DEFAULT_APPLY_FUNNEL } from "@/lib/apply/defaults";
+import { DEFAULT_DNA } from "@/lib/dna/questions";
 import { DEFAULT_FUNNEL } from "@/lib/funnel/defaults";
 import type { CmsContent } from "./types";
 
@@ -43,6 +45,12 @@ export const DEFAULT_CMS: CmsContent = {
         visible: true,
       },
       {
+        id: "dna",
+        label: "Performance DNA",
+        href: "/dna",
+        visible: true,
+      },
+      {
         id: "admin",
         label: "Admin",
         href: "/admin/login",
@@ -61,6 +69,18 @@ export const DEFAULT_CMS: CmsContent = {
         id: "shop",
         label: "Shop",
         href: "https://theformulaperformance.com/",
+        visible: true,
+      },
+      {
+        id: "qualify",
+        label: "See if you qualify",
+        href: "/apply",
+        visible: true,
+      },
+      {
+        id: "dna",
+        label: "Performance DNA",
+        href: "/dna",
         visible: true,
       },
       {
@@ -641,4 +661,6 @@ export const DEFAULT_CMS: CmsContent = {
     saved: "Preference saved.",
   },
   funnel: DEFAULT_FUNNEL,
+  applyFunnel: DEFAULT_APPLY_FUNNEL,
+  dna: DEFAULT_DNA,
 };
