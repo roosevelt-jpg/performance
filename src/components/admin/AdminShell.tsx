@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { SiteFooter, SiteHeader } from "@/components/layout/SiteChrome";
+import { useAdminIdleLogout } from "@/hooks/useAdminIdleLogout";
 
 const TABS = [
   { href: "/admin/content", label: "Content CMS" },
@@ -55,6 +56,18 @@ export function AdminShell({
     });
     router.replace("/admin/login");
   }
+
+  const expireIdle = useCallback(async () => {
+    await fetch("/api/admin/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    router.replace(
+      `/admin/login?next=${encodeURIComponent(pathname)}&reason=idle`,
+    );
+  }, [pathname, router]);
+
+  useAdminIdleLogout(expireIdle, !checking && Boolean(username));
 
   return (
     <main className="flex min-h-dvh flex-1 flex-col">

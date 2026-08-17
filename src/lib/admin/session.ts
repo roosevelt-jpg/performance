@@ -1,7 +1,8 @@
 import { createHmac, timingSafeEqual, randomBytes } from "crypto";
+import { ADMIN_SESSION_TTL_MS } from "./idle";
 
 const COOKIE_NAME = "c365_admin_session";
-const SESSION_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
+const SESSION_TTL_MS = ADMIN_SESSION_TTL_MS;
 
 export type AdminCredentials = {
   username: string;

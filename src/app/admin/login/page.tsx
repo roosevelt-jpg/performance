@@ -10,6 +10,7 @@ function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/admin/content";
+  const idle = params.get("reason") === "idle";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -53,7 +54,8 @@ function LoginForm() {
           Admin login
         </h1>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          Sign in to manage integrations and go-live settings.
+          Sign in to manage integrations and go-live settings. You are signed
+          out after 10 minutes of inactivity.
         </p>
       </div>
 
@@ -86,6 +88,12 @@ function LoginForm() {
             required
           />
         </label>
+
+        {idle ? (
+          <p className="text-sm text-[var(--fg-soft)]" role="status">
+            You were signed out after 10 minutes without activity.
+          </p>
+        ) : null}
 
         {error ? (
           <p className="text-sm text-red-400" role="alert">
