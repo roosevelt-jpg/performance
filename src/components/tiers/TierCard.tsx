@@ -5,6 +5,10 @@ import { GatedLink } from "@/components/marketing/WatchGate";
 import type { CmsTier } from "@/lib/cms/types";
 import { useCms } from "@/components/cms/CmsProvider";
 import { ChallengeOffer } from "@/components/marketing/ChallengeOffer";
+import {
+  isApplicationOnlyTier,
+  publicTierHref,
+} from "@/lib/cms/tierCommerce";
 
 type Props = {
   tier: CmsTier;
@@ -13,11 +17,12 @@ type Props = {
 export function TierCard({ tier }: Props) {
   const { tiersSection } = useCms().home;
   const isSell = tier.cta.kind === "book";
-  const isChallenge = tier.cta.kind === "checkout";
-  const href =
-    tier.cta.kind === "book"
-      ? `/book?tier=${tier.cta.bookTier}`
-      : tier.cta.href;
+  const isChallenge = tier.id === "challenge" && tier.cta.kind === "checkout";
+  const href = publicTierHref(tier);
+  const showPrice =
+    !isApplicationOnlyTier(tier) &&
+    !isChallenge &&
+    tier.priceAmount > 0;
   const guarantee = tiersSection.guarantee;
 
   return (
@@ -40,6 +45,11 @@ export function TierCard({ tier }: Props) {
             {tier.name}
           </h3>
           <p className="mt-1 text-sm text-[var(--muted)]">{tier.subhead}</p>
+          {showPrice ? (
+            <p className="mt-2 font-heading text-2xl text-[var(--fg)]">
+              £{tier.priceAmount}
+            </p>
+          ) : null}
         </div>
         {isSell && tier.applyBadge ? (
           <span className="shrink-0 rounded-md border border-[var(--accent)] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">

@@ -5,7 +5,7 @@ import {
   writePersistedJson,
 } from "@/lib/persist/jsonFile";
 import { DEFAULT_CMS } from "./defaults";
-import { normalizeTierCommerce, stripPrivateCommerce } from "./tierCommerce";
+import { ensureUniqueTierIds, stripPrivateCommerce } from "./tierCommerce";
 import type { CmsContent } from "./types";
 
 export const CMS_FILE = path.join(process.cwd(), "data", "cms.local.json");
@@ -182,8 +182,8 @@ export function mergeCms(
     out.home.tiersSection.enabled = base.home.tiersSection.enabled;
   }
   out.site.seo = { ...base.site.seo, ...out.site.seo };
-  out.tiers = (Array.isArray(out.tiers) ? out.tiers : base.tiers).map(
-    normalizeTierCommerce,
+  out.tiers = ensureUniqueTierIds(
+    Array.isArray(out.tiers) ? out.tiers : base.tiers,
   );
 
   return out;

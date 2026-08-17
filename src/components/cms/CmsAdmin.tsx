@@ -11,7 +11,16 @@ import type {
   CmsVideoSection,
 } from "@/lib/cms/types";
 import { CMS_MEDIA_SLOT_OPTIONS } from "@/lib/cms/types";
-import { EMPTY_TIER_COMMERCE, isApplicationOnlyTier } from "@/lib/cms/tierCommerce";
+import {
+  EMPTY_TIER_COMMERCE,
+  duplicateTierCard,
+  isApplicationOnlyTier,
+  isSystemTierId,
+  newCustomTierId,
+  slugifyTierId,
+  uniqueTierId,
+  SYSTEM_TIER_IDS,
+} from "@/lib/cms/tierCommerce";
 import { toPlainText } from "@/lib/text/plain";
 
 type TabId =
@@ -251,26 +260,86 @@ export function CmsAdmin() {
     }));
   }
 
-  function addTier() {
-    setForm((f) => ({
-      ...f,
-      tiers: [
-        ...f.tiers,
-        {
-          id: cmsId("tier"),
-          enabled: true,
-          highlight: false,
-          name: "New programme",
-          badge: "",
-          subhead: "",
-          body: [],
-          includes: [],
-          cta: { kind: "book", label: "Apply", bookTier: "pro" },
-          applyBadge: "Application only",
-          ...EMPTY_TIER_COMMERCE,
-        },
-      ],
-    }));
+  function addTier(kind: "book" | "checkout") {
+    setForm((f) => {
+      const name = "New programme";
+      const id = newCustomTierId(name, f.tiers.map((t) => t.id));
+      return {
+        ...f,
+        tiers: [
+          ...f.tiers,
+          {
+            id,
+            enabled: true,
+            highlight: false,
+            name,
+            badge: "",
+            subhead: "",
+            body: [],
+            includes: [],
+            cta:
+              kind === "book"
+                ? {
+                    kind: "book",
+                    label: "See If You're a Fit",
+                    bookTier: "pro",
+                  }
+                : { kind: "checkout", label: "Join", href: "" },
+            applyBadge: kind === "book" ? "Application only" : "",
+            ...EMPTY_TIER_COMMERCE,
+          },
+        ],
+      };
+    });
+  }
+
+  function duplicateTier(index: number) {
+    setForm((f) => {
+      const copy = duplicateTierCard(
+        f.tiers[index],
+        f.tiers.map((t) => t.id),
+      );
+      const tiers = [...f.tiers];
+      tiers.splice(index + 1, 0, copy);
+      return { ...f, tiers };
+    });
+  }
+
+  function moveTier(index: number, direction: -1 | 1) {
+    setForm((f) => {
+      const next = index + direction;
+      if (next < 0 || next >= f.tiers.length) return f;
+      const tiers = [...f.tiers];
+      const current = tiers[index];
+      tiers[index] = tiers[next];
+      tiers[next] = current;
+      return { ...f, tiers };
+    });
+  }
+
+  function renameTier(index: number, name: string) {
+    setForm((f) => {
+      const current = f.tiers[index];
+      const others = f.tiers.filter((_, j) => j !== index).map((t) => t.id);
+      const tracksName =
+        !isSystemTierId(current.id) &&
+        (current.name === "New programme" ||
+          current.id === slugifyTierId(current.name));
+      return {
+        ...f,
+        tiers: f.tiers.map((t, i) =>
+          i === index
+            ? {
+                ...t,
+                name,
+                id: tracksName
+                  ? uniqueTierId(name, [...others, ...SYSTEM_TIER_IDS])
+                  : t.id,
+              }
+            : t,
+        ),
+      };
+    });
   }
 
   function removeTier(index: number) {
@@ -3665,8 +3734,26 @@ export function CmsAdmin() {
 
       {tab === "tiers" ? (
         <div className="space-y-6">
+          <Section title="Programmes">
+            <p className="text-sm leading-[1.6] text-[var(--muted)]">
+              Add as many programmes as you want. Rename Pro, Elite, or Challenge
+              — that only changes what people see. Booking and Challenge checkout
+              still use the locked internal IDs. Save at the bottom when you are
+              done.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <AddBlock
+                label="Add application-only programme"
+                onClick={() => addTier("book")}
+              />
+              <AddBlock
+                label="Add self-serve checkout programme"
+                onClick={() => addTier("checkout")}
+              />
+            </div>
+          </Section>
           {form.tiers.map((tier, i) => (
-            <Section key={tier.id} title={`Tier: ${tier.name || tier.id}`}>
+            <Section key={`tier-editor-${i}`} title={tier.name || "Untitled programme"}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
                   <input
@@ -3679,10 +3766,35 @@ export function CmsAdmin() {
                   />
                   Enabled on landing page
                 </label>
-                <RemoveBlock
-                  label="Remove programme"
-                  onClick={() => removeTier(i)}
-                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="rounded-md border border-[var(--border)] px-2 py-1 text-xs font-semibold disabled:opacity-40"
+                    disabled={i === 0}
+                    onClick={() => moveTier(i, -1)}
+                  >
+                    Move up
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md border border-[var(--border)] px-2 py-1 text-xs font-semibold disabled:opacity-40"
+                    disabled={i === form.tiers.length - 1}
+                    onClick={() => moveTier(i, 1)}
+                  >
+                    Move down
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md border border-[var(--border)] px-2 py-1 text-xs font-semibold"
+                    onClick={() => duplicateTier(i)}
+                  >
+                    Duplicate
+                  </button>
+                  <RemoveBlock
+                    label="Remove"
+                    onClick={() => removeTier(i)}
+                  />
+                </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
                 <input
@@ -3696,10 +3808,32 @@ export function CmsAdmin() {
                 Highlight (sell tier)
               </label>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Name">
+                <Field
+                  label="Public name"
+                  hint="What people see on the site. Rename existing programmes here."
+                >
                   <Text
                     value={tier.name}
-                    onChange={(v) => updateTier(i, { name: v })}
+                    onChange={(v) => renameTier(i, v)}
+                  />
+                </Field>
+                <Field
+                  label="Internal ID"
+                  hint={
+                    isSystemTierId(tier.id)
+                      ? "Locked so booking and Challenge checkout keep working."
+                      : "Used in Stripe. Letters, numbers and hyphens."
+                  }
+                >
+                  <input
+                    className={inputClass}
+                    value={tier.id}
+                    disabled={isSystemTierId(tier.id)}
+                    onChange={(e) =>
+                      updateTier(i, {
+                        id: slugifyTierId(e.target.value || tier.id),
+                      })
+                    }
                   />
                 </Field>
                 <Field label="Badge">
@@ -3731,12 +3865,29 @@ export function CmsAdmin() {
                 value={tier.includes}
                 onChange={(v) => updateTier(i, { includes: v })}
               />
-              <Field label="CTA kind">
+              <Field
+                label="CTA kind"
+                hint={
+                  tier.id === "pro" || tier.id === "elite"
+                    ? "Pro and Elite stay application-only."
+                    : undefined
+                }
+              >
                 <select
                   className={inputClass}
                   value={tier.cta.kind}
                   onChange={(e) => {
                     const kind = e.target.value as CmsTier["cta"]["kind"];
+                    if (tier.id === "pro" || tier.id === "elite") {
+                      updateTier(i, {
+                        cta: {
+                          kind: "book",
+                          label: tier.cta.label,
+                          bookTier: tier.id === "elite" ? "elite" : "pro",
+                        },
+                      });
+                      return;
+                    }
                     if (kind === "book") {
                       updateTier(i, {
                         cta: {
@@ -3755,7 +3906,7 @@ export function CmsAdmin() {
                             tier.cta.kind === "checkout" ||
                             tier.cta.kind === "link"
                               ? tier.cta.href
-                              : "/challenge",
+                              : "",
                         },
                       });
                     } else {
@@ -3767,15 +3918,19 @@ export function CmsAdmin() {
                             tier.cta.kind === "checkout" ||
                             tier.cta.kind === "link"
                               ? tier.cta.href
-                              : "/challenge",
+                              : "/",
                         },
                       });
                     }
                   }}
                 >
-                  <option value="book">Book call</option>
-                  <option value="checkout">Checkout</option>
-                  <option value="link">Link</option>
+                  <option value="book">Book call / apply</option>
+                  {tier.id === "pro" || tier.id === "elite" ? null : (
+                    <>
+                      <option value="checkout">Checkout</option>
+                      <option value="link">Link</option>
+                    </>
+                  )}
                 </select>
               </Field>
               <Field label="CTA label">
@@ -3832,7 +3987,10 @@ export function CmsAdmin() {
                   />
                 </Field>
               ) : (
-                <Field label="Book tier">
+                <Field
+                  label="Book calendar"
+                  hint="Which Kane calendar this programme uses after a qualified apply."
+                >
                   <select
                     className={inputClass}
                     value={tier.cta.bookTier}
@@ -3846,8 +4004,8 @@ export function CmsAdmin() {
                       })
                     }
                   >
-                    <option value="pro">pro</option>
-                    <option value="elite">elite</option>
+                    <option value="pro">Pro calendar</option>
+                    <option value="elite">Elite calendar</option>
                   </select>
                 </Field>
               )}
@@ -3915,7 +4073,16 @@ export function CmsAdmin() {
               ) : null}
             </Section>
           ))}
-          <AddBlock label="Add programme card" onClick={addTier} />
+          <div className="flex flex-wrap gap-2">
+            <AddBlock
+              label="Add application-only programme"
+              onClick={() => addTier("book")}
+            />
+            <AddBlock
+              label="Add self-serve checkout programme"
+              onClick={() => addTier("checkout")}
+            />
+          </div>
         </div>
       ) : null}
 
