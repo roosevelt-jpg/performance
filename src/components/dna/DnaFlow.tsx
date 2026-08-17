@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BrandLogo } from "@/components/layout/SiteChrome";
+import { DnaReportView } from "@/components/dna/DnaReportView";
 import { useCms } from "@/components/cms/CmsProvider";
 import { DEFAULT_DNA, DNA_QUESTIONS } from "@/lib/dna/questions";
-import { liveDnaBoard } from "@/lib/dna/score";
+import { liveDnaBoard, scoreDna } from "@/lib/dna/score";
 import type { DnaResult } from "@/lib/dna/types";
 
-type Stage = "intro" | "quiz" | "contact" | "result";
+type Stage = "intro" | "quiz" | "report" | "contact" | "sent";
 
 export function DnaFlow() {
   const copy = useCms().dna ?? DEFAULT_DNA;
@@ -19,6 +20,7 @@ export function DnaFlow() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
+  const [preview, setPreview] = useState<DnaResult | null>(null);
   const [result, setResult] = useState<DnaResult | null>(null);
   const [pdfUrl, setPdfUrl] = useState("");
   const [delivery, setDelivery] = useState<string[]>([]);
@@ -31,6 +33,12 @@ export function DnaFlow() {
     () => liveDnaBoard(answers, copy),
     [answers, copy],
   );
+  const shown = result ?? preview;
+
+  function openReport(nextAnswers: Record<string, string>) {
+    setPreview(scoreDna(nextAnswers, copy));
+    setStage("report");
+  }
 
   async function finish(e: React.FormEvent) {
     e.preventDefault();
@@ -54,7 +62,7 @@ export function DnaFlow() {
         };
       };
       if (!res.ok || !json.result) {
-        setError(json.error || "Could not score this run.");
+        setError(json.error || "Could not send this report.");
         return;
       }
       setResult(json.result);
@@ -64,16 +72,16 @@ export function DnaFlow() {
       if (json.delivery?.emailSent) notes.unshift("Report emailed.");
       if (json.delivery?.whatsappSent) notes.unshift("Report sent on WhatsApp.");
       setDelivery(notes);
-      setStage("result");
+      setStage("sent");
     } finally {
       setSaving(false);
     }
   }
 
   const ctaLabel =
-    result?.path === "call"
+    shown?.path === "call"
       ? "See if you qualify"
-      : result?.path === "challenge"
+      : shown?.path === "challenge"
         ? "Start the 8-Week Challenge"
         : "Join the next step";
 
@@ -98,7 +106,7 @@ export function DnaFlow() {
             <ul className="mt-6 space-y-2 text-sm text-[var(--fg-soft)]">
               <li>Twelve questions — training, nutrition, routine, health, mindset.</li>
               <li>A live scoreboard as you go. Honesty scores higher than vanity.</li>
-              <li>Coach assigned from Kane&apos;s team. PDF on WhatsApp and email.</li>
+              <li>Your analysis on screen first. Then the PDF on WhatsApp and email.</li>
             </ul>
             <button
               type="button"
@@ -155,11 +163,12 @@ export function DnaFlow() {
                   key={opt.id}
                   type="button"
                   onClick={() => {
-                    setAnswers((current) => ({ ...current, [question.id]: opt.id }));
+                    const next = { ...answers, [question.id]: opt.id };
+                    setAnswers(next);
                     if (index < questions.length - 1) {
                       setIndex((i) => i + 1);
                     } else {
-                      setStage("contact");
+                      openReport(next);
                     }
                   }}
                   className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-left text-sm hover:border-[var(--fg-soft)]"
@@ -171,31 +180,34 @@ export function DnaFlow() {
           </>
         ) : null}
 
+        {stage === "report" && shown ? (
+          <div className="mt-8">
+            <DnaReportView copy={copy} result={shown} />
+            <button
+              type="button"
+              className="mt-8 inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--accent-fg)]"
+              onClick={() => setStage("contact")}
+            >
+              Send this PDF to email and WhatsApp
+            </button>
+            <p className="mt-3 text-xs text-[var(--muted)]">
+              Read it here first. Then we send the file to you.
+            </p>
+          </div>
+        ) : null}
+
         {stage === "contact" ? (
           <form onSubmit={(e) => void finish(e)} className="mt-10 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-              Scoreboard complete
+              Send the report
             </p>
             <h1 className="font-heading text-[clamp(1.6rem,4vw,2.2rem)]">
-              Your DNA is scored. Where should we send it?
+              Where should we send the PDF?
             </h1>
             <p className="text-sm leading-[1.7] text-[var(--muted)]">
-              Live score {overall}/100. We assign a coach from Kane&apos;s team and
-              send the PDF to email and WhatsApp.
+              Live score {overall}/100. Email is required. WhatsApp is optional if
+              you add a number with country code.
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {liveScores.map((row) => (
-                <div
-                  key={row.id}
-                  className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
-                >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-                    {row.label}
-                  </p>
-                  <p className="mt-1 font-heading text-lg">{row.score ?? "—"}</p>
-                </div>
-              ))}
-            </div>
             <input
               required
               placeholder="First name"
@@ -227,59 +239,21 @@ export function DnaFlow() {
               disabled={saving}
               className="inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--accent-fg)]"
             >
-              {saving ? "Scoring…" : "See my DNA and next step"}
+              {saving ? "Sending…" : "Email and WhatsApp my report"}
+            </button>
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center rounded-md border border-[var(--border-soft)] px-5 py-3.5 text-sm font-semibold"
+              onClick={() => setStage("report")}
+            >
+              Back to analysis
             </button>
           </form>
         ) : null}
 
-        {stage === "result" && result ? (
+        {stage === "sent" && shown ? (
           <div className="mt-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-              {copy.resultHeading}
-            </p>
-            <h1 className="mt-3 font-heading text-[clamp(2rem,6vw,3rem)]">
-              {result.overall}
-              <span className="text-lg text-[var(--muted)]"> / 100</span>
-            </h1>
-            <p className="mt-3 text-base leading-[1.7] text-[var(--muted)]">
-              {result.summary}
-            </p>
-            <p className="mt-4 rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
-              Assigned: <strong>{result.coach.name}</strong>
-              <span className="block text-[var(--muted)]">{result.coach.role}</span>
-            </p>
-            {result.primaryLeak ? (
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                Primary leak:{" "}
-                <strong className="text-[var(--fg)]">
-                  {result.primaryLeak.label} {result.primaryLeak.score}
-                </strong>
-              </p>
-            ) : null}
-            <div className="mt-6 space-y-4">
-              {result.categories.map((cat) => (
-                <div key={cat.id}>
-                  <div className="mb-1 flex justify-between text-xs uppercase tracking-[0.12em] text-[var(--muted)]">
-                    <span>{cat.label}</span>
-                    <span>{cat.score}</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[var(--border)]">
-                    <div
-                      className="h-full bg-[var(--accent)]"
-                      style={{ width: `${cat.score}%` }}
-                    />
-                  </div>
-                  {cat.insight ? (
-                    <p className="mt-1.5 text-sm leading-[1.6] text-[var(--fg-soft)]">
-                      {cat.insight}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-            <p className="mt-6 text-sm font-medium text-[var(--fg)]">
-              {result.nextStep}
-            </p>
+            <DnaReportView copy={copy} result={shown} />
             <Link
               href={nextHref}
               className="mt-8 inline-flex w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--accent-fg)]"

@@ -1,6 +1,7 @@
 import { DEFAULT_APPLY_FUNNEL } from "@/lib/apply/defaults";
 import { DEFAULT_DNA } from "@/lib/dna/questions";
 import { DEFAULT_FUNNEL } from "@/lib/funnel/defaults";
+import { EMPTY_TIER_COMMERCE } from "./tierCommerce";
 import type { CmsContent } from "./types";
 
 export const DEFAULT_CMS: CmsContent = {
@@ -485,6 +486,7 @@ export const DEFAULT_CMS: CmsContent = {
       includes: ["Guided plan", "Community access"],
       cta: { kind: "link", label: "Learn more", href: "/challenge" },
       applyBadge: "",
+      ...EMPTY_TIER_COMMERCE,
     },
     {
       id: "challenge",
@@ -511,6 +513,7 @@ export const DEFAULT_CMS: CmsContent = {
         href: "/challenge#checkout",
       },
       applyBadge: "",
+      ...EMPTY_TIER_COMMERCE,
     },
     {
       id: "pro",
@@ -536,6 +539,7 @@ export const DEFAULT_CMS: CmsContent = {
       ],
       cta: { kind: "book", label: "See If You're a Fit", bookTier: "pro" },
       applyBadge: "Apply",
+      ...EMPTY_TIER_COMMERCE,
     },
     {
       id: "elite",
@@ -559,6 +563,7 @@ export const DEFAULT_CMS: CmsContent = {
       ],
       cta: { kind: "book", label: "See If You're a Fit", bookTier: "elite" },
       applyBadge: "Apply",
+      ...EMPTY_TIER_COMMERCE,
     },
   ],
   questionnaire: {

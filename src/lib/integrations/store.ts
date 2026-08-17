@@ -447,14 +447,11 @@ export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
     {
       id: "stripe",
       group: "payments",
-      label: "Stripe Challenge checkout",
-      status:
-        config.stripe?.secretKey && config.stripe?.challengePriceId
-          ? "ready"
-          : "optional",
-      detail: config.stripe?.challengePriceId
-        ? "Price ID set — Challenge pays through Stripe"
-        : "Add secret key + Challenge Price ID to take card payments here",
+      label: "Stripe",
+      status: config.stripe?.secretKey ? "ready" : "optional",
+      detail: config.stripe?.secretKey
+        ? "Secret key set — purchases dashboard and Payment Links will sync from Admin → Content → Tiers"
+        : "Add secret key on this page, then add a price and payment link on each programme",
     },
     {
       id: "youtube_api",

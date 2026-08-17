@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Newsreader, Poppins } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import { GoogleTags, JsonLd } from "@/components/seo/GoogleTags";
-import { loadCms } from "@/lib/cms/store";
+import { loadCms, loadPublicCmsView } from "@/lib/cms/store";
 import { loadIntegrations } from "@/lib/integrations/store";
 import { buildJsonLd } from "@/lib/seo/jsonld";
 import { absoluteUrl, parseKeywords, siteOrigin } from "@/lib/seo/site";
@@ -88,7 +88,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cms = await loadCms();
+  const cms = loadPublicCmsView(await loadCms());
   const integrations = await loadIntegrations();
   return (
     <html

@@ -3,6 +3,7 @@ import {
   embedUrlForTier,
   shouldUseNativeBooking,
 } from "@/lib/calendar/nativeReady";
+import { loadCms } from "@/lib/cms/store";
 import type {
   CalendarBookingMode,
   CalendarPlatform,
@@ -35,6 +36,8 @@ export type PublicRuntimeConfig = {
 
 export async function getPublicRuntimeConfig(): Promise<PublicRuntimeConfig> {
   const config = await loadIntegrations();
+  const cms = await loadCms();
+  const challenge = cms.tiers.find((tier) => tier.id === "challenge");
   const nativePro = shouldUseNativeBooking(config, "pro");
   const nativeElite = shouldUseNativeBooking(config, "elite");
   const nativeBooking = nativePro || nativeElite;
@@ -43,6 +46,13 @@ export async function getPublicRuntimeConfig(): Promise<PublicRuntimeConfig> {
     config.email.provider === "ghl"
       ? Boolean(config.ghl.apiKey)
       : config.email.provider !== "none" && Boolean(config.email.apiKey);
+
+  const stripeCheckoutReady = Boolean(
+    config.stripe?.secretKey &&
+      (config.stripe?.challengePriceId ||
+        challenge?.stripePriceId ||
+        challenge?.stripePaymentLink),
+  );
 
   return {
     pricing: config.pricing,
@@ -62,9 +72,7 @@ export async function getPublicRuntimeConfig(): Promise<PublicRuntimeConfig> {
       provider: config.email.provider,
     },
     stripe: {
-      enabled: Boolean(
-        config.stripe?.secretKey && config.stripe?.challengePriceId,
-      ),
+      enabled: stripeCheckoutReady,
       publishableKey: config.stripe?.publishableKey ?? "",
     },
   };

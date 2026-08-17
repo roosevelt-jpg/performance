@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { challengePaidContact } from "./fulfill";
+import { challengePaidContact, paidLeadFromSession } from "./fulfill";
 
 describe("challengePaidContact", () => {
   it("tags a paid Challenge checkout for GHL", () => {
@@ -22,5 +22,14 @@ describe("challengePaidContact", () => {
         customerDetails: { email: "sam@example.com" },
       }),
     ).toBeNull();
+  });
+
+  it("still records a private Pro payment for GHL without Challenge tags", () => {
+    const lead = paidLeadFromSession({
+      metadata: { cmsTierId: "pro", product: "pro" },
+      customerDetails: { email: "sam@example.com", name: "Sam" },
+    });
+    expect(lead?.tags).toContain("paid_pro");
+    expect(lead?.tags).not.toContain("paid_challenge");
   });
 });

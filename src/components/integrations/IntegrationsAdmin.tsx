@@ -1521,7 +1521,7 @@ export function IntegrationsAdmin({
               </Field>
               <Field
                 label="Challenge Price ID"
-                hint="Stripe Price for the 8-Week Challenge. Create the product in Stripe, paste price_… here."
+                hint="Filled automatically when you save a Challenge price in Content → Tier cards. You can still paste a price_… here."
               >
                 <input
                   className={inputClass}

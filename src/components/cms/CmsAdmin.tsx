@@ -11,6 +11,7 @@ import type {
   CmsVideoSection,
 } from "@/lib/cms/types";
 import { CMS_MEDIA_SLOT_OPTIONS } from "@/lib/cms/types";
+import { EMPTY_TIER_COMMERCE, isApplicationOnlyTier } from "@/lib/cms/tierCommerce";
 import { toPlainText } from "@/lib/text/plain";
 
 type TabId =
@@ -207,13 +208,35 @@ export function CmsAdmin() {
       const json = (await res.json()) as {
         content?: CmsContent;
         error?: string;
+        stripeSync?: {
+          connected?: boolean;
+          synced?: number;
+          skipped?: number;
+          errors?: string[];
+        };
       };
       if (!res.ok) {
         setError(json.error ?? "Save failed");
         return;
       }
       if (json.content) setForm(json.content);
-      setMessage("CMS saved — live site will pick this up within ~30s.");
+      const sync = json.stripeSync;
+      if (!sync?.connected) {
+        setMessage(
+          "CMS saved. Add Stripe keys in Integrations to create Payment Links from the prices on each tier.",
+        );
+      } else if (sync.errors?.length) {
+        setError(
+          `CMS saved. Stripe: ${sync.errors.join(" ")}`,
+        );
+        setMessage(
+          `Synced ${sync.synced ?? 0} programme(s) to Stripe.`,
+        );
+      } else {
+        setMessage(
+          `CMS saved. Stripe synced ${sync.synced ?? 0} programme(s) — live site updates within ~30s.`,
+        );
+      }
     } catch {
       setError("Save failed");
     } finally {
@@ -244,6 +267,7 @@ export function CmsAdmin() {
           includes: [],
           cta: { kind: "book", label: "Apply", bookTier: "pro" },
           applyBadge: "Application only",
+          ...EMPTY_TIER_COMMERCE,
         },
       ],
     }));
@@ -3827,6 +3851,68 @@ export function CmsAdmin() {
                   </select>
                 </Field>
               )}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field
+                  label="Price (GBP)"
+                  hint={
+                    isApplicationOnlyTier(tier)
+                      ? "Private. Used to create a Stripe Payment Link you can send after an application. Never shown on public Pro/Elite cards."
+                      : "Creates or updates a Stripe Price and Payment Link when you save. Public checkout uses this."
+                  }
+                >
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={tier.priceAmount || ""}
+                    onChange={(e) =>
+                      updateTier(i, {
+                        priceAmount: Number.parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </Field>
+                <Field
+                  label="Stripe payment link"
+                  hint="Paste a buy.stripe.com URL, or leave blank — save creates one when Stripe keys and a price are set."
+                >
+                  <Text
+                    value={tier.stripePaymentLink}
+                    onChange={(v) =>
+                      updateTier(i, { stripePaymentLink: v })
+                    }
+                  />
+                </Field>
+              </div>
+              {tier.stripePaymentLink ? (
+                <p className="text-xs text-[var(--muted)]">
+                  Live link:{" "}
+                  <a
+                    href={tier.stripePaymentLink}
+                    className="break-all text-[var(--accent)]"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {tier.stripePaymentLink}
+                  </a>
+                </p>
+              ) : null}
+              {tier.stripePriceId || tier.stripeProductId ? (
+                <p className="text-xs text-[var(--muted)]">
+                  Stripe product {tier.stripeProductId || "—"} · price{" "}
+                  {tier.stripePriceId || "—"}
+                  {tier.stripePaymentLinkId
+                    ? ` · ${tier.stripePaymentLinkId}`
+                    : ""}
+                </p>
+              ) : null}
+              {tier.stripeSyncNote ? (
+                <p className="text-xs text-[var(--fg-soft)]">
+                  {tier.stripeSyncNote}
+                </p>
+              ) : null}
             </Section>
           ))}
           <AddBlock label="Add programme card" onClick={addTier} />

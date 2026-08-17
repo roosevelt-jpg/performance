@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { loadIntegrations } from "@/lib/integrations/store";
-import { challengePaidContact } from "@/lib/stripe/fulfill";
+import { paidLeadFromSession } from "@/lib/stripe/fulfill";
 
 export const runtime = "nodejs";
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const details = session.customer_details;
-    const contact = challengePaidContact({
+    const lead = paidLeadFromSession({
       email: details?.email,
       name: details?.name,
       phone: details?.phone,
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       },
       metadata: session.metadata,
     });
-    if (contact && config.ghl.apiKey && config.ghl.locationId) {
+    if (lead && config.ghl.apiKey && config.ghl.locationId) {
       try {
         await fetch(`${config.ghl.apiBaseUrl}/contacts/upsert`, {
           method: "POST",
@@ -58,16 +58,16 @@ export async function POST(request: Request) {
           },
           body: JSON.stringify({
             locationId: config.ghl.locationId,
-            email: contact.email,
-            firstName: contact.name.split(" ")[0] || contact.name,
-            name: contact.name || undefined,
-            phone: contact.phone || undefined,
-            source: "stripe_challenge",
-            tags: contact.tags,
+            email: lead.email,
+            firstName: lead.name.split(" ")[0] || lead.name,
+            name: lead.name || undefined,
+            phone: lead.phone || undefined,
+            source: lead.source,
+            tags: lead.tags,
           }),
         });
       } catch (error) {
-        console.warn("[stripe-webhook] GHL paid Challenge upsert failed", error);
+        console.warn("[stripe-webhook] GHL paid upsert failed", error);
       }
     }
   }

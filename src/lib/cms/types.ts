@@ -98,6 +98,15 @@ export type CmsTier = {
   includes: string[];
   cta: CmsTierCta;
   applyBadge: string;
+  /** Major units (e.g. 197). Never shown on public Pro/Elite cards. */
+  priceAmount: number;
+  priceCurrency: string;
+  /** buy.stripe.com or dashboard URL. Auto-created on save when Stripe is connected. */
+  stripePaymentLink: string;
+  stripePaymentLinkId: string;
+  stripePriceId: string;
+  stripeProductId: string;
+  stripeSyncNote: string;
 };
 
 export type CmsProofItem = {

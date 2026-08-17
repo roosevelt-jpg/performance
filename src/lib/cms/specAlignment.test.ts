@@ -33,6 +33,8 @@ describe("Brand-voice landing defaults", () => {
       expect(tier.cta.kind).toBe("book");
       const haystack = [tier.subhead, ...tier.body, ...tier.includes].join(" ");
       expect(haystack).not.toMatch(/£\s*\d/);
+      expect(tier.priceAmount).toBe(0);
+      expect(tier.stripePaymentLink).toBe("");
     }
   });
 

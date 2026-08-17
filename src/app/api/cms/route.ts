@@ -9,6 +9,12 @@ import {
 } from "@/lib/cms/store";
 import { sanitizePlainDeep } from "@/lib/text/plain";
 import type { CmsContent } from "@/lib/cms/types";
+import {
+  loadIntegrations,
+  saveIntegrations,
+} from "@/lib/integrations/store";
+import { getStripeClient } from "@/lib/stripe/client";
+import { syncTiersToStripe } from "@/lib/stripe/syncTiers";
 
 export const runtime = "nodejs";
 
@@ -41,11 +47,53 @@ export async function PUT(request: Request) {
   }
 
   const next = sanitizePlainDeep(mergeCms(DEFAULT_CMS, body.content));
+  const stripe = await getStripeClient();
+  let stripeSync = {
+    connected: false,
+    synced: 0,
+    skipped: next.tiers.length,
+    errors: [] as string[],
+  };
+
+  if (stripe) {
+    const result = await syncTiersToStripe({
+      stripe,
+      tiers: next.tiers,
+      siteUrl: next.site.brand.siteUrl,
+    });
+    next.tiers = result.tiers;
+    stripeSync = result.summary;
+    const challenge = result.tiers.find((tier) => tier.id === "challenge");
+    if (challenge?.stripePriceId) {
+      const integrations = await loadIntegrations();
+      if (integrations.stripe.challengePriceId !== challenge.stripePriceId) {
+        await saveIntegrations({
+          ...integrations,
+          stripe: {
+            ...integrations.stripe,
+            challengePriceId: challenge.stripePriceId,
+          },
+        });
+      }
+    }
+  } else {
+    next.tiers = next.tiers.map((tier) =>
+      tier.priceAmount > 0
+        ? {
+            ...tier,
+            stripeSyncNote:
+              "Stripe credentials missing. Add the secret key in Admin → Integrations, then save again.",
+          }
+        : tier,
+    );
+  }
+
   await saveCms(next);
 
   return NextResponse.json({
     ok: true,
     content: next,
+    stripeSync,
     storage: await getCmsStorageMeta(),
   });
 }
