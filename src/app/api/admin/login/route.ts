@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Admin credentials are not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD in Vercel → Project → Settings → Environment Variables, then redeploy.",
+          "Admin credentials are not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD in your host environment variables, then redeploy.",
       },
       { status: 503 },
     );

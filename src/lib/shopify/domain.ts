@@ -16,7 +16,7 @@ export function normalizeStoreDomain(input: string | undefined | null): string {
   }
 }
 
-/** Vercel Marketplace Shopify injects this — not Kane's live storefront. */
+/** Hosting-injected Shopify placeholder — not Kane's live storefront. */
 export function isPlaceholderStoreDomain(domain: string): boolean {
   const host = normalizeStoreDomain(domain);
   if (!host) return true;
@@ -27,8 +27,8 @@ export function isPlaceholderStoreDomain(domain: string): boolean {
 }
 
 /**
- * Live shop hostname. Drops Vercel placeholder shops so the checklist
- * does not show vercel-store-….myshopify.com over the real domain.
+ * Live shop hostname. Drops injected placeholder shops so the checklist
+ * does not show a temporary hostname over the real domain.
  */
 export function resolveStoreDomain(
   input?: string | null,

@@ -20,7 +20,7 @@ describe("normalizeStoreDomain", () => {
 });
 
 describe("resolveStoreDomain", () => {
-  it("replaces the Vercel Marketplace placeholder with Kane's shop", () => {
+  it("replaces an injected placeholder shop with Kane's shop", () => {
     expect(
       isPlaceholderStoreDomain(
         "vercel-store-ed52b137-0gurug0q.myshopify.com",

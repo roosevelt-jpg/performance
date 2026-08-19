@@ -96,11 +96,10 @@ function LoginForm() {
             Admin login is not configured on this server yet.
           </p>
           <p>
-            After moving to a new Vercel project, add{" "}
+            Add{" "}
             <code className="text-xs">ADMIN_USERNAME</code> and{" "}
-            <code className="text-xs">ADMIN_PASSWORD</code> under{" "}
-            <strong>Vercel → performance → Settings → Environment Variables</strong>
-            , then redeploy production.
+            <code className="text-xs">ADMIN_PASSWORD</code> in your host’s{" "}
+            <strong>environment variables</strong>, then redeploy production.
           </p>
           <p className="text-xs text-[var(--muted)]">
             Also set <code>NEXT_PUBLIC_SITE_URL=https://train.theformulaperformance.com</code>{" "}

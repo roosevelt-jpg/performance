@@ -36,6 +36,7 @@ yarn-error.log*
 
 # local deploy cache
 .vercel
+.cursor/
 
 # typescript
 *.tsbuildinfo

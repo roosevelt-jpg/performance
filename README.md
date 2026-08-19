@@ -24,9 +24,9 @@ See `src/lib/config/assumptions.ts` and `.env.example`.
 
 ## Admin
 
-Admin login reads **`ADMIN_USERNAME`** and **`ADMIN_PASSWORD`** from the server environment (Vercel → **performance** → Settings → **Environment Variables**). They are not stored in the repo.
+Admin login reads **`ADMIN_USERNAME`** and **`ADMIN_PASSWORD`** from the server environment (your host’s **Environment Variables** panel). They are not stored in the repo.
 
-After moving to a new Vercel project or domain, set at minimum:
+After deploying to a new host or domain, set at minimum:
 
 | Variable | Example | Environments |
 |----------|---------|--------------|
@@ -35,7 +35,7 @@ After moving to a new Vercel project or domain, set at minimum:
 | `ADMIN_SESSION_SECRET` | long random string | Production, Preview, Development |
 | `NEXT_PUBLIC_SITE_URL` | `https://train.theformulaperformance.com` | Production, Preview, Development |
 
-Then **Redeploy** production (Deployments → … → Redeploy). Until those vars exist, `/admin/login` shows “credentials not configured” and `admin` / `Collective365!` will not work.
+Then **Redeploy** production. Until those vars exist, `/admin/login` shows “credentials not configured”.
 
 1. Copy `.env.example` to `.env.local` for local dev and set the same vars
 2. Open `/admin/login`
