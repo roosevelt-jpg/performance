@@ -1,11 +1,16 @@
 "use client";
 
 import { useCms } from "@/components/cms/CmsProvider";
+import { usePublicConfig } from "@/hooks/usePublicConfig";
 import { TierCard } from "./TierCard";
 
 export function TierRow() {
   const cms = useCms();
-  const tiers = cms.tiers.filter((t) => t.enabled);
+  const { config } = usePublicConfig();
+  const tiers = cms.tiers.filter((t) => {
+    if (t.id === "entry") return t.enabled || config.product.showEntryTier;
+    return t.enabled;
+  });
   const section = cms.home.tiersSection;
 
   const gridClass =

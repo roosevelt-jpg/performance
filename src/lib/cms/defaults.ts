@@ -10,7 +10,7 @@ export const DEFAULT_CMS: CmsContent = {
       name: "The Formula Performance",
       product: "Performance coaching",
       coach: "Kane",
-      siteUrl: "https://marketing.theformulaperformance.com/",
+      siteUrl: "https://train.theformulaperformance.com/",
       wordmark: "The Formula",
       accent: "Performance",
       logoUrl: "/logo.png",

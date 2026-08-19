@@ -2,7 +2,7 @@ export const BRAND = {
   name: "The Formula Performance",
   product: "Performance coaching",
   coach: "Kane",
-  siteUrl: "https://marketing.theformulaperformance.com/",
+  siteUrl: "https://train.theformulaperformance.com/",
 } as const;
 
 export const CONFIRMATION_COPY =

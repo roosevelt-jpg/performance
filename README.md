@@ -24,8 +24,21 @@ See `src/lib/config/assumptions.ts` and `.env.example`.
 
 ## Admin
 
-1. Copy `.env.example` to `.env.local` and set `ADMIN_USERNAME` / `ADMIN_PASSWORD`
-2. Open `/admin/login` with those credentials
+Admin login reads **`ADMIN_USERNAME`** and **`ADMIN_PASSWORD`** from the server environment (Vercel → **performance** → Settings → **Environment Variables**). They are not stored in the repo.
+
+After moving to a new Vercel project or domain, set at minimum:
+
+| Variable | Example | Environments |
+|----------|---------|--------------|
+| `ADMIN_USERNAME` | `admin` | Production, Preview, Development |
+| `ADMIN_PASSWORD` | your password | Production, Preview, Development |
+| `ADMIN_SESSION_SECRET` | long random string | Production, Preview, Development |
+| `NEXT_PUBLIC_SITE_URL` | `https://train.theformulaperformance.com` | Production, Preview, Development |
+
+Then **Redeploy** production (Deployments → … → Redeploy). Until those vars exist, `/admin/login` shows “credentials not configured” and `admin` / `Collective365!` will not work.
+
+1. Copy `.env.example` to `.env.local` for local dev and set the same vars
+2. Open `/admin/login`
 3. **Content CMS** (`/admin/content`) — edit brand, nav, hero, banners, videos, tiers, CTAs, funnel copy
 4. **Integrations** (`/admin/integrations`) — GHL, calendar embeds, Q9 pricing
 

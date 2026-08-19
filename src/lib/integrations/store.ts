@@ -488,9 +488,29 @@ export function buildChecks(config: IntegrationsConfig): IntegrationCheck[] {
             ? config.ghl.apiKey
               ? "ready"
               : "missing"
-            : config.email.apiKey
-              ? "ready"
-              : "missing",
+            : config.email.provider === "mailchimp"
+              ? config.email.apiKey &&
+                config.email.listId &&
+                config.email.serverPrefix
+                ? "ready"
+                : "missing"
+              : config.email.provider === "klaviyo"
+                ? config.email.apiKey && config.email.listId
+                  ? "ready"
+                  : "missing"
+                : config.email.apiKey
+                  ? "ready"
+                  : "missing",
+      detail:
+        config.email.provider === "mailchimp"
+          ? config.email.listId
+            ? `List ${config.email.listId}`
+            : "Mailchimp list ID required"
+          : config.email.provider === "klaviyo"
+            ? config.email.listId
+              ? `List ${config.email.listId}`
+              : "Klaviyo list ID required"
+            : undefined,
     },
     {
       id: "shopify_store",

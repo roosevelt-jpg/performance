@@ -12,9 +12,9 @@ export type ReportDelivery = {
 
 function originFrom(siteUrl?: string): string {
   try {
-    return new URL(siteUrl || "https://marketing.theformulaperformance.com").origin;
+    return new URL(siteUrl || "https://train.theformulaperformance.com").origin;
   } catch {
-    return "https://marketing.theformulaperformance.com";
+    return "https://train.theformulaperformance.com";
   }
 }
 

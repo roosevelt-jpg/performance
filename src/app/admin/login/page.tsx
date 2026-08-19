@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -16,6 +16,32 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [credentialsConfigured, setCredentialsConfigured] = useState<
+    boolean | null
+  >(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/admin/me", { credentials: "include" })
+      .then(async (res) => {
+        const data = (await res.json()) as {
+          authenticated?: boolean;
+          credentialsConfigured?: boolean;
+        };
+        if (cancelled) return;
+        if (data.authenticated) {
+          router.replace(next);
+          return;
+        }
+        setCredentialsConfigured(data.credentialsConfigured !== false);
+      })
+      .catch(() => {
+        if (!cancelled) setCredentialsConfigured(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [next, router]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -44,6 +70,8 @@ function LoginForm() {
   const fieldClass =
     "mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2.5 text-base text-[var(--fg)] outline-none focus:border-[var(--accent)] sm:text-sm";
 
+  const loginDisabled = credentialsConfigured === false;
+
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10 sm:py-16">
       <div className="mb-6 text-center sm:mb-8">
@@ -58,6 +86,28 @@ function LoginForm() {
           out after 10 minutes of inactivity.
         </p>
       </div>
+
+      {loginDisabled ? (
+        <div
+          className="mb-4 space-y-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-[var(--fg-soft)]"
+          role="alert"
+        >
+          <p className="font-semibold text-[var(--fg)]">
+            Admin login is not configured on this server yet.
+          </p>
+          <p>
+            After moving to a new Vercel project, add{" "}
+            <code className="text-xs">ADMIN_USERNAME</code> and{" "}
+            <code className="text-xs">ADMIN_PASSWORD</code> under{" "}
+            <strong>Vercel → performance → Settings → Environment Variables</strong>
+            , then redeploy production.
+          </p>
+          <p className="text-xs text-[var(--muted)]">
+            Also set <code>NEXT_PUBLIC_SITE_URL=https://train.theformulaperformance.com</code>{" "}
+            and a random <code>ADMIN_SESSION_SECRET</code>.
+          </p>
+        </div>
+      ) : null}
 
       <form
         onSubmit={onSubmit}
@@ -103,7 +153,7 @@ function LoginForm() {
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || loginDisabled}
           className="w-full rounded-md bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-[var(--accent-fg)] transition hover:bg-[var(--accent-bright)] disabled:opacity-60 sm:py-2.5"
         >
           {submitting ? "Signing in…" : "Sign in"}
