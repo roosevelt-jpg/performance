@@ -98,13 +98,25 @@ export type CmsTier = {
   includes: string[];
   cta: CmsTierCta;
   applyBadge: string;
-  /** Major units (e.g. 197). Never shown on public Pro/Elite cards. */
+  /** Setup / first payment in major units (e.g. 149). Never shown on public Pro/Elite cards. */
   priceAmount: number;
   priceCurrency: string;
+  /** Monthly (or interval) amount after setup. 0 = one-off only. */
+  recurringAmount: number;
+  /** Billing interval when recurringAmount > 0. */
+  recurringInterval: "month" | "none";
+  /** 0 = rolling; otherwise cancel after this many months (e.g. 6). */
+  recurringMonths: number;
+  /** Delay before recurring starts (e.g. Challenge: 8 weeks). 0 = starts with checkout. */
+  recurringStartsAfterWeeks: number;
+  /** Human-readable billing note shown on public self-serve cards only. */
+  billingLabel: string;
   /** buy.stripe.com or dashboard URL. Auto-created on save when Stripe is connected. */
   stripePaymentLink: string;
   stripePaymentLinkId: string;
   stripePriceId: string;
+  /** Recurring Stripe Price id when monthly billing is set. */
+  stripeRecurringPriceId: string;
   stripeProductId: string;
   stripeSyncNote: string;
 };

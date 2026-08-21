@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { PublicRuntimeConfig } from "@/lib/integrations/runtime";
 
 const EMPTY: PublicRuntimeConfig = {
-  pricing: { pro: 297, elite: 497 },
+  pricing: { pro: 449, elite: 599 },
   product: {
     showEntryTier: false,
     challengeCheckoutUrl:

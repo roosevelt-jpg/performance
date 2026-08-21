@@ -3,9 +3,15 @@ import type { CmsTier } from "./types";
 export const EMPTY_TIER_COMMERCE = {
   priceAmount: 0,
   priceCurrency: "gbp",
+  recurringAmount: 0,
+  recurringInterval: "none" as const,
+  recurringMonths: 0,
+  recurringStartsAfterWeeks: 0,
+  billingLabel: "",
   stripePaymentLink: "",
   stripePaymentLinkId: "",
   stripePriceId: "",
+  stripeRecurringPriceId: "",
   stripeProductId: "",
   stripeSyncNote: "",
 };
@@ -90,19 +96,77 @@ export function unitAmountFromMajor(amount: number): number {
   return Math.round(parsePriceAmount(amount) * 100);
 }
 
+export function parseNonNegInt(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.round(value));
+  }
+  if (typeof value === "string") {
+    const n = Number.parseInt(value, 10);
+    if (Number.isFinite(n)) return Math.max(0, n);
+  }
+  return 0;
+}
+
+export function formatPublicBilling(tier: Pick<
+  CmsTier,
+  | "priceAmount"
+  | "recurringAmount"
+  | "recurringInterval"
+  | "recurringMonths"
+  | "recurringStartsAfterWeeks"
+  | "billingLabel"
+>): string {
+  const custom = String(tier.billingLabel || "").trim();
+  if (custom) return custom;
+
+  const setup = parsePriceAmount(tier.priceAmount);
+  const recurring = parsePriceAmount(tier.recurringAmount);
+  const months = parseNonNegInt(tier.recurringMonths);
+  const afterWeeks = parseNonNegInt(tier.recurringStartsAfterWeeks);
+
+  if (setup > 0 && recurring <= 0) return `£${setup} · one-off`;
+  if (setup <= 0 && recurring > 0) {
+    if (months > 0) return `£${recurring} / month · ${months} months`;
+    return `£${recurring} / month · rolling`;
+  }
+  if (setup > 0 && recurring > 0) {
+    const then =
+      afterWeeks > 0
+        ? `then £${recurring} / month after ${afterWeeks} weeks`
+        : months > 0
+          ? `then £${recurring} / month for ${months} months`
+          : `then £${recurring} / month`;
+    return `£${setup} · ${then}`;
+  }
+  return "";
+}
+
 export function normalizeTierCommerce(tier: CmsTier): CmsTier {
   const rawId = String(tier.id || "").trim();
   const id = /^[a-z0-9-]+$/.test(rawId)
     ? rawId
     : slugifyTierId(rawId || tier.name || "programme");
+  const recurringAmount = parsePriceAmount(tier.recurringAmount);
+  const recurringInterval =
+    recurringAmount > 0
+      ? tier.recurringInterval === "month"
+        ? "month"
+        : "month"
+      : "none";
   return {
     ...tier,
     id: id || tier.id,
     priceAmount: parsePriceAmount(tier.priceAmount),
     priceCurrency: (tier.priceCurrency || "gbp").trim().toLowerCase() || "gbp",
+    recurringAmount,
+    recurringInterval,
+    recurringMonths: parseNonNegInt(tier.recurringMonths),
+    recurringStartsAfterWeeks: parseNonNegInt(tier.recurringStartsAfterWeeks),
+    billingLabel: String(tier.billingLabel || "").trim(),
     stripePaymentLink: String(tier.stripePaymentLink || "").trim(),
     stripePaymentLinkId: String(tier.stripePaymentLinkId || "").trim(),
     stripePriceId: String(tier.stripePriceId || "").trim(),
+    stripeRecurringPriceId: String(tier.stripeRecurringPriceId || "").trim(),
     stripeProductId: String(tier.stripeProductId || "").trim(),
     stripeSyncNote: String(tier.stripeSyncNote || "").trim(),
   };

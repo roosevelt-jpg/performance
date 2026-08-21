@@ -6,6 +6,7 @@ import type { CmsTier } from "@/lib/cms/types";
 import { useCms } from "@/components/cms/CmsProvider";
 import { ChallengeOffer } from "@/components/marketing/ChallengeOffer";
 import {
+  formatPublicBilling,
   isApplicationOnlyTier,
   publicTierHref,
 } from "@/lib/cms/tierCommerce";
@@ -19,10 +20,11 @@ export function TierCard({ tier }: Props) {
   const isSell = tier.cta.kind === "book";
   const isChallenge = tier.id === "challenge" && tier.cta.kind === "checkout";
   const href = publicTierHref(tier);
+  const billing = formatPublicBilling(tier);
   const showPrice =
     !isApplicationOnlyTier(tier) &&
     !isChallenge &&
-    tier.priceAmount > 0;
+    (tier.priceAmount > 0 || tier.recurringAmount > 0 || Boolean(billing));
   const guarantee = tiersSection.guarantee;
 
   return (
@@ -46,8 +48,8 @@ export function TierCard({ tier }: Props) {
           </h3>
           <p className="mt-1 text-sm text-[var(--muted)]">{tier.subhead}</p>
           {showPrice ? (
-            <p className="mt-2 font-heading text-2xl text-[var(--fg)]">
-              £{tier.priceAmount}
+            <p className="mt-2 font-heading text-lg leading-snug text-[var(--fg)] sm:text-xl">
+              {billing || `£${tier.priceAmount}`}
             </p>
           ) : null}
         </div>

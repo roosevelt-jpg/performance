@@ -3,8 +3,8 @@
  * Never surface on public Pro/Elite cards or checkout.
  */
 export const PRICING = {
-  pro: Number(process.env.NEXT_PUBLIC_PRICE_PRO ?? "297"),
-  elite: Number(process.env.NEXT_PUBLIC_PRICE_ELITE ?? "497"),
+  pro: Number(process.env.NEXT_PUBLIC_PRICE_PRO ?? "449"),
+  elite: Number(process.env.NEXT_PUBLIC_PRICE_ELITE ?? "599"),
 } as const;
 
 export type BookableTier = keyof typeof PRICING;

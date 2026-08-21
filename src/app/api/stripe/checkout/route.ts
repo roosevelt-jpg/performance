@@ -19,13 +19,14 @@ export async function POST() {
 
   const cms = await loadCms();
   const challenge = cms.tiers.find((tier) => tier.id === "challenge");
-  const priceId =
-    challenge?.stripePriceId?.trim() || config.stripe.challengePriceId?.trim();
   const paymentLink = challenge?.stripePaymentLink?.trim();
-
-  if (!priceId && paymentLink) {
+  // Prefer the synced Payment Link so setup + recurring billing stay intact.
+  if (paymentLink) {
     return NextResponse.json({ url: paymentLink });
   }
+
+  const priceId =
+    challenge?.stripePriceId?.trim() || config.stripe.challengePriceId?.trim();
   if (!priceId) {
     return NextResponse.json(
       {

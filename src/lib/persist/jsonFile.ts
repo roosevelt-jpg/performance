@@ -1,8 +1,10 @@
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
+import { get, put } from "@vercel/blob";
 
 const memory = new Map<string, unknown>();
+const BLOB_PREFIX = "tfp-persist/";
 
 function dataFile(name: string): string {
   return path.join(process.cwd(), "data", name);
@@ -10,6 +12,14 @@ function dataFile(name: string): string {
 
 function tmpFile(name: string): string {
   return path.join(os.tmpdir(), `tfp-${name}`);
+}
+
+function blobPathname(name: string): string {
+  return `${BLOB_PREFIX}${name}`;
+}
+
+function blobToken(): string | undefined {
+  return process.env.BLOB_READ_WRITE_TOKEN?.trim() || undefined;
 }
 
 async function readJsonFile<T>(file: string): Promise<T | null> {
@@ -21,11 +31,52 @@ async function readJsonFile<T>(file: string): Promise<T | null> {
   }
 }
 
+async function readFromBlob<T>(name: string): Promise<T | null> {
+  const token = blobToken();
+  if (!token) return null;
+  try {
+    const result = await get(blobPathname(name), {
+      access: "private",
+      token,
+      useCache: false,
+    });
+    if (!result?.stream) return null;
+    const text = await new Response(result.stream).text();
+    if (!text.trim()) return null;
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
+async function writeToBlob(
+  name: string,
+  payload: string,
+): Promise<{ ok: true; url: string } | { ok: false }> {
+  const token = blobToken();
+  if (!token) return { ok: false };
+  try {
+    const blob = await put(blobPathname(name), payload, {
+      access: "private",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      token,
+    });
+    return { ok: true, url: blob.url };
+  } catch {
+    return { ok: false };
+  }
+}
+
 export async function readPersistedJson<T>(name: string): Promise<T | null> {
   if (memory.has(name)) return memory.get(name) as T;
+
   const fromDisk =
     (await readJsonFile<T>(dataFile(name))) ??
+    (await readFromBlob<T>(name)) ??
     (await readJsonFile<T>(tmpFile(name)));
+
   if (fromDisk) memory.set(name, fromDisk);
   return fromDisk;
 }
@@ -40,8 +91,18 @@ export async function writePersistedJson<T>(
   try {
     await fs.mkdir(path.dirname(dataFile(name)), { recursive: true });
     await fs.writeFile(dataFile(name), payload, "utf8");
+    // Mirror to Blob when available so production and local stay aligned.
+    await writeToBlob(name, payload);
     return { durable: true, path: `data/${name}`, writable: true };
   } catch {
+    const blob = await writeToBlob(name, payload);
+    if (blob.ok) {
+      return {
+        durable: true,
+        path: "durable cloud storage",
+        writable: true,
+      };
+    }
     try {
       await fs.writeFile(tmpFile(name), payload, "utf8");
       return {
@@ -61,29 +122,39 @@ export async function persistMeta(name: string): Promise<{
   writable: boolean;
   durable: boolean;
 }> {
-  let fileExists = false;
+  const hasBlob = Boolean(blobToken());
+  let fileExists = memory.has(name);
   try {
     await fs.access(dataFile(name));
     fileExists = true;
   } catch {
-    fileExists = memory.has(name);
+    if (!fileExists && hasBlob) {
+      const fromBlob = await readFromBlob<unknown>(name);
+      fileExists = fromBlob != null;
+    }
   }
 
-  let durable = false;
+  let localDurable = false;
   try {
     const dir = path.dirname(dataFile(name));
     await fs.mkdir(dir, { recursive: true });
     const probe = path.join(dir, ".write-probe");
     await fs.writeFile(probe, "ok");
     await fs.unlink(probe);
-    durable = true;
+    localDurable = true;
   } catch {
-    durable = false;
+    localDurable = false;
   }
+
+  const durable = localDurable || hasBlob;
 
   return {
     fileExists,
-    path: durable ? `data/${name}` : "host storage",
+    path: localDurable
+      ? `data/${name}`
+      : hasBlob
+        ? "durable cloud storage"
+        : "host storage",
     writable: true,
     durable,
   };

@@ -1,7 +1,14 @@
+import {
+  buildCheckoutWrite,
+  type ProgrammePurchaseWrite,
+} from "@/lib/crm/programmeCutover";
+
 export type PaidSession = {
   email?: string | null;
   name?: string | null;
   phone?: string | null;
+  customer?: string | { id?: string | null } | null;
+  subscription?: string | { id?: string | null } | null;
   customerDetails?: {
     email?: string | null;
     name?: string | null;
@@ -32,10 +39,18 @@ function contactFrom(session: PaidSession) {
   };
 }
 
+function idOf(
+  value: string | { id?: string | null } | null | undefined,
+): string {
+  if (!value) return "";
+  if (typeof value === "string") return value.trim();
+  return (value.id || "").trim();
+}
+
 export function productKey(session: PaidSession): string {
   return (
-    session.metadata?.product ||
     session.metadata?.cmsTierId ||
+    session.metadata?.product ||
     ""
   ).trim();
 }
@@ -45,37 +60,54 @@ export function isChallengeCheckout(session: PaidSession): boolean {
   return product === "8-week-challenge" || product === "challenge";
 }
 
+/** Full GHL cutover write for a paid Checkout Session. */
+export function programmePurchaseFromSession(
+  session: PaidSession,
+): ProgrammePurchaseWrite | null {
+  const contact = contactFrom(session);
+  const product = productKey(session);
+  const tierId =
+    product === "8-week-challenge"
+      ? "challenge"
+      : product || (contact.email ? "challenge" : "");
+  if (!contact.email || !tierId) return null;
+
+  return buildCheckoutWrite({
+    email: contact.email,
+    name: contact.name,
+    phone: contact.phone,
+    tierId,
+    stripeCustomerId: idOf(session.customer),
+    stripeSubscriptionId: idOf(session.subscription),
+    source: isChallengeCheckout(session)
+      ? "stripe_challenge"
+      : "stripe_checkout",
+  });
+}
+
 export function challengePaidContact(session: PaidSession): PaidLead | null {
   if (!isChallengeCheckout(session)) return null;
-  const contact = contactFrom(session);
-  if (!contact.email) return null;
+  const purchase = programmePurchaseFromSession(session);
+  if (!purchase) return null;
   return {
-    ...contact,
-    tags: ["paid_challenge", "stripe_challenge", "funnel_apply"],
-    source: "stripe_challenge",
+    email: purchase.email,
+    name: purchase.name,
+    phone: purchase.phone,
+    tags: purchase.tagsAdd,
+    source: purchase.source,
     product: "challenge",
   };
 }
 
 export function paidLeadFromSession(session: PaidSession): PaidLead | null {
-  const challenge = challengePaidContact(session);
-  if (challenge) return challenge;
-  const contact = contactFrom(session);
-  if (!contact.email) return null;
-  const product = productKey(session);
-  if (!product) {
-    return {
-      ...contact,
-      tags: ["stripe_paid"],
-      source: "stripe",
-      product: "",
-    };
-  }
-  const tierId = product === "8-week-challenge" ? "challenge" : product;
+  const purchase = programmePurchaseFromSession(session);
+  if (!purchase) return null;
   return {
-    ...contact,
-    tags: ["stripe_paid", `paid_${tierId}`],
-    source: "stripe",
-    product: tierId,
+    email: purchase.email,
+    name: purchase.name,
+    phone: purchase.phone,
+    tags: purchase.tagsAdd,
+    source: purchase.source,
+    product: purchase.tierId,
   };
 }

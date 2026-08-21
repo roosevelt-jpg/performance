@@ -37,5 +37,7 @@ export function productMetadata(tierId: string, applicationOnly: boolean) {
     cmsTierId: tierId,
     product: tierId === "challenge" ? "8-week-challenge" : tierId,
     applicationOnly: applicationOnly ? "true" : "false",
+    track: "B",
+    cutover: "programme",
   };
 }

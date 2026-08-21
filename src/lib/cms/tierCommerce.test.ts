@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_CMS } from "./defaults";
 import {
   duplicateTierCard,
+  formatPublicBilling,
   isApplicationOnlyTier,
   isSystemTierId,
   newCustomTierId,
@@ -26,14 +27,17 @@ describe("tier commerce", () => {
         tier.id === "pro"
           ? {
               ...tier,
-              priceAmount: 297,
+              priceAmount: 2249,
+              recurringAmount: 449,
               stripePaymentLink: "https://buy.stripe.com/pro-secret",
               stripePriceId: "price_pro",
+              stripeRecurringPriceId: "price_pro_mo",
             }
           : tier.id === "challenge"
             ? {
                 ...tier,
-                priceAmount: 97,
+                priceAmount: 149,
+                recurringAmount: 79,
                 stripePaymentLink: "https://buy.stripe.com/challenge",
                 stripePriceId: "price_challenge",
               }
@@ -43,8 +47,10 @@ describe("tier commerce", () => {
     const pro = tiers.find((t) => t.id === "pro");
     const challenge = tiers.find((t) => t.id === "challenge");
     expect(pro?.priceAmount).toBe(0);
+    expect(pro?.recurringAmount).toBe(0);
     expect(pro?.stripePaymentLink).toBe("");
-    expect(challenge?.priceAmount).toBe(97);
+    expect(challenge?.priceAmount).toBe(149);
+    expect(challenge?.recurringAmount).toBe(79);
     expect(challenge?.stripePaymentLink).toContain("buy.stripe.com");
   });
 
@@ -53,30 +59,58 @@ describe("tier commerce", () => {
     expect(unitAmountFromMajor(197.5)).toBe(19750);
   });
 
+  it("formats setup + recurring billing for public self-serve cards", () => {
+    expect(
+      formatPublicBilling({
+        priceAmount: 149,
+        recurringAmount: 79,
+        recurringInterval: "month",
+        recurringMonths: 0,
+        recurringStartsAfterWeeks: 8,
+        billingLabel: "",
+      }),
+    ).toContain("after 8 weeks");
+    expect(
+      formatPublicBilling({
+        priceAmount: 1499,
+        recurringAmount: 0,
+        recurringInterval: "none",
+        recurringMonths: 0,
+        recurringStartsAfterWeeks: 0,
+        billingLabel: "",
+      }),
+    ).toBe("£1499 · one-off");
+  });
+
   it("lets extra programmes keep unique ids without stealing Pro or Challenge", () => {
     expect(slugifyTierId("Gold 1:1")).toBe("gold-1-1");
     expect(
       newCustomTierId("Pro", ["challenge", "pro", "elite"]),
     ).toBe("pro-2");
-    const copy = duplicateTierCard(DEFAULT_CMS.tiers[2], [
+    const pro = DEFAULT_CMS.tiers.find((t) => t.id === "pro")!;
+    const copy = duplicateTierCard(pro, [
       "challenge",
       "pro",
       "elite",
+      "performance",
+      "performance-analysis",
     ]);
     expect(copy.id).not.toBe("pro");
-    expect(copy.name).toBe("Pro copy");
+    expect(copy.name).toBe("TFP Pro copy");
     expect(copy.stripePriceId).toBe("");
+    expect(copy.recurringAmount).toBe(0);
   });
 
   it("sends custom checkout cards to their Stripe link, not /challenge", () => {
+    const challenge = DEFAULT_CMS.tiers.find((t) => t.id === "challenge")!;
     const custom: (typeof DEFAULT_CMS.tiers)[number] = {
-      ...DEFAULT_CMS.tiers[1],
+      ...challenge,
       id: "nutrition",
       cta: { kind: "checkout", label: "Buy", href: "" },
       stripePaymentLink: "https://buy.stripe.com/nutrition",
     };
     expect(publicTierHref(custom)).toBe("https://buy.stripe.com/nutrition");
-    expect(publicTierHref(DEFAULT_CMS.tiers[1])).toBe("/challenge#checkout");
+    expect(publicTierHref(challenge)).toBe("/challenge#checkout");
     expect(isSystemTierId("pro")).toBe(true);
     expect(isSystemTierId("nutrition")).toBe(false);
   });

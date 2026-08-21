@@ -212,6 +212,16 @@ function fromEnv(): IntegrationsConfig {
   };
 }
 
+/** Empty overlay secrets must not blank env-backed values after a failed host save. */
+function preferSecret(
+  overlay: string | undefined,
+  base: string,
+): string {
+  const value = typeof overlay === "string" ? overlay.trim() : "";
+  if (!value || value.includes("••••")) return base;
+  return overlay as string;
+}
+
 function mergeConfig(
   base: IntegrationsConfig,
   overlay: Partial<IntegrationsConfig> | null,
@@ -221,32 +231,97 @@ function mergeConfig(
     admin: { ...base.admin, ...overlay.admin },
     pricing: { ...base.pricing, ...overlay.pricing },
     product: { ...base.product, ...overlay.product },
-    calendar: calendarDefaults({ ...base.calendar, ...overlay.calendar }),
+    calendar: calendarDefaults({
+      ...base.calendar,
+      ...overlay.calendar,
+      calendlyApiToken: preferSecret(
+        overlay.calendar?.calendlyApiToken,
+        base.calendar.calendlyApiToken,
+      ),
+      googleClientSecret: preferSecret(
+        overlay.calendar?.googleClientSecret,
+        base.calendar.googleClientSecret,
+      ),
+      googleRefreshToken: preferSecret(
+        overlay.calendar?.googleRefreshToken,
+        base.calendar.googleRefreshToken,
+      ),
+      googleServiceAccountJson: preferSecret(
+        overlay.calendar?.googleServiceAccountJson,
+        base.calendar.googleServiceAccountJson,
+      ),
+    }),
     ghl: {
       ...base.ghl,
       ...overlay.ghl,
+      apiKey: preferSecret(overlay.ghl?.apiKey, base.ghl.apiKey),
       workflowQualifiedId:
         overlay.ghl?.workflowQualifiedId ?? base.ghl.workflowQualifiedId,
       workflowDisqualifiedId:
         overlay.ghl?.workflowDisqualifiedId ?? base.ghl.workflowDisqualifiedId,
     },
-    youtube: { ...base.youtube, ...overlay.youtube },
+    youtube: {
+      ...base.youtube,
+      ...overlay.youtube,
+      apiKey: preferSecret(overlay.youtube?.apiKey, base.youtube.apiKey),
+    },
     seo: { ...base.seo, ...overlay.seo },
     email: {
       ...base.email,
       ...overlay.email,
+      apiKey: preferSecret(overlay.email?.apiKey, base.email.apiKey),
+      gmailAppPassword: preferSecret(
+        overlay.email?.gmailAppPassword,
+        base.email.gmailAppPassword ?? "",
+      ),
     },
-    stripe: { ...base.stripe, ...overlay.stripe },
-    whatsapp: { ...base.whatsapp, ...overlay.whatsapp },
-    ai: { ...base.ai, ...overlay.ai },
+    stripe: {
+      ...base.stripe,
+      ...overlay.stripe,
+      secretKey: preferSecret(
+        overlay.stripe?.secretKey,
+        base.stripe?.secretKey ?? "",
+      ),
+      webhookSecret: preferSecret(
+        overlay.stripe?.webhookSecret,
+        base.stripe?.webhookSecret ?? "",
+      ),
+    },
+    whatsapp: {
+      ...base.whatsapp,
+      ...overlay.whatsapp,
+      accessToken: preferSecret(
+        overlay.whatsapp?.accessToken,
+        base.whatsapp?.accessToken ?? "",
+      ),
+    },
+    ai: {
+      ...base.ai,
+      ...overlay.ai,
+      openaiApiKey: preferSecret(
+        overlay.ai?.openaiApiKey,
+        base.ai?.openaiApiKey ?? "",
+      ),
+    },
     shopify: {
       ...base.shopify,
       ...overlay.shopify,
       storeDomain: resolveStoreDomain(
         overlay.shopify?.storeDomain ?? base.shopify.storeDomain,
       ),
+      storefrontToken: preferSecret(
+        overlay.shopify?.storefrontToken,
+        base.shopify.storefrontToken,
+      ),
     },
-    reviews: { ...base.reviews, ...overlay.reviews },
+    reviews: {
+      ...base.reviews,
+      ...overlay.reviews,
+      judgemeApiToken: preferSecret(
+        overlay.reviews?.judgemeApiToken,
+        base.reviews.judgemeApiToken,
+      ),
+    },
   };
 }
 

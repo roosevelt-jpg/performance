@@ -78,7 +78,7 @@ export async function PUT(request: Request) {
     }
   } else {
     next.tiers = next.tiers.map((tier) =>
-      tier.priceAmount > 0
+      tier.priceAmount > 0 || tier.recurringAmount > 0
         ? {
             ...tier,
             stripeSyncNote:

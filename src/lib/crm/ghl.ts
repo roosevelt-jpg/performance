@@ -1,6 +1,13 @@
 import type { LeadSubmissionPayload } from "@/types/lead";
 import { loadIntegrations } from "@/lib/integrations/store";
 import type { IntegrationsConfig } from "@/lib/integrations/types";
+import {
+  buildCancelledTags,
+  buildPaymentFailedTags,
+  buildPaymentRecoveredTags,
+  buildWhatsAppConsentTags,
+  type ProgrammePurchaseWrite,
+} from "@/lib/crm/programmeCutover";
 
 function ghlHeaders(apiKey: string): HeadersInit {
   return {
@@ -234,13 +241,13 @@ export async function updateWhatsAppOptIn(params: {
     return { mocked: true };
   }
 
-  const tags = params.optedIn ? ["whatsapp_opt_in"] : ["whatsapp_opt_out"];
+  const consent = buildWhatsAppConsentTags(params.optedIn);
 
   const res = await fetch(`${apiBaseUrl}/contacts/${params.contactId}`, {
     method: "PUT",
     headers: ghlHeaders(apiKey),
     body: JSON.stringify({
-      tags,
+      tags: consent.tagsAdd,
       customFields: [
         { key: "whatsapp_opt_in", field_value: String(params.optedIn) },
         { key: "whatsapp_opt_in_source", field_value: params.source },
@@ -254,7 +261,203 @@ export async function updateWhatsAppOptIn(params: {
     throw new Error(`GHL WhatsApp update failed (${res.status}): ${text}`);
   }
 
+  await removeContactTags({
+    apiBaseUrl,
+    apiKey,
+    contactId: params.contactId,
+    tags: consent.tagsRemove,
+  });
+
   return { mocked: false };
+}
+
+async function removeContactTags(params: {
+  apiBaseUrl: string;
+  apiKey: string;
+  contactId: string;
+  tags: string[];
+}): Promise<void> {
+  if (!params.tags.length) return;
+  try {
+    const res = await fetch(
+      `${params.apiBaseUrl}/contacts/${encodeURIComponent(params.contactId)}/tags`,
+      {
+        method: "DELETE",
+        headers: ghlHeaders(params.apiKey),
+        body: JSON.stringify({ tags: params.tags }),
+      },
+    );
+    if (!res.ok) {
+      console.warn(
+        "[ghl] tag remove failed",
+        res.status,
+        await res.text(),
+      );
+    }
+  } catch (error) {
+    console.warn("[ghl] tag remove failed", error);
+  }
+}
+
+async function addContactNote(params: {
+  apiBaseUrl: string;
+  apiKey: string;
+  contactId: string;
+  body: string;
+}): Promise<boolean> {
+  try {
+    const noteRes = await fetch(
+      `${params.apiBaseUrl}/contacts/${encodeURIComponent(params.contactId)}/notes`,
+      {
+        method: "POST",
+        headers: ghlHeaders(params.apiKey),
+        body: JSON.stringify({ body: params.body }),
+      },
+    );
+    if (!noteRes.ok) {
+      console.warn("[ghl] note failed", noteRes.status, await noteRes.text());
+    }
+    return noteRes.ok;
+  } catch (error) {
+    console.warn("[ghl] note failed", error);
+    return false;
+  }
+}
+
+/**
+ * Stripe checkout → GHL programme cutover write (tags, fields, removals).
+ * This app is the event source; GHL workflows listen to these tags/fields.
+ */
+export async function upsertProgrammePurchase(
+  write: ProgrammePurchaseWrite,
+): Promise<{ id: string; mocked: boolean }> {
+  const { ghl } = await loadIntegrations();
+  const { apiKey, locationId, apiBaseUrl } = ghl;
+
+  if (!apiKey || !locationId) {
+    console.warn(
+      "[ghl] Missing API key or location ID — programme purchase mocked",
+    );
+    return { id: `mock_paid_${Date.now()}`, mocked: true };
+  }
+
+  const res = await fetch(`${apiBaseUrl}/contacts/upsert`, {
+    method: "POST",
+    headers: ghlHeaders(apiKey),
+    body: JSON.stringify({
+      locationId,
+      email: write.email,
+      firstName: write.name.split(" ")[0] || write.name || undefined,
+      lastName: write.name.split(" ").slice(1).join(" ") || undefined,
+      name: write.name || undefined,
+      phone: write.phone || undefined,
+      source: write.source,
+      tags: write.tagsAdd,
+      customFields: write.customFields,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`GHL programme upsert failed (${res.status}): ${text}`);
+  }
+
+  const data = (await res.json()) as {
+    contact?: { id?: string };
+    id?: string;
+  };
+  const id = data.contact?.id ?? data.id ?? `ghl_${Date.now()}`;
+
+  await removeContactTags({
+    apiBaseUrl,
+    apiKey,
+    contactId: id,
+    tags: write.tagsRemove,
+  });
+  await addContactNote({
+    apiBaseUrl,
+    apiKey,
+    contactId: id,
+    body: write.note,
+  });
+
+  return { id, mocked: false };
+}
+
+export async function applySubscriptionLifecycle(params: {
+  email?: string | null;
+  stripeCustomerId?: string | null;
+  event: "payment_failed" | "payment_recovered" | "cancelled";
+}): Promise<{ mocked: boolean; id?: string }> {
+  const { ghl } = await loadIntegrations();
+  const { apiKey, locationId, apiBaseUrl } = ghl;
+  const email = (params.email || "").trim().toLowerCase();
+  if (!apiKey || !locationId || !email) {
+    return { mocked: true };
+  }
+
+  let tagsAdd: string[] = [];
+  let tagsRemove: string[] = [];
+  let customFields: { key: string; field_value: string }[] = [];
+
+  if (params.event === "payment_failed") {
+    const patch = buildPaymentFailedTags();
+    tagsAdd = patch.tagsAdd;
+    customFields = patch.customFields;
+  } else if (params.event === "payment_recovered") {
+    const patch = buildPaymentRecoveredTags();
+    tagsAdd = patch.tagsAdd;
+    tagsRemove = patch.tagsRemove;
+    customFields = patch.customFields;
+  } else {
+    const patch = buildCancelledTags();
+    tagsAdd = patch.tagsAdd;
+    tagsRemove = patch.tagsRemove;
+    customFields = patch.customFields;
+  }
+
+  if (params.stripeCustomerId) {
+    customFields = [
+      ...customFields,
+      {
+        key: "stripe_customer_id",
+        field_value: params.stripeCustomerId,
+      },
+    ];
+  }
+
+  const res = await fetch(`${apiBaseUrl}/contacts/upsert`, {
+    method: "POST",
+    headers: ghlHeaders(apiKey),
+    body: JSON.stringify({
+      locationId,
+      email,
+      tags: tagsAdd,
+      customFields,
+      source: `stripe_${params.event}`,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`GHL lifecycle upsert failed (${res.status}): ${text}`);
+  }
+
+  const data = (await res.json()) as {
+    contact?: { id?: string };
+    id?: string;
+  };
+  const id = data.contact?.id ?? data.id;
+  if (id && tagsRemove.length) {
+    await removeContactTags({
+      apiBaseUrl,
+      apiKey,
+      contactId: id,
+      tags: tagsRemove,
+    });
+  }
+
+  return { mocked: false, id };
 }
 
 export async function upsertEmailSignup(params: {

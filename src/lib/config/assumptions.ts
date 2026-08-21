@@ -5,7 +5,7 @@
 export const SECTION_8_ASSUMPTIONS = {
   pricing: {
     status: "assumed" as const,
-    note: "Pro £297 / Elite £497 — Q9 only, never on public cards. Set NEXT_PUBLIC_PRICE_PRO / NEXT_PUBLIC_PRICE_ELITE.",
+    note: "Pro £449 / Elite £599 — Q9 only, never on public cards. Set NEXT_PUBLIC_PRICE_PRO / NEXT_PUBLIC_PRICE_ELITE.",
   },
   entryTier: {
     status: "assumed" as const,

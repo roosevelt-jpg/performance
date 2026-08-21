@@ -134,8 +134,8 @@ export type IntegrationCheck = {
 export const DEFAULT_INTEGRATIONS: IntegrationsConfig = {
   admin: { notes: "" },
   pricing: {
-    pro: 297,
-    elite: 497,
+    pro: 449,
+    elite: 599,
   },
   product: {
     showEntryTier: false,

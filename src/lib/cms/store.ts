@@ -182,9 +182,17 @@ export function mergeCms(
     out.home.tiersSection.enabled = base.home.tiersSection.enabled;
   }
   out.site.seo = { ...base.site.seo, ...out.site.seo };
-  out.tiers = ensureUniqueTierIds(
+  const mergedTiers = ensureUniqueTierIds(
     Array.isArray(out.tiers) ? out.tiers : base.tiers,
   );
+  const have = new Set(mergedTiers.map((tier) => tier.id));
+  for (const seed of base.tiers) {
+    if (!have.has(seed.id)) {
+      mergedTiers.push(structuredClone(seed));
+      have.add(seed.id);
+    }
+  }
+  out.tiers = ensureUniqueTierIds(mergedTiers);
 
   return out;
 }

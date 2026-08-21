@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CMS } from "./defaults";
 import { DEFAULT_FUNNEL_LAYOUT } from "@/lib/funnel/defaults";
+import { stripPrivateCommerce } from "./tierCommerce";
 
 describe("Brand-voice landing defaults", () => {
   it("uses one public apply CTA without changing the watch or challenge paths", () => {
@@ -27,15 +28,23 @@ describe("Brand-voice landing defaults", () => {
   });
 
   it("does not put Pro or Elite prices on public tier cards", () => {
-    for (const tier of DEFAULT_CMS.tiers.filter(
+    for (const tier of stripPrivateCommerce(DEFAULT_CMS.tiers).filter(
       (t) => t.id === "pro" || t.id === "elite",
     )) {
       expect(tier.cta.kind).toBe("book");
       const haystack = [tier.subhead, ...tier.body, ...tier.includes].join(" ");
       expect(haystack).not.toMatch(/£\s*\d/);
       expect(tier.priceAmount).toBe(0);
+      expect(tier.recurringAmount).toBe(0);
       expect(tier.stripePaymentLink).toBe("");
     }
+    // Admin defaults keep private amounts for Payment Link sync — never public.
+    expect(DEFAULT_CMS.tiers.find((t) => t.id === "pro")?.priceAmount).toBe(
+      2249,
+    );
+    expect(DEFAULT_CMS.tiers.find((t) => t.id === "elite")?.priceAmount).toBe(
+      2999,
+    );
   });
 
   it("seeds buying-objection FAQs so admin can edit rather than start blank", () => {

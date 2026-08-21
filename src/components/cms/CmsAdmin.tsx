@@ -4011,11 +4011,11 @@ export function CmsAdmin() {
               )}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field
-                  label="Price (GBP)"
+                  label="Setup / first payment (GBP)"
                   hint={
                     isApplicationOnlyTier(tier)
                       ? "Private. Used to create a Stripe Payment Link you can send after an application. Never shown on public Pro/Elite cards."
-                      : "Creates or updates a Stripe Price and Payment Link when you save. Public checkout uses this."
+                      : "Creates a Stripe setup Price + Payment Link on save. Public cards can show this."
                   }
                 >
                   <input
@@ -4033,8 +4033,80 @@ export function CmsAdmin() {
                   />
                 </Field>
                 <Field
+                  label="Monthly recurring (GBP)"
+                  hint="0 = one-off only. When set, Stripe also creates a monthly Price on the same Payment Link."
+                >
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={tier.recurringAmount || ""}
+                    onChange={(e) => {
+                      const recurringAmount =
+                        Number.parseFloat(e.target.value) || 0;
+                      updateTier(i, {
+                        recurringAmount,
+                        recurringInterval:
+                          recurringAmount > 0 ? "month" : "none",
+                      });
+                    }}
+                  />
+                </Field>
+                <Field
+                  label="Recurring months"
+                  hint="0 = rolling. Use 6 for a six-month programme. Cancel after N months is noted on the Stripe product — confirm in Stripe Dashboard if needed."
+                >
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputMode="numeric"
+                    value={tier.recurringMonths || ""}
+                    onChange={(e) =>
+                      updateTier(i, {
+                        recurringMonths: Number.parseInt(e.target.value, 10) || 0,
+                      })
+                    }
+                  />
+                </Field>
+                <Field
+                  label="Recurring starts after (weeks)"
+                  hint="Challenge example: 8. Uses a Stripe trial so monthly billing begins after the setup period."
+                >
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputMode="numeric"
+                    value={tier.recurringStartsAfterWeeks || ""}
+                    onChange={(e) =>
+                      updateTier(i, {
+                        recurringStartsAfterWeeks:
+                          Number.parseInt(e.target.value, 10) || 0,
+                      })
+                    }
+                  />
+                </Field>
+                <Field
+                  label="Public billing label"
+                  hint={
+                    isApplicationOnlyTier(tier)
+                      ? "Ignored on public Pro/Elite cards (application-only)."
+                      : "Optional override shown under the price on public self-serve cards."
+                  }
+                >
+                  <Text
+                    value={tier.billingLabel}
+                    onChange={(v) => updateTier(i, { billingLabel: v })}
+                  />
+                </Field>
+                <Field
                   label="Stripe payment link"
-                  hint="Paste a buy.stripe.com URL, or leave blank — save creates one when Stripe keys and a price are set."
+                  hint="Paste a buy.stripe.com URL, or leave blank — save creates one when Stripe keys and prices are set (setup + recurring on one link)."
                 >
                   <Text
                     value={tier.stripePaymentLink}
@@ -4057,10 +4129,15 @@ export function CmsAdmin() {
                   </a>
                 </p>
               ) : null}
-              {tier.stripePriceId || tier.stripeProductId ? (
+              {tier.stripePriceId ||
+              tier.stripeRecurringPriceId ||
+              tier.stripeProductId ? (
                 <p className="text-xs text-[var(--muted)]">
-                  Stripe product {tier.stripeProductId || "—"} · price{" "}
+                  Stripe product {tier.stripeProductId || "—"} · setup{" "}
                   {tier.stripePriceId || "—"}
+                  {tier.stripeRecurringPriceId
+                    ? ` · monthly ${tier.stripeRecurringPriceId}`
+                    : ""}
                   {tier.stripePaymentLinkId
                     ? ` · ${tier.stripePaymentLinkId}`
                     : ""}

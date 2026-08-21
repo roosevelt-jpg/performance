@@ -42,6 +42,8 @@ type ApiPayload = {
   };
   envSnippet?: string;
   error?: string;
+  durable?: boolean;
+  warning?: string;
 };
 
 function statusColor(status: IntegrationCheck["status"]) {
@@ -262,7 +264,25 @@ export function IntegrationsAdmin({
       setWhatsappTokenDraft("");
       setGmailPasswordDraft("");
       setOpenaiDraft("");
-      setMessage("Saved. You can fill the rest later.");
+      if (json.durable === false || json.warning) {
+        setError(
+          json.warning ||
+            "Saved temporarily only — add BLOB_READ_WRITE_TOKEN so credentials survive redeploys.",
+        );
+        setMessage(null);
+      } else {
+        const sync = (json as { stripeTierSync?: { synced?: number; errors?: string[] } })
+          .stripeTierSync;
+        const syncNote =
+          sync && typeof sync.synced === "number"
+            ? sync.errors?.length
+              ? ` Stripe synced ${sync.synced} programme(s) with notes.`
+              : sync.synced > 0
+                ? ` Stripe Payment Links synced for ${sync.synced} programme(s).`
+                : ""
+            : "";
+        setMessage(`Saved. Credentials are stored for this host.${syncNote}`);
+      }
     } catch {
       setError("Save failed");
     } finally {
@@ -385,10 +405,12 @@ export function IntegrationsAdmin({
       ) : null}
 
       {data && !data.storage.durable ? (
-        <p className="mb-4 rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--muted)]">
-          Save works with incomplete details. This host may reset the file on
-          deploy, so also paste SHOPIFY_STORE_DOMAIN=theformulaperformance.com
-          into the host environment when you go live.
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-[var(--fg-soft)]">
+          This host cannot keep Integrations/CMS files on disk after a redeploy.
+          Create a Blob store and set{" "}
+          <code className="text-xs">BLOB_READ_WRITE_TOKEN</code> in environment
+          variables, then redeploy. Until then, secrets may disappear after
+          save.
         </p>
       ) : null}
 
@@ -1467,7 +1489,11 @@ export function IntegrationsAdmin({
                 Stripe (all card checkouts)
               </h2>
               <p className="text-sm text-[var(--muted)]">
-                The 8-Week Challenge is the only public checkout. Pro and Elite stay application-only.
+                Save keys here and Payment Links sync automatically from Admin →
+                Content programmes (setup + recurring). Checkout writes GHL tags{" "}
+                <code className="text-xs">track-b</code>,{" "}
+                <code className="text-xs">tier-programme</code>, and subscription
+                fields. Pro and Elite stay application-only on the public site.
               </p>
               <Field
                 label="Publishable key"
@@ -1508,7 +1534,7 @@ export function IntegrationsAdmin({
               </Field>
               <Field
                 label="Webhook secret"
-                hint="For /api/stripe/webhook — optional until you want paid events."
+                hint="Point Stripe to https://train.theformulaperformance.com/api/stripe/webhook — events: checkout.session.completed, invoice.payment_failed, invoice.paid, customer.subscription.deleted, customer.subscription.updated."
               >
                 <input
                   type="password"

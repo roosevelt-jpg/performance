@@ -283,11 +283,63 @@ export async function PUT(request: Request) {
 
   const current = await loadIntegrations();
   const next = normalizeIncoming(body, current);
-  await saveIntegrations(next);
+  const hadStripe = Boolean(current.stripe?.secretKey?.trim());
+  const hasStripe = Boolean(next.stripe?.secretKey?.trim());
+  const storage = await saveIntegrations(next);
+
+  let stripeTierSync:
+    | { synced: number; skipped: number; errors: string[] }
+    | undefined;
+
+  // When Stripe becomes available (or stays available), sync CMS tiers → Payment Links automatically.
+  if (hasStripe) {
+    try {
+      const { getStripeClient } = await import("@/lib/stripe/client");
+      const { syncTiersToStripe } = await import("@/lib/stripe/syncTiers");
+      const { loadCms, saveCms } = await import("@/lib/cms/store");
+      const stripe = await getStripeClient();
+      if (stripe) {
+        const cms = await loadCms();
+        const result = await syncTiersToStripe({
+          stripe,
+          tiers: cms.tiers,
+          siteUrl: cms.site.brand.siteUrl,
+        });
+        await saveCms({ ...cms, tiers: result.tiers });
+        const challenge = result.tiers.find((tier) => tier.id === "challenge");
+        if (
+          challenge?.stripePriceId &&
+          next.stripe.challengePriceId !== challenge.stripePriceId
+        ) {
+          next.stripe.challengePriceId = challenge.stripePriceId;
+          await saveIntegrations(next);
+        }
+        stripeTierSync = {
+          synced: result.summary.synced,
+          skipped: result.summary.skipped,
+          errors: result.summary.errors,
+        };
+      }
+    } catch (error) {
+      stripeTierSync = {
+        synced: 0,
+        skipped: 0,
+        errors: [
+          error instanceof Error ? error.message : "Stripe tier sync failed",
+        ],
+      };
+    }
+  }
 
   const checks = buildChecks(next);
   return NextResponse.json({
     ok: true,
+    durable: storage.durable,
+    warning: storage.durable
+      ? undefined
+      : "Credentials were saved only in temporary storage on this host. Add BLOB_READ_WRITE_TOKEN (Blob store) so Integrations and CMS survive redeploys.",
+    stripeTierSync,
+    stripeJustConnected: !hadStripe && hasStripe,
     config: maskConfig(next),
     secretsSet: {
       ...listSecretsSet(next),
