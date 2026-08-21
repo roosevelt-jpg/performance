@@ -408,9 +408,10 @@ export function IntegrationsAdmin({
         <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-[var(--fg-soft)]">
           This host cannot keep Integrations/CMS files on disk after a redeploy.
           Create a Blob store and set{" "}
-          <code className="text-xs">BLOB_READ_WRITE_TOKEN</code> in environment
-          variables, then redeploy. Until then, secrets may disappear after
-          save.
+          <code className="text-xs">PERFORMANCE_BLOB_READ_WRITE_TOKEN</code>{" "}
+          (or <code className="text-xs">BLOB_READ_WRITE_TOKEN</code>) in
+          environment variables, then redeploy. Until then, secrets may disappear
+          after save.
         </p>
       ) : null}
 

@@ -19,7 +19,30 @@ function blobPathname(name: string): string {
 }
 
 function blobToken(): string | undefined {
-  return process.env.BLOB_READ_WRITE_TOKEN?.trim() || undefined;
+  // Accept the standard SDK name plus Formula / Performance-prefixed store tokens.
+  return (
+    process.env.BLOB_READ_WRITE_TOKEN?.trim() ||
+    process.env.PERFORMANCE_BLOB_READ_WRITE_TOKEN?.trim() ||
+    process.env.FORMULA_BLOB_READ_WRITE_TOKEN?.trim() ||
+    undefined
+  );
+}
+
+function blobStoreId(): string | undefined {
+  return (
+    process.env.PERFORMANCE_STORE_ID?.trim() ||
+    process.env.PERFORMANCE_BLOB_STORE_ID?.trim() ||
+    process.env.BLOB_STORE_ID?.trim() ||
+    process.env.FORMULA_BLOB_STORE_ID?.trim() ||
+    undefined
+  );
+}
+
+function blobAuthOptions(): { token: string; storeId?: string } | null {
+  const token = blobToken();
+  if (!token) return null;
+  const storeId = blobStoreId();
+  return storeId ? { token, storeId } : { token };
 }
 
 async function readJsonFile<T>(file: string): Promise<T | null> {
@@ -32,12 +55,13 @@ async function readJsonFile<T>(file: string): Promise<T | null> {
 }
 
 async function readFromBlob<T>(name: string): Promise<T | null> {
-  const token = blobToken();
-  if (!token) return null;
+  const auth = blobAuthOptions();
+  if (!auth) return null;
   try {
     const result = await get(blobPathname(name), {
       access: "private",
-      token,
+      token: auth.token,
+      ...(auth.storeId ? { storeId: auth.storeId } : {}),
       useCache: false,
     });
     if (!result?.stream) return null;
@@ -53,15 +77,16 @@ async function writeToBlob(
   name: string,
   payload: string,
 ): Promise<{ ok: true; url: string } | { ok: false }> {
-  const token = blobToken();
-  if (!token) return { ok: false };
+  const auth = blobAuthOptions();
+  if (!auth) return { ok: false };
   try {
     const blob = await put(blobPathname(name), payload, {
       access: "private",
       contentType: "application/json",
       addRandomSuffix: false,
       allowOverwrite: true,
-      token,
+      token: auth.token,
+      ...(auth.storeId ? { storeId: auth.storeId } : {}),
     });
     return { ok: true, url: blob.url };
   } catch {
