@@ -11,6 +11,7 @@ const TABS = [
   { href: "/admin/funnel", label: "Funnel" },
   { href: "/admin/purchases", label: "Purchases" },
   { href: "/admin/integrations", label: "Integrations" },
+  { href: "/admin/status", label: "Status" },
 ] as const;
 
 export function AdminShell({

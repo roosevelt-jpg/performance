@@ -1535,7 +1535,11 @@ export function IntegrationsAdmin({
               </Field>
               <Field
                 label="Webhook secret"
-                hint="Point Stripe to https://train.theformulaperformance.com/api/stripe/webhook — events: checkout.session.completed, invoice.payment_failed, invoice.paid, customer.subscription.deleted, customer.subscription.updated."
+                hint={
+                  data.secretsSet.stripeWebhookSecret
+                    ? "Saved (masked). Paste a new whsec_… only to replace. Endpoint: https://train.theformulaperformance.com/api/stripe/webhook"
+                    : "Point Stripe to https://train.theformulaperformance.com/api/stripe/webhook — events: checkout.session.completed, invoice.payment_failed, invoice.paid, customer.subscription.deleted, customer.subscription.updated."
+                }
               >
                 <input
                   type="password"
