@@ -3,6 +3,14 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { IntegrationCheck } from "@/lib/integrations/types";
+import {
+  INTEGRATION_SECTIONS,
+  integrationsHref,
+  scrollToHash,
+  sectionByCheckGroup,
+  sectionByProbe,
+  type ProbeTarget,
+} from "@/lib/integrations/statusLinks";
 
 type StatusPayload = {
   checks: IntegrationCheck[];
@@ -24,14 +32,6 @@ type LiveResult = {
   durable?: boolean;
   path?: string;
 };
-
-type ProbeTarget =
-  | "storage"
-  | "ghl"
-  | "calendar"
-  | "stripe"
-  | "gmail"
-  | "youtube";
 
 const PROBES: {
   id: ProbeTarget;
@@ -82,6 +82,17 @@ function probeTone(result: LiveResult | undefined, testing: boolean) {
   return result.ok ? "text-[var(--accent)]" : "text-red-400";
 }
 
+function ConfigLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="text-xs font-semibold text-[var(--accent)] hover:underline"
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function StatusAdmin() {
   const [loading, setLoading] = useState(true);
   const [testingAll, setTestingAll] = useState(false);
@@ -113,6 +124,14 @@ export function StatusAdmin() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (loading || !data) return;
+    const hash = window.location.hash;
+    if (!hash) return;
+    const t = window.setTimeout(() => scrollToHash(hash), 80);
+    return () => window.clearTimeout(t);
+  }, [loading, data]);
 
   async function runProbe(target: ProbeTarget) {
     setTesting(target);
@@ -243,16 +262,19 @@ export function StatusAdmin() {
             </h2>
             <p className="text-sm text-[var(--muted)]">
               Config can look set while the key is invalid. These hit the real
-              APIs where possible.
+              APIs where possible. Each row links back to its Integrations
+              fields.
             </p>
             <ul className="divide-y divide-[var(--border)] rounded-lg border border-[var(--border)] bg-[var(--surface)]">
               {PROBES.map((probe) => {
                 const result = live[probe.id];
                 const busy = testing === probe.id;
+                const section = sectionByProbe(probe.id);
                 return (
                   <li
                     key={probe.id}
-                    className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                    id={`probe-${probe.id}`}
+                    className="scroll-mt-24 flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[var(--fg)]">
@@ -270,6 +292,21 @@ export function StatusAdmin() {
                               : result.error || "Failed"
                             : "Not tested yet"}
                       </p>
+                      {section ? (
+                        <div className="mt-1">
+                          <ConfigLink
+                            href={integrationsHref(section.id)}
+                            label={`Edit ${section.label} →`}
+                          />
+                        </div>
+                      ) : probe.id === "storage" ? (
+                        <div className="mt-1">
+                          <ConfigLink
+                            href="/admin/integrations"
+                            label="Open Integrations →"
+                          />
+                        </div>
+                      ) : null}
                     </div>
                     <button
                       type="button"
@@ -290,32 +327,68 @@ export function StatusAdmin() {
               Configuration checklist
             </h2>
             <p className="text-sm text-[var(--muted)]">
-              Based on saved Integrations values (secrets never shown).
+              Based on saved Integrations values (secrets never shown). Jump to
+              the matching fields to fix anything missing.
             </p>
             <ul className="space-y-4">
-              {[...grouped.entries()].map(([group, checks]) => (
-                <li key={group}>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
-                    {group}
-                  </p>
-                  <ul className="divide-y divide-[var(--border)] rounded-lg border border-[var(--border)] bg-[var(--surface)]">
-                    {checks.map((check) => (
-                      <li
-                        key={check.id}
-                        className="flex flex-col gap-1 px-4 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-3"
-                      >
-                        <span className="text-[var(--fg-soft)]">
-                          {check.label}
-                        </span>
-                        <span
-                          className={`font-medium sm:shrink-0 sm:text-right ${statusTone(check.status)}`}
+              {[...grouped.entries()].map(([group, checks]) => {
+                const section = sectionByCheckGroup(group);
+                return (
+                  <li key={group} id={`check-${group}`} className="scroll-mt-24">
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+                        {group}
+                      </p>
+                      {section ? (
+                        <ConfigLink
+                          href={integrationsHref(section.id)}
+                          label={`Edit ${section.label} →`}
+                        />
+                      ) : group === "security" ? (
+                        <ConfigLink
+                          href="/admin/integrations"
+                          label="Open Integrations →"
+                        />
+                      ) : null}
+                    </div>
+                    <ul className="divide-y divide-[var(--border)] rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+                      {checks.map((check) => (
+                        <li
+                          key={check.id}
+                          className="flex flex-col gap-1 px-4 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-3"
                         >
-                          {check.status}
-                          {check.detail ? ` · ${check.detail}` : ""}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                          <span className="text-[var(--fg-soft)]">
+                            {check.label}
+                          </span>
+                          <span
+                            className={`font-medium sm:shrink-0 sm:text-right ${statusTone(check.status)}`}
+                          >
+                            {check.status}
+                            {check.detail ? ` · ${check.detail}` : ""}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-[var(--fg)]">
+              All Integrations sections
+            </h2>
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {INTEGRATION_SECTIONS.map((section) => (
+                <li key={section.id}>
+                  <Link
+                    href={integrationsHref(section.id)}
+                    className="flex items-center justify-between rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--fg-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                  >
+                    <span>{section.label}</span>
+                    <span className="text-xs font-semibold">Edit →</span>
+                  </Link>
                 </li>
               ))}
             </ul>

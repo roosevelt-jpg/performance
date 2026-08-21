@@ -9,9 +9,35 @@ import type {
 } from "@/lib/integrations/types";
 import { DEFAULT_INTEGRATIONS } from "@/lib/integrations/types";
 import {
+  scrollToHash,
+  statusHref,
+} from "@/lib/integrations/statusLinks";
+import {
   TimezoneSelect,
   WhatsAppLanguageSelect,
 } from "@/components/forms/I18nSelects";
+
+function SectionStatusLink({
+  hash,
+  className = "",
+}: {
+  hash: string;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={statusHref(hash)}
+      className={[
+        "text-xs font-semibold text-[var(--accent)] hover:underline",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      View on Status →
+    </Link>
+  );
+}
 
 type ApiPayload = {
   config: IntegrationsConfig;
@@ -160,6 +186,14 @@ export function IntegrationsAdmin({
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (loading || !data) return;
+    const hash = window.location.hash;
+    if (!hash) return;
+    const t = window.setTimeout(() => scrollToHash(hash), 80);
+    return () => window.clearTimeout(t);
+  }, [loading, data]);
 
   async function logout() {
     await fetch("/api/admin/logout", {
@@ -411,7 +445,13 @@ export function IntegrationsAdmin({
           <code className="text-xs">PERFORMANCE_BLOB_READ_WRITE_TOKEN</code>{" "}
           (or <code className="text-xs">BLOB_READ_WRITE_TOKEN</code>) in
           environment variables, then redeploy. Until then, secrets may disappear
-          after save.
+          after save.{" "}
+          <Link
+            href={statusHref("probe-storage")}
+            className="font-semibold text-[var(--accent)] hover:underline"
+          >
+            Test storage on Status →
+          </Link>
         </p>
       ) : null}
 
@@ -434,6 +474,13 @@ export function IntegrationsAdmin({
               Storage: {data.storage.path}
               {data.storage.fileExists ? " (file present)" : " (no file yet)"}
               {data.storage.durable ? "" : " · file may reset on deploy"}
+              {" · "}
+              <Link
+                href="/admin/status"
+                className="font-semibold text-[var(--accent)] hover:underline"
+              >
+                Open Status page
+              </Link>
             </p>
             <ul className="mt-4 space-y-2">
               {(
@@ -470,11 +517,17 @@ export function IntegrationsAdmin({
           </div>
 
           <div className="space-y-8">
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+            <section
+              id="integration-ghl"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-lg font-semibold text-[var(--fg)]">
-                  GoHighLevel CRM
-                </h2>
+                <div className="min-w-0 space-y-1">
+                  <h2 className="text-lg font-semibold text-[var(--fg)]">
+                    GoHighLevel CRM
+                  </h2>
+                  <SectionStatusLink hash="probe-ghl" />
+                </div>
                 <button
                   type="button"
                   onClick={() => test("ghl")}
@@ -563,11 +616,17 @@ export function IntegrationsAdmin({
               </Field>
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+            <section
+              id="integration-youtube"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-lg font-semibold text-[var(--fg)]">
-                  YouTube Data API
-                </h2>
+                <div className="min-w-0 space-y-1">
+                  <h2 className="text-lg font-semibold text-[var(--fg)]">
+                    YouTube Data API
+                  </h2>
+                  <SectionStatusLink hash="probe-youtube" />
+                </div>
                 <button
                   type="button"
                   onClick={() => test("youtube")}
@@ -612,10 +671,16 @@ export function IntegrationsAdmin({
               </Field>
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                Google search &amp; measurement
-              </h2>
+            <section
+              id="integration-seo"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  Google search &amp; measurement
+                </h2>
+                <SectionStatusLink hash="check-seo" />
+              </div>
               <p className="text-sm text-[var(--muted)]">
                 Sitemap is at /sitemap.xml. Robots allow Googlebot, image, video,
                 ads, and inspection crawlers. Title and description live in
@@ -699,10 +764,16 @@ export function IntegrationsAdmin({
               </Field>
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                Email signup
-              </h2>
+            <section
+              id="integration-email"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  Email signup
+                </h2>
+                <SectionStatusLink hash="check-email" />
+              </div>
               <Field
                 label="Provider"
                 hint="Popup signups on the landing page go here. GHL uses the CRM key above."
@@ -779,11 +850,17 @@ export function IntegrationsAdmin({
               ) : null}
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+            <section
+              id="integration-shopify"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-lg font-semibold text-[var(--fg)]">
-                  Shopify
-                </h2>
+                <div className="min-w-0 space-y-1">
+                  <h2 className="text-lg font-semibold text-[var(--fg)]">
+                    Shopify
+                  </h2>
+                  <SectionStatusLink hash="check-product" />
+                </div>
                 <button
                   type="button"
                   onClick={() => void save()}
@@ -827,10 +904,16 @@ export function IntegrationsAdmin({
               </Field>
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                Reviews
-              </h2>
+            <section
+              id="integration-reviews"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  Reviews
+                </h2>
+                <SectionStatusLink hash="check-reviews" />
+              </div>
               <Field
                 label="Provider"
                 hint="Internal uses CMS testimonials in the reviews popup."
@@ -889,11 +972,17 @@ export function IntegrationsAdmin({
               ) : null}
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+            <section
+              id="integration-calendar"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-lg font-semibold text-[var(--fg)]">
-                  Calendar
-                </h2>
+                <div className="min-w-0 space-y-1">
+                  <h2 className="text-lg font-semibold text-[var(--fg)]">
+                    Calendar
+                  </h2>
+                  <SectionStatusLink hash="probe-calendar" />
+                </div>
                 <button
                   type="button"
                   onClick={() => test("calendar")}
@@ -1366,10 +1455,16 @@ export function IntegrationsAdmin({
               ) : null}
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                Pricing (Q9 only — never on public cards)
-              </h2>
+            <section
+              id="integration-pricing"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  Pricing (Q9 only — never on public cards)
+                </h2>
+                <SectionStatusLink hash="check-pricing" />
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field label="Pro £ / month">
                   <input
@@ -1408,10 +1503,16 @@ export function IntegrationsAdmin({
               </div>
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                Product
-              </h2>
+            <section
+              id="integration-product"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  Product
+                </h2>
+                <SectionStatusLink hash="check-product" />
+              </div>
               <Field label="Challenge checkout URL">
                 <input
                   className={inputClass}
@@ -1485,10 +1586,16 @@ export function IntegrationsAdmin({
               </label>
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                Stripe (all card checkouts)
-              </h2>
+            <section
+              id="integration-stripe"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  Stripe (all card checkouts)
+                </h2>
+                <SectionStatusLink hash="probe-stripe" />
+              </div>
               <p className="text-sm text-[var(--muted)]">
                 Save keys here and Payment Links sync automatically from Admin →
                 Content programmes (setup + recurring). Checkout writes GHL tags{" "}
@@ -1571,10 +1678,30 @@ export function IntegrationsAdmin({
               </Field>
             </section>
 
-            <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-              <h2 className="text-lg font-semibold text-[var(--fg)]">
-                DNA report delivery
-              </h2>
+            <section
+              id="integration-dna"
+              className="scroll-mt-24 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-[var(--fg)]">
+                  DNA report delivery
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  <SectionStatusLink hash="probe-gmail" />
+                  <Link
+                    href={statusHref("check-messaging")}
+                    className="text-xs font-semibold text-[var(--accent)] hover:underline"
+                  >
+                    WhatsApp status →
+                  </Link>
+                  <Link
+                    href={statusHref("check-ai")}
+                    className="text-xs font-semibold text-[var(--accent)] hover:underline"
+                  >
+                    OpenAI status →
+                  </Link>
+                </div>
+              </div>
               <Field
                 label="OpenAI API key"
                 hint={
