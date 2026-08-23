@@ -3741,6 +3741,32 @@ export function CmsAdmin() {
               still use the locked internal IDs. Save at the bottom when you are
               done.
             </p>
+            {form.funnel?.enabled ? (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200">
+                <strong>
+                  {form.funnel?.layout?.tiers
+                    ? "Chat engine is on."
+                    : "Programme cards are hidden on the live homepage right now."}
+                </strong>{" "}
+                While the Chat engine is on (Admin → Funnel → Chat engine), the
+                enabled checkboxes below only decide{" "}
+                <em>which</em> cards show — whether the whole section shows at
+                all is a separate switch at Admin → Funnel → Landing page →{" "}
+                {form.funnel?.layout?.tiers ? (
+                  <>
+                    &ldquo;Programme cards (Choose your level)&rdquo;, which is
+                    currently <strong>ticked</strong>.
+                  </>
+                ) : (
+                  <>
+                    &ldquo;Programme cards (Choose your level)&rdquo;, which is
+                    currently <strong>unticked</strong> — that&rsquo;s why
+                    ticking a programme below won&rsquo;t make it appear until
+                    you tick that too.
+                  </>
+                )}
+              </div>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               <AddBlock
                 label="Add application-only programme"
@@ -3755,17 +3781,25 @@ export function CmsAdmin() {
           {form.tiers.map((tier, i) => (
             <Section key={`tier-editor-${i}`} title={tier.name || "Untitled programme"}>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
-                  <input
-                    type="checkbox"
-                    className="accent-[var(--accent)]"
-                    checked={tier.enabled}
-                    onChange={(e) =>
-                      updateTier(i, { enabled: e.target.checked })
-                    }
-                  />
-                  Enabled on landing page
-                </label>
+                <div>
+                  <label className="flex items-center gap-2 text-sm text-[var(--fg-soft)]">
+                    <input
+                      type="checkbox"
+                      className="accent-[var(--accent)]"
+                      checked={tier.enabled}
+                      onChange={(e) =>
+                        updateTier(i, { enabled: e.target.checked })
+                      }
+                    />
+                    Enabled on landing page
+                  </label>
+                  {form.funnel?.enabled && !form.funnel?.layout?.tiers ? (
+                    <p className="mt-1 text-xs text-amber-300">
+                      Won&rsquo;t show yet — Admin → Funnel → Landing page →
+                      &ldquo;Programme cards&rdquo; is off.
+                    </p>
+                  ) : null}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
