@@ -88,13 +88,21 @@ async function tokenFromRefresh(cal: IntegrationsConfig["calendar"]): Promise<st
   return data.access_token;
 }
 
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
+/** Access tokens are valid for an hour; reuse one until shortly before it expires
+ * instead of minting a fresh one on every availability poll and booking call. */
 export async function googleAccessToken(
   cal: IntegrationsConfig["calendar"],
 ): Promise<string> {
-  if (cal.googleServiceAccountJson.trim()) {
-    return tokenFromServiceAccount(cal.googleServiceAccountJson);
+  if (cachedToken && cachedToken.expiresAt > Date.now()) {
+    return cachedToken.token;
   }
-  return tokenFromRefresh(cal);
+  const token = cal.googleServiceAccountJson.trim()
+    ? await tokenFromServiceAccount(cal.googleServiceAccountJson)
+    : await tokenFromRefresh(cal);
+  cachedToken = { token, expiresAt: Date.now() + 50 * 60_000 };
+  return token;
 }
 
 function calendarId(cal: IntegrationsConfig["calendar"]): string {

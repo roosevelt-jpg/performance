@@ -15,6 +15,10 @@ export function ConfirmationView() {
   const [ready, setReady] = useState(false);
   const [contactId, setContactId] = useState<string | null>(null);
   const [bookingLabel, setBookingLabel] = useState<string | null>(null);
+  const [mobile, setMobile] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
+  const [bookingStart, setBookingStart] = useState<string | null>(null);
+  const [bookingTimeZone, setBookingTimeZone] = useState<string | null>(null);
 
   useEffect(() => {
     const flow = loadLeadFlow();
@@ -23,8 +27,12 @@ export function ConfirmationView() {
       return;
     }
     setContactId(flow.submissionId ?? null);
+    setMobile(flow.answers.mobile || null);
+    setName(flow.answers.name || null);
     if (flow.booking?.start) {
       const zone = flow.booking.timeZone || "Europe/London";
+      setBookingStart(flow.booking.start);
+      setBookingTimeZone(zone);
       setBookingLabel(
         new Intl.DateTimeFormat("en-GB", {
           timeZone: zone,
@@ -49,7 +57,14 @@ export function ConfirmationView() {
       await fetch("/api/whatsapp-optin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactId, optedIn: whatsapp }),
+        body: JSON.stringify({
+          contactId,
+          optedIn: whatsapp,
+          mobile,
+          name,
+          bookingStart,
+          bookingTimeZone,
+        }),
       });
       mergeLeadFlow({ bookedAt: new Date().toISOString() });
       setSaved(true);
@@ -74,14 +89,14 @@ export function ConfirmationView() {
         {c.eyebrow}
       </p>
       <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--fg)] sm:text-3xl">
-        {c.title}
+        {bookingLabel ? c.bookedTitle : c.title}
       </h1>
       <p className="mt-4 text-base leading-relaxed text-[var(--fg-soft)]">
-        {c.body}
+        {bookingLabel ? c.bookedBody : c.body}
       </p>
       {bookingLabel ? (
-        <p className="mt-3 text-sm text-[var(--fg)]">
-          Call booked: {bookingLabel}
+        <p className="mt-3 text-sm font-medium text-[var(--fg)]">
+          {bookingLabel}
         </p>
       ) : null}
 

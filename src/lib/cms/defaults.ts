@@ -732,6 +732,9 @@ export const DEFAULT_CMS: CmsContent = {
     eyebrow: "Application received",
     title: "You're on the list",
     body: "Kane reviews every application himself. You'll hear back within 24 hours.",
+    bookedTitle: "Your call is confirmed",
+    bookedBody:
+      "Kane will call you at the time below. Add it to your calendar so you don't miss it.",
     whatsappLabel:
       "Message me on WhatsApp about this application and call reminders. This is separate from the privacy consent you already gave.",
     save: "Save preference",
