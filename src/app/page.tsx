@@ -257,6 +257,9 @@ export default function HomePage() {
               alt=""
               className="h-full w-full max-w-none object-cover object-[50%_10%] sm:object-[52%_12%] lg:object-[62%_16%] xl:object-[58%_14%]"
             />
+            {/* Softens the seam where the two figures overlap so it reads as one
+               composed shot rather than a jarring double image. */}
+            <div className="absolute inset-0 bg-[radial-gradient(closest-side,rgba(10,10,10,0.6)_0%,rgba(10,10,10,0.28)_45%,transparent_75%)] [background-position:44%_28%] [background-size:70%_70%] mix-blend-multiply sm:[background-position:46%_30%] lg:[background-position:54%_32%] xl:[background-position:52%_30%]" />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0.22)_0%,rgba(10,10,10,0.08)_28%,rgba(10,10,10,0.5)_58%,rgba(10,10,10,0.92)_100%)] lg:hidden" />
             <div className="absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(10,10,10,0.9)_0%,rgba(10,10,10,0.46)_46%,rgba(10,10,10,0.16)_100%),linear-gradient(180deg,rgba(10,10,10,0.28)_0%,transparent_30%,rgba(10,10,10,0.5)_100%)] lg:block" />
           </div>
