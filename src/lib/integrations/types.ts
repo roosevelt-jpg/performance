@@ -91,8 +91,13 @@ export type IntegrationsConfig = {
     phoneNumberId: string;
     accessToken: string;
     graphVersion: string;
+    /** WhatsApp Business Account ID — required to create/list message templates. */
+    businessAccountId: string;
     templateName: string;
     templateLanguage: string;
+    /** Approved template used for the post-booking confirmation send. */
+    bookingTemplateName: string;
+    bookingTemplateLanguage: string;
   };
   ai: {
     openaiApiKey: string;
@@ -206,8 +211,11 @@ export const DEFAULT_INTEGRATIONS: IntegrationsConfig = {
     phoneNumberId: "",
     accessToken: "",
     graphVersion: "v21.0",
+    businessAccountId: "",
     templateName: "",
     templateLanguage: "en",
+    bookingTemplateName: "",
+    bookingTemplateLanguage: "en",
   },
   ai: {
     openaiApiKey: "",

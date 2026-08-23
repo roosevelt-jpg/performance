@@ -201,11 +201,23 @@ function normalizeIncoming(
         body.whatsapp?.graphVersion?.trim() ||
         current.whatsapp?.graphVersion ||
         DEFAULT_INTEGRATIONS.whatsapp.graphVersion,
+      businessAccountId:
+        body.whatsapp?.businessAccountId ??
+        current.whatsapp?.businessAccountId ??
+        "",
       templateName:
         body.whatsapp?.templateName ?? current.whatsapp?.templateName ?? "",
       templateLanguage:
         body.whatsapp?.templateLanguage?.trim() ||
         current.whatsapp?.templateLanguage ||
+        "en",
+      bookingTemplateName:
+        body.whatsapp?.bookingTemplateName ??
+        current.whatsapp?.bookingTemplateName ??
+        "",
+      bookingTemplateLanguage:
+        body.whatsapp?.bookingTemplateLanguage?.trim() ||
+        current.whatsapp?.bookingTemplateLanguage ||
         "en",
     },
     ai: {

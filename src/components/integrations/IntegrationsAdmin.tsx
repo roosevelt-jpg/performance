@@ -16,6 +16,7 @@ import {
   TimezoneSelect,
   WhatsAppLanguageSelect,
 } from "@/components/forms/I18nSelects";
+import { WhatsAppTemplatesManager } from "@/components/integrations/WhatsAppTemplatesManager";
 
 function SectionStatusLink({
   hash,
@@ -1803,6 +1804,26 @@ export function IntegrationsAdmin({
                 />
               </Field>
               <Field
+                label="WhatsApp Business Account ID"
+                hint="Meta for Developers → WhatsApp → API Setup — the WABA ID, not the phone number ID. Required to create and list message templates below."
+              >
+                <input
+                  className={inputClass}
+                  value={form.whatsapp?.businessAccountId ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      whatsapp: {
+                        ...(f.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
+                        businessAccountId: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="987654321098765"
+                  autoComplete="off"
+                />
+              </Field>
+              <Field
                 label="WhatsApp access token"
                 hint={
                   data.secretsSet.whatsappAccessToken
@@ -1855,6 +1876,44 @@ export function IntegrationsAdmin({
                   }
                 />
               </Field>
+              <Field
+                label="Booking confirmation template name"
+                hint="Separate from the DNA report template above — must be its own APPROVED UTILITY template, since template body text can't be reused for different content. Create one below once you have credentials saved."
+              >
+                <input
+                  className={inputClass}
+                  value={form.whatsapp?.bookingTemplateName ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      whatsapp: {
+                        ...(f.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
+                        bookingTemplateName: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="booking_confirmation"
+                />
+              </Field>
+              <Field
+                label="Booking confirmation template language"
+                hint="Must match the language the booking template above was approved in."
+              >
+                <WhatsAppLanguageSelect
+                  className={inputClass}
+                  value={form.whatsapp?.bookingTemplateLanguage ?? "en"}
+                  onChange={(bookingTemplateLanguage) =>
+                    setForm((f) => ({
+                      ...f,
+                      whatsapp: {
+                        ...(f.whatsapp ?? DEFAULT_INTEGRATIONS.whatsapp),
+                        bookingTemplateLanguage,
+                      },
+                    }))
+                  }
+                />
+              </Field>
+              <WhatsAppTemplatesManager />
             </section>
 
             <section className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
