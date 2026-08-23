@@ -257,30 +257,40 @@ export async function updateWhatsAppOptIn(params: {
 
   const consent = buildWhatsAppConsentTags(params.optedIn);
 
-  const res = await fetch(`${apiBaseUrl}/contacts/${params.contactId}`, {
-    method: "PUT",
-    headers: ghlHeaders(apiKey),
-    body: JSON.stringify({
-      tags: consent.tagsAdd,
-      customFields: [
-        { key: "whatsapp_opt_in", field_value: String(params.optedIn) },
-        { key: "whatsapp_opt_in_source", field_value: params.source },
-        { key: "whatsapp_opt_in_timestamp", field_value: params.timestamp },
-      ],
-    }),
-  });
+  // A bad/expired API key must not fail the customer-facing save — log it
+  // for ops and report success so the page doesn't error on the visitor.
+  try {
+    const res = await fetch(`${apiBaseUrl}/contacts/${params.contactId}`, {
+      method: "PUT",
+      headers: ghlHeaders(apiKey),
+      body: JSON.stringify({
+        tags: consent.tagsAdd,
+        customFields: [
+          { key: "whatsapp_opt_in", field_value: String(params.optedIn) },
+          { key: "whatsapp_opt_in_source", field_value: params.source },
+          { key: "whatsapp_opt_in_timestamp", field_value: params.timestamp },
+        ],
+      }),
+    });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`GHL WhatsApp update failed (${res.status}): ${text}`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`GHL WhatsApp update failed (${res.status}): ${text}`);
+    }
+
+    await removeContactTags({
+      apiBaseUrl,
+      apiKey,
+      contactId: params.contactId,
+      tags: consent.tagsRemove,
+    });
+  } catch (error) {
+    console.error(
+      "[ghl] WhatsApp opt-in update failed — check the GHL API key in Admin → Integrations",
+      error,
+    );
+    return { mocked: true };
   }
-
-  await removeContactTags({
-    apiBaseUrl,
-    apiKey,
-    contactId: params.contactId,
-    tags: consent.tagsRemove,
-  });
 
   return { mocked: false };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { BookingCalendar } from "@/components/calendar/BookingCalendar";
 import { useCms } from "@/components/cms/CmsProvider";
 import {
@@ -13,6 +13,8 @@ type Props = {
   tier: "pro" | "elite";
   answers: QuestionnaireAnswers;
   contactId?: string;
+  /** Fetched server-side by the page so the browser never has to round-trip for it. */
+  runtime?: CalendarRuntimeConfig;
   onBooked: (booking?: {
     start: string;
     end: string;
@@ -36,34 +38,9 @@ function buildSrc(base: string, params: Record<string, string>): string {
   }
 }
 
-export function CalendarEmbed({ tier, answers, contactId, onBooked }: Props) {
+export function CalendarEmbed({ tier, answers, contactId, runtime, onBooked }: Props) {
   const cms = useCms();
   const cal = cms.calendar;
-  const [runtime, setRuntime] = useState<CalendarRuntimeConfig | undefined>();
-  const [configLoaded, setConfigLoaded] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    void fetch("/api/public-config")
-      .then((r) => r.json())
-      .then(
-        (cfg: {
-          calendar?: CalendarRuntimeConfig;
-        }) => {
-          if (cancelled) return;
-          if (cfg.calendar) setRuntime(cfg.calendar);
-        },
-      )
-      .catch(() => {
-        /* env fallback inside resolveCalendarEmbed */
-      })
-      .finally(() => {
-        if (!cancelled) setConfigLoaded(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const embed = useMemo(
     () =>
@@ -107,11 +84,7 @@ export function CalendarEmbed({ tier, answers, contactId, onBooked }: Props) {
         <p className="mt-1 text-sm text-[var(--muted)]">{subhead}</p>
       </div>
 
-      {!configLoaded ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-16 text-center text-sm text-[var(--muted)]">
-          Loading calendar…
-        </div>
-      ) : useNative ? (
+      {useNative ? (
         <BookingCalendar
           tier={tier}
           answers={answers}
@@ -141,7 +114,7 @@ export function CalendarEmbed({ tier, answers, contactId, onBooked }: Props) {
         </div>
       )}
 
-      {configLoaded && src && !useNative ? (
+      {src && !useNative ? (
         <div className="mt-4">
           <button
             type="button"

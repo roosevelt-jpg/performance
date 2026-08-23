@@ -412,6 +412,9 @@ export type CmsContent = {
     eyebrow: string;
     title: string;
     body: string;
+    /** Shown instead of title/body when a specific call time was booked. */
+    bookedTitle: string;
+    bookedBody: string;
     whatsappLabel: string;
     save: string;
     saving: string;
