@@ -136,30 +136,44 @@ export async function upsertLeadInGhl(
     };
   }
 
-  const res = await fetch(`${apiBaseUrl}/contacts/upsert`, {
-    method: "POST",
-    headers: ghlHeaders(apiKey),
-    body: JSON.stringify(body),
-  });
+  // A bad/expired API key or a GHL outage must not fail the applicant's
+  // submission — fall back to a mock contact so /api/leads still succeeds.
+  try {
+    const res = await fetch(`${apiBaseUrl}/contacts/upsert`, {
+      method: "POST",
+      headers: ghlHeaders(apiKey),
+      body: JSON.stringify(body),
+    });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`GHL upsert failed (${res.status}): ${text}`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`GHL upsert failed (${res.status}): ${text}`);
+    }
+
+    const data = (await res.json()) as {
+      contact?: { id?: string };
+      id?: string;
+    };
+
+    const id = data.contact?.id ?? data.id ?? `ghl_${Date.now()}`;
+    const automation = await runGhlLeadAutomations({
+      contactId: id,
+      payload,
+      ghl,
+    });
+
+    return { id, mocked: false, automation };
+  } catch (error) {
+    console.error(
+      "[ghl] Contact upsert failed — check the GHL API key and location ID in Admin → Integrations",
+      error,
+    );
+    return {
+      id: `mock_${payload.answers.tier}_${Date.now()}`,
+      mocked: true,
+      automation: { mocked: true, noteAdded: false, workflowTriggered: false },
+    };
   }
-
-  const data = (await res.json()) as {
-    contact?: { id?: string };
-    id?: string;
-  };
-
-  const id = data.contact?.id ?? data.id ?? `ghl_${Date.now()}`;
-  const automation = await runGhlLeadAutomations({
-    contactId: id,
-    payload,
-    ghl,
-  });
-
-  return { id, mocked: false, automation };
 }
 
 export type GhlAutomationResult = {
