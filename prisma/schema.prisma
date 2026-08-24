@@ -1,0 +1,523 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Shared database with the-formula-programme (see /root/.claude/plans/atomic-hugging-minsky.md
+// for the full migration plan). Schema changes must be mirrored in both repos'
+// prisma/migrations/ directories — the-formula-programme is the pre-existing
+// source of truth; author changes there first, then copy the generated .sql
+// migration file into this repo unmodified so both repos' migration history
+// (_prisma_migrations) stays in sync against the one physical database.
+
+enum Goal {
+  lose
+  build
+  fit
+  focus
+  general
+}
+
+enum Level {
+  beg
+  int
+  adv
+}
+
+enum Sex {
+  male
+  female
+  other
+}
+
+enum Diet {
+  none
+  vegetarian
+  vegan
+  pescatarian
+  halal
+  other
+}
+
+// Payments. Stripe is the system of record; these tables are a derived read
+// model that converges via webhooks plus a daily reconcile, so every write is an
+// idempotent upsert on a unique Stripe id. Timestamptz here; Waitlist predates
+// that and converting it belongs in its own migration.
+
+enum PurchaseStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+// Every value Stripe can send, so a Dashboard-initiated pause or uncollectible
+// invoice can't poison the event stream with an un-writable status.
+enum SubscriptionStatus {
+  incomplete
+  incomplete_expired
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+  paused
+}
+
+// `received` and `failed` are the states Stripe's retry (or the reconcile
+// sweeper) must pick up again — never ack-and-drop them.
+enum StripeEventStatus {
+  received
+  enqueued
+  processed
+  skipped
+  failed
+}
+
+// Which app originated a Purchase/Subscription row. Distinct from `product`
+// because `product` is free text (performance's CMS lets admins create custom
+// tier ids at runtime), so appSource is the cheap, stable column to filter or
+// report on without knowing the tier vocabulary.
+enum AppSource {
+  formula_programme
+  performance
+}
+
+// Created by the webhook once payment lands, never before. Name, email and
+// WhatsApp ride in the Checkout Session's metadata, which is enough to charge
+// someone and reach them; everything else is asked after they've paid.
+model Customer {
+  id String @id @default(cuid())
+
+  // Both unique: the WhatsApp bot identifies an inbound message by number alone,
+  // and GHL's upsert matches on email OR phone.
+  email            String @unique
+  name             String
+  whatsapp         String @unique
+  stripeCustomerId String @unique
+
+  // Recorded per purchase as consent proof, carried through session metadata.
+  consentAt     DateTime @default(now()) @db.Timestamptz
+  consentText   String
+  policyVersion String
+
+  // Set when the buyer came from a waitlist link; null for organic buyers
+  // and for every performance-originated buyer (performance has no waitlist).
+  waitlistId String?
+  waitlist   Waitlist? @relation(fields: [waitlistId], references: [id], onDelete: SetNull)
+
+  coaching      CoachingProfile?
+  purchases     Purchase[]
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // @unique on email and whatsapp already provides their indexes.
+  @@index([waitlistId])
+}
+
+// The coaching questions, asked AFTER payment. A paying customer has no row
+// here until they complete onboarding, which is why every field is optional and
+// why nothing in fulfillment depends on it.
+model CoachingProfile {
+  id String @id @default(cuid())
+
+  customerId String   @unique
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  goal         Goal?
+  level        Level?
+  sex          Sex?
+  age          Int?
+  heightCm     Int?
+  weightKg     Int?
+  goalWeightKg Int?
+  diet         Diet?
+  injuries     String?
+
+  completedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+}
+
+model Purchase {
+  id  String @id @default(cuid())
+  ref String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Which app sold this, and which product within it. appSource is a closed
+  // enum for cheap filtering; product is the CmsTier id ("pro" | "elite" |
+  // "challenge" | any admin-created custom tier id) for performance
+  // purchases, or the literal "formula_programme" for the other app. Not a DB
+  // enum/FK on purpose: performance's Admin UI lets operators create/rename
+  // tiers at runtime (see slugifyTierId/uniqueTierId in
+  // src/lib/cms/tierCommerce.ts) — a DB enum would need a migration per tier.
+  // Resolved from Stripe session/subscription metadata at webhook time, not
+  // from CmsTier, since that's what's actually available during processing.
+  // Defaults keep the-formula-programme's existing Payment Links (which never
+  // set this metadata) working unmodified.
+  appSource AppSource @default(formula_programme)
+  product   String    @default("formula_programme")
+
+  stripeCheckoutSessionId String @unique
+
+  // dahlia severed charge.invoice, invoice.charge and payment_intent.invoice,
+  // so the payment intent shared by the charge and the first invoice is the
+  // only thing a refund can match a purchase on.
+  stripeInvoiceId       String?
+  stripePaymentIntentId String? @unique
+
+  amountTotal   Int
+  discountTotal Int     @default(0)
+  currency      String
+  promoCode     String?
+
+  status PurchaseStatus @default(pending)
+
+  pdfToken String @unique
+
+  // Step ledger: each child task check-and-sets its own column, so a replay
+  // whose Trigger idempotency key has expired still can't double-send. This,
+  // not the queue key, is the real exactly-once guarantee.
+  welcomeEmailAt DateTime? @db.Timestamptz
+  pdfReadyAt     DateTime? @db.Timestamptz
+  ghlSyncedAt    DateTime? @db.Timestamptz
+  capiSentAt     DateTime? @db.Timestamptz
+
+  purchasedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([customerId])
+  @@index([status, createdAt])
+  @@index([appSource, product])
+}
+
+model Subscription {
+  id                   String @id @default(cuid())
+  stripeSubscriptionId String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // See Purchase.appSource/product above — same reasoning. Populated from
+  // subscription.metadata, set at session-creation time via
+  // subscription_data.metadata so it survives onto every later
+  // customer.subscription.* event (those reference the Subscription object
+  // directly, never the originating Checkout Session).
+  appSource AppSource @default(formula_programme)
+  product   String    @default("formula_programme")
+
+  stripePriceId String
+
+  status SubscriptionStatus
+
+  cancelAtPeriodEnd  Boolean   @default(false)
+  currentPeriodStart DateTime? @db.Timestamptz
+  currentPeriodEnd   DateTime? @db.Timestamptz
+  trialEnd           DateTime? @db.Timestamptz
+  canceledAt         DateTime? @db.Timestamptz
+
+  // Write fence: `created` of the newest event already applied. Concurrent
+  // deliveries can fetch canonical state then race on the write, so an older
+  // event is a no-op — otherwise a stale past_due lands after a terminal cancel.
+  lastStripeEventCreated Int @default(0)
+
+  // Claimed before the heads-up is sent. Stripe can deliver trial_will_end more
+  // than once, and telling someone twice that they are about to be charged
+  // reads as a billing fault.
+  trialEndingEmailAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([customerId])
+  @@index([status])
+  @@index([appSource, product])
+}
+
+// Every signature-verified event, stored before any side effect runs. The event
+// id as primary key makes duplicate delivery a PK conflict rather than a race.
+// Payloads are pruned after 90 days; the envelope stays as an audit trail.
+// Product-agnostic already — serves both apps' events as-is.
+model StripeEvent {
+  id        String            @id
+  type      String
+  livemode  Boolean
+  payload   Json?
+  status    StripeEventStatus @default(received)
+  attempts  Int               @default(0)
+  lastError String?
+
+  receivedAt  DateTime  @default(now()) @db.Timestamptz
+  processedAt DateTime? @db.Timestamptz
+
+  // Redrive and the reconcile sweeper scan by status, newest first. A partial
+  // index would be smaller, but Prisma can't express one and migrations stay
+  // Prisma-generated, so this composite covers the same queries.
+  @@index([status, receivedAt])
+  @@index([type, receivedAt])
+}
+
+model Waitlist {
+  id String @id @default(cuid())
+
+  customers Customer[]
+
+  // ref: human display code. publicToken: unguessable key used in the /joined
+  // URL (never expose the primary key there).
+  ref         String @unique
+  publicToken String @unique
+
+  email        String  @unique
+  name         String
+  whatsapp     String
+  goal         Goal?
+  level        Level?
+  sex          Sex?
+  age          Int?
+  heightCm     Int?
+  weightKg     Int?
+  goalWeightKg Int?
+  diet         Diet?
+  injuries     String?
+
+  consentAt     DateTime @default(now())
+  consentText   String
+  policyVersion String
+  consentIp     String?
+
+  // Claimed before the launch announcement is sent, so a re-run of the blast
+  // skips anyone already told rather than mailing the list twice.
+  launchEmailAt DateTime? @db.Timestamptz
+
+  utmSource             String?
+  utmMedium             String?
+  utmCampaign           String?
+  utmContent            String?
+  utmTerm               String?
+  fbclid                String?
+  gclid                 String?
+  referrer              String?
+  landingPath           String?
+  // When the first-touch attribution (incl. fbclid) was captured client-side —
+  // required to reconstruct Meta's _fbc for the Conversions API.
+  attributionCapturedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
+// --- performance's funnel data (added here; see plan doc Section "Schema design") ---
+
+enum LeadTier {
+  pro
+  elite
+}
+
+enum LeadOutcome {
+  qualified
+  disqualified
+}
+
+// The Pro/Elite qualification questionnaire (src/app/api/leads/route.ts).
+// Append-only: every submission is a new row, there is no update-in-place.
+// Replaces upsertLeadInGhl's silent mock-id-on-failure pattern in ghl.ts —
+// once the row lands here before GHL sync is even attempted, there's nothing
+// left for a GHL outage to silently drop.
+model Lead {
+  id String @id @default(cuid())
+
+  tier      LeadTier
+  name      String
+  email     String
+  mobile    String
+  instagram String
+
+  mainGoal            String?
+  trainingNow         String?
+  daysCommit          String?
+  medical             String?
+  stoppedResults      String?
+  whyNow              String?
+  structuredProgramme String?
+  investment          String?
+  privacyConsent      Boolean @default(false)
+
+  // Free-form today (varies by funnel entry point) — kept as text rather than
+  // an enum since the source vocabulary already varies and a new entry point
+  // shouldn't need a migration.
+  consentSource String
+  consentAt     DateTime @db.Timestamptz
+
+  outcome           LeadOutcome
+  flags             String[]
+  disqualifyReasons String[]
+
+  // Step ledger, mirrors Purchase: check-and-set, not a queue-level guarantee.
+  ghlContactId String?
+  ghlSyncedAt  DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+enum ApplicationStep {
+  gate
+  vsl
+  qualify
+  routed
+}
+
+enum ApplicationRoute {
+  high_pro
+  high_elite
+  low
+  nurture
+}
+
+// The gated-VSL funnel (src/app/api/apply/route.ts). Unlike Lead this IS
+// updated in place across multiple partial saves — the client holds the id
+// after the first call and resubmits it as the visitor progresses, matching
+// today's ApplyLead/upsertApplyLead semantics exactly.
+model Application {
+  id String @id @default(cuid())
+
+  step        ApplicationStep   @default(gate)
+  droppedAt   String? // last step name reached at drop-off, if any
+  vslWatchPct Int               @default(0)
+  route       ApplicationRoute?
+
+  name          String @default("")
+  email         String @default("")
+  mobile        String @default("")
+  goal          String @default("")
+  startingPoint String @default("")
+  days          String @default("")
+  obstacles     String[]
+  timeline      String @default("")
+  coachHistory  String @default("")
+  investment    String @default("")
+
+  // Named UTM columns, matching Waitlist's existing convention, plus a raw
+  // fallback for anything outside the standard utm_* set (today's code
+  // captures every utm_* query param into a free-form Record).
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+  utmRaw      Json?
+  referrer    String?
+
+  ghlContactId String?
+  ghlSyncedAt  DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([email])
+  @@index([route])
+}
+
+// Replaces data/dna-reports/<id>.json plus the O(n) directory-scan token
+// lookup in getDnaReportByToken (src/lib/dna/store.ts) with a unique-indexed
+// column — a real fix, not just a storage swap.
+model DnaReport {
+  id    String @id @default(cuid())
+  token String @unique
+
+  name   String
+  email  String
+  mobile String
+
+  // DnaAnswers / DnaResult stay free-form JSON: no reporting need for
+  // individual columns. overallScore/path are pulled out for indexing since
+  // those two drive nextHref routing and any future dashboards.
+  answers Json
+  result  Json
+
+  overallScore Int
+  path         String
+
+  emailSentAt    DateTime? @db.Timestamptz
+  whatsappSentAt DateTime? @db.Timestamptz
+  pdfReadyAt     DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+enum CalendarProvider {
+  google
+  calendly
+  ghl
+}
+
+enum BookingTier {
+  pro
+  elite
+}
+
+// New persistence — today's src/lib/calendar/booking.ts writes straight to
+// the provider (Google/Calendly/GHL Calendar) with nothing stored locally.
+model CalendarBooking {
+  id String @id @default(cuid())
+
+  tier     BookingTier
+  provider CalendarProvider
+
+  name     String
+  email    String
+  phone    String?
+  timezone String?
+  notes    String?
+
+  ghlContactId String?
+
+  start DateTime @db.Timestamptz
+  end   DateTime @db.Timestamptz
+
+  providerEventId String?
+  providerLink    String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([email])
+  @@index([start])
+}
+
+// WhatsApp opt-in events (src/app/api/whatsapp-optin/route.ts). Kept as its
+// own append-only log rather than a column on CalendarBooking: contactId is
+// the only reliable key the route receives, and it isn't guaranteed to map
+// 1:1 to a CalendarBooking row (the contact may have come from a Lead or
+// Application, and the whatsapp-optin call can arrive without a booking).
+model WhatsappOptInEvent {
+  id String @id @default(cuid())
+
+  ghlContactId String
+  optedIn      Boolean
+  source       String
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([ghlContactId])
+}
